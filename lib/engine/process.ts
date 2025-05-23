@@ -1,5 +1,5 @@
-import { GameState, Knowledge } from "../game";
-import { GameAction } from "../messages";
+import { GameState, Knowledge } from ".";
+import { GameAction } from "./actions";
 
 export class ProcessError {
   reason: string | Error;
@@ -32,14 +32,33 @@ export class ActionResult {
   }
 }
 
-export type ProcessResult = 
+export type ProcessResult =
   | ProcessError
   | ActionResult
 
-export function processAction(state: GameState, action: GameAction, actorId: string): ProcessResult {
+export interface ProcessInputs<T extends GameAction> {
+  state: GameState,
+  knowledge: Record<string, Knowledge[]>,
+  action: T,
+  actorId: string,
+}
+
+export function processAction<T extends GameAction>(inputs: ProcessInputs<T>): ProcessResult {
   try {
-    return new ActionResult(state);
+    const mutableInputs: ProcessInputs<T> = {
+      state: structuredClone(inputs.state),
+      knowledge: structuredClone(inputs.knowledge),
+      actorId: inputs.actorId,
+      action: inputs.action,
+    }
+
+    // do stuff to the state
+
+    return new ActionResult(mutableInputs.state, mutableInputs.knowledge);
   } catch (e) {
+    if (e instanceof ProcessError) {
+      return e;
+    }
     return new ProcessError("server", e);
   }
 }

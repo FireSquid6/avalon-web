@@ -21,6 +21,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/bun": "latest",
     "postcss": "^8",
     "tailwindcss": "^3.4.1"
   }

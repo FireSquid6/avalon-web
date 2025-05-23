@@ -7,7 +7,6 @@ export const ruleEnum = z.enum([
   "Oberon",
   "Morgause",
   "Mordred",
-  "Asassin",
   "Percival and Morgana",
   "Excalibur",
   "Visible Teammate Roles",
@@ -23,13 +22,13 @@ export const roleEnum = z.enum([
   "Assassin",
   "Morgana",
   "Oberon",
+  "Lancelot",
   "Mordredic Servant",
 ]);
 export type Role = z.infer<typeof roleEnum>;
 
 export const playerSchema = z.object({
   id: z.string(),
-  socketId: z.string(),
   displayName: z.string(),
 });
 export type Player = z.infer<typeof playerSchema>;
@@ -37,6 +36,8 @@ export type Player = z.infer<typeof playerSchema>;
 
 export const roundSchema = z.object({
   monarch: z.string(), // playerId of monarch
+  questNumber: z.number(),
+  ladyUsed: z.boolean(),
   electedPlayers: z.optional(z.array(z.string())),
   votes: z.optional(z.map(z.string(), z.enum(["Approve", "Reject"]))),
   failCards: z.optional(z.number()),
@@ -50,10 +51,11 @@ export const gameStateSchema = z.object({
   status: z.enum(["in-progress", "finished", "waiting"]),
   players: z.array(playerSchema),
   tableOrder: z.array(z.string()),  // first playerId is the starting monarch
+  monarchIndex: z.number(),
   ladyHolder: z.optional(z.string()),
 
   gameMaster: z.string(),
-  ruleset: z.array(roleEnum),
+  ruleset: z.array(ruleEnum),
 
   rounds: z.array(roundSchema),
   // Arthurian Victory - three quest passes 
@@ -63,8 +65,8 @@ export const gameStateSchema = z.object({
   // Deadlock - too many failed votes
   result: z.optional(z.enum(["Arthurian Victory", "Assassination Failure", "Mordredic Victory", "Assassination", "Deadlock"])),
 
-  // hidden roles are provided after the game is over
-  hiddenRoles: z.optional(z.map(z.string(), roleEnum)),
+  // hidden roles are not provided to the client unless the game is over
+  hiddenRoles: z.map(z.string(), roleEnum),
 
   assassinationTarget: z.optional(z.string()),
 });
@@ -88,3 +90,8 @@ export const knowledgeSchema = z.object({
   ])
 });
 export type Knowledge = z.infer<typeof knowledgeSchema>;
+
+export interface Quest {
+  players: number;
+  failsRequired: number;
+}
