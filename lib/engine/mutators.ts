@@ -3,7 +3,7 @@
 import { GameState, Knowledge } from ".";
 import { AssassinationAction, LadyAction, NominateAction, QuestAction, StartAction, VoteAction } from "./actions";
 import { getRolesForRuleset, validateRuleeset, rulesetHas, getNextIntendedAction, newRound, getQuestInformation, getFailedVotes, getScore, getTeam } from "./logic";
-import { processAction, ProcessError, ProcessInputs } from "./process";
+import { ProcessError, ProcessInputs } from "./process";
 
 
 // general structure:

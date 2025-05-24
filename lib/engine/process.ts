@@ -1,5 +1,6 @@
 import { GameState, Knowledge } from ".";
 import { GameAction } from "./actions";
+import { performAssassination, performLady, performNominate, performQuest, performStart, performVote } from "./mutators";
 
 export class ProcessError {
   reason: string | Error;
@@ -52,7 +53,63 @@ export function processAction<T extends GameAction>(inputs: ProcessInputs<T>): P
       action: inputs.action,
     }
 
-    // do stuff to the state
+    const state = structuredClone(inputs.state);
+    const knowledge = structuredClone(inputs.knowledge);
+    const actorId = inputs.actorId;
+    const action = inputs.action;
+
+    switch (action.kind) {
+      case "vote":
+        performVote({
+          state,
+          knowledge,
+          action,
+          actorId,
+        })
+        break;
+      case "lady":
+        performLady({
+          state,
+          knowledge,
+          action,
+          actorId,
+        })
+        break;
+      case "quest":
+        performQuest({
+          state,
+          knowledge,
+          action,
+          actorId,
+        })
+        break;
+      case "start":
+        performStart({
+          state,
+          knowledge,
+          action,
+          actorId,
+        })
+        break;
+      case "nominate":
+        performNominate({
+          state,
+          knowledge,
+          action,
+          actorId,
+        })
+        break;
+      case "assassinate":
+        performAssassination({
+          state,
+          knowledge,
+          action,
+          actorId,
+        })
+        break;
+      default:
+        throw new Error("Bad action: ", action);
+    }
 
     return new ActionResult(mutableInputs.state, mutableInputs.knowledge);
   } catch (e) {
