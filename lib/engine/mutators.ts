@@ -1,9 +1,5 @@
-
-
 // all mutators take in a ProcessInputs object and can mutate it
 // they can also at any time throw an error
-
-import { cursorTo } from "readline";
 import { GameState, Knowledge, Rule } from ".";
 import { StartAction } from "./actions";
 import { getRolesForRuleset, validateRuleeset } from "./logic";
@@ -78,7 +74,7 @@ function resetKnowledge(state: GameState, knowledgeMap: Record<string, Knowledge
       case "Assassin":
       case "Mordred":
       case "Morgana":
-        state.hiddenRoles.keys().map((p) => {
+        for (const p of state.hiddenRoles.keys()) {
           const r = state.hiddenRoles.get(p)!;
 
           if (r === "Assassin" || r === "Mordred" || r === "Morgana" || r === "Mordredic Servant") {
@@ -100,10 +96,10 @@ function resetKnowledge(state: GameState, knowledgeMap: Record<string, Knowledge
               });
             }
           }
-        })
+        }
         break;
       case "Percival":
-        state.hiddenRoles.keys().map((p) => {
+        for (const p of state.hiddenRoles.keys()) {
           const r = state.hiddenRoles.get(p)!
 
           if (r === "Merlin" || r === "Morgana") {
@@ -114,10 +110,10 @@ function resetKnowledge(state: GameState, knowledgeMap: Record<string, Knowledge
               },
             });
           }
-        });
+        }
         break;
       case "Merlin":
-        state.hiddenRoles.keys().map((p) => {
+        for (const p of state.hiddenRoles.keys()) {
           const r = state.hiddenRoles.get(p)!;
 
           if (r === "Morgana" || r === "Assassin" || r === "Oberon" || r === "Mordredic Servant") {
@@ -129,7 +125,8 @@ function resetKnowledge(state: GameState, knowledgeMap: Record<string, Knowledge
               },
             });
           }
-        });
+
+        }
         break;
     }
 

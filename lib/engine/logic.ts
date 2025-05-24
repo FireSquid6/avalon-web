@@ -1,6 +1,5 @@
 import type { GameState, Quest, Role, Rule, Player } from ".";
 import { playerCounts, questInfo } from "./data";
-import { ProcessError } from "./process";
 
 export function validateRuleeset(ruleset: Rule[], playerCount: number): string | true {
   if (hasDuplicates(ruleset)) {
@@ -11,7 +10,7 @@ export function validateRuleeset(ruleset: Rule[], playerCount: number): string |
     return `Need a player amount between 5 and 10 (inclusive), got ${playerCount}`;
   }
   let maxEvilPlayers = 0;
-  
+
   switch (playerCount) {
     case 5:
     case 6:
@@ -83,7 +82,7 @@ export function getQuestInformation(players: number): Quest[] {
   return quests;
 }
 
-export function getGoodEvilNumber(players: number): { good: number, evil: number} {
+export function getGoodEvilNumber(players: number): { good: number, evil: number } {
   const res = playerCounts[players];
 
   if (res === undefined) {
@@ -123,23 +122,22 @@ export function getRolesForRuleset(ruleset: Rule[], playerCount: number): Role[]
         goodRemaining -= 1;
         break;
     }
-
-    while (goodRemaining > 0) {
-      roles.push("Arthurian Servant");
-      goodRemaining -= 1;
-    }
-
-    while (evilRemaining > 0) {
-      roles.push("Mordredic Servant");
-      evilRemaining -= 1;
-    }
   }
 
+  while (goodRemaining > 0) {
+    roles.push("Arthurian Servant");
+    goodRemaining -= 1;
+  }
+
+  while (evilRemaining > 0) {
+    roles.push("Mordredic Servant");
+    evilRemaining -= 1;
+  }
 
   if (roles.length !== playerCount) {
     throw new Error(`Super screwed! Allocated ${roles.length} roles for a ${playerCount} player game!`);
   }
-  
+
   return roles;
 }
 
