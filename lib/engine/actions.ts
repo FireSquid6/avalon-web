@@ -46,6 +46,7 @@ export type StartAction = z.infer<typeof startActionSchema>;
 
 export const gameActions = z.discriminatedUnion("kind", [
   voteActionSchema,
+  nominateActionSchema,
   questActionSchema,
   ladyActionSchema,
   assassinateActionSchema,

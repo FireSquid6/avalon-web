@@ -1,5 +1,6 @@
 import type { GameState, Quest, Role, Rule, Player } from ".";
 import { playerCounts, questInfo } from "./data";
+import { ProcessError } from "./process";
 
 export function validateRuleeset(ruleset: Rule[], playerCount: number): string | true {
   if (hasDuplicates(ruleset)) {
@@ -158,4 +159,152 @@ export function getBlankState(id: string, gameMasterId: string, ruleset: Rule[])
 export function insertPlayer(state: GameState, player: Player) {
   state.players.push(player);
   state.tableOrder.push(player.id);
+}
+
+type IntendedAction = "vote" | "nominate" | "quest" | "lady" | "start" | "assassinate" | "complete" | "none";
+export function getNextIntendedAction(state: GameState): IntendedAction {
+  if (state.status === "waiting") {
+    return "start";
+  }
+  if (state.status === "finished") {
+    return "none";
+  }
+
+  const currentRound = state.rounds[state.rounds.length - 1];
+
+  if (currentRound === undefined) {
+    throw new ProcessError("server", "In situation where there should be a round but isn't");
+  }
+
+  if (!currentRound.nominatedPlayers) {
+    return "nominate";
+  }
+
+
+  if (currentRound.votes.size < state.players.length) {
+    return "vote";
+  }
+
+  if (!currentRound.quest || !currentRound.quest.completed) {
+    return "quest";
+  }
+
+  const questNumber = currentRound.questNumber;
+  const needsToUseLady = rulesetHas(state.ruleset, "Lady of the Lake")
+    && questNumber >= 2
+    && questNumber <= 4
+    && !currentRound.ladyUsed
+
+  if (needsToUseLady) {
+    return "lady";
+  }
+
+  // quest five is done
+  if (currentRound.questNumber === 5) {
+    // quest 5 is over, game is done
+    if (rulesetHas(state.ruleset, "Quickshot Assassin")) {
+      return "complete";
+    } else {
+      return "assassinate";
+    }
+  }
+
+  throw new ProcessError("server", "Game state is such that no action can be taken");
+
+}
+
+export function rulesetHas(ruleset: Rule[], rule: Rule): boolean {
+  return ruleset.find((r) => r === rule) !== undefined;
+}
+
+
+export function newRound(state: GameState) {
+  if (state.rounds.length === 0) {
+    state.rounds.push(
+      {
+        monarch: state.tableOrder[0],
+        questNumber: 1,
+        ladyUsed: false,
+
+        votes: new Map(),
+      }
+    );
+    return;
+  }
+
+  const lastRound = state.rounds[state.rounds.length - 1]!;
+  const monarchIndex = state.rounds.length % state.players.length;
+  const didLastRound = lastRound.quest !== undefined;
+
+  state.rounds.push({
+    monarch: state.tableOrder[monarchIndex],
+    questNumber: didLastRound ? lastRound.questNumber + 1 : lastRound.questNumber,
+    ladyUsed: false,
+    votes: new Map(),
+  });
+}
+
+export function getFailedVotes(state: GameState): number {
+  let failed: number = 0;
+
+  for (const round of state.rounds) {
+    const voted = round.votes.size === state.players.length;
+    if (!voted) {
+      continue;
+    }
+
+    const requiredApproves = Math.ceil(state.players.length / 2);
+    let approves: number = 0;
+    for (const r of round.votes.values()) {
+      if (r === "Approve") {
+        approves += 1;
+      }
+
+    }
+
+    if (approves < requiredApproves) {
+      failed += 1;
+    }
+  }
+  return failed;
+}
+
+export function getScore(state: GameState): {fails: number, passes: number} {
+  let fails: number = 0;
+  let passes: number = 0;
+
+  const quests = getQuestInformation(state.players.length);
+
+  for (const round of state.rounds) {
+    if (!round.quest) {
+      continue;
+    }
+    const questInfo = quests[round.questNumber - 1]!;
+    if (round.quest.failCards >= questInfo.failsRequired) {
+      fails += 1;
+    } else {
+      passes += 1;
+    }
+  }
+
+  return {
+    fails,
+    passes,
+  }
+}
+
+export function getTeam(role: Role): "Mordredic" | "Arthurian" {
+  switch (role) {
+    case "Oberon":
+    case "Mordred":
+    case "Mordredic Servant":
+    case "Assassin":
+    case "Morgana":
+      return "Mordredic";
+    case "Merlin":
+    case "Lancelot":
+    case "Percival":
+    case "Arthurian Servant":
+      return "Arthurian";
+  }
 }
