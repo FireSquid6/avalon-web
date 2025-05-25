@@ -7,3 +7,5 @@ export function getTreaty() {
 
   return eden.api;
 }
+
+export type Api = ReturnType<typeof getTreaty>;

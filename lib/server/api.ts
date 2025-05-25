@@ -169,6 +169,16 @@ export const api = new Elysia({ prefix: '/api' })
         ws.send(socketFailure(`Tried to subscribe to an already subscribed game or unsubscribe from unsubscribed game`));
       }
     },
+    // TODO - unsubscribe from all stuff on close
+    close(ws) {
+      const games = ws.data.store.games;
+      const listeners = ws.data.store.listeners;
+
+      const keysToKill = listeners.keys().filter((k) => k.startsWith(ws.id));
+    },
+    error(ws) {
+
+    },
   })
 
 export type App = typeof api;
