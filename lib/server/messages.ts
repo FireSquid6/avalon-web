@@ -8,6 +8,10 @@ export const messageSchema = z.object({
 });
 export type SocketMessage = z.infer<typeof messageSchema>;
 
+export function makeMessage(msg: SocketMessage): string {
+  return JSON.stringify(msg);
+}
+
 export const infoResponseSchema = z.object({
   type: z.literal("info"),
   result: z.enum(["success", "failure"]),

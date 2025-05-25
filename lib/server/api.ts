@@ -126,6 +126,7 @@ export const api = new Elysia({ prefix: '/api' })
     })
   })
   .ws("/stream", {
+    // TODO - new rule: each client can only be connected to ONE game
     message(ws, rawMessage) {
       const games = ws.data.store.games;
       const listeners = ws.data.store.listeners;
@@ -133,9 +134,7 @@ export const api = new Elysia({ prefix: '/api' })
       const json = JSON.parse(rawMessage as string);
       const message = messageSchema.parse(json);
 
-      const key = `${ws.id}-${message.playerId}-${message.gameId}`;
-
-      const isSubscribed = listeners.has(key);
+      const isSubscribed = listeners.has(ws.id);
       const game = games.get(message.gameId);
 
       if (game === undefined) {
@@ -156,28 +155,30 @@ export const api = new Elysia({ prefix: '/api' })
         }
 
         game.subscribe(listener);
-        listeners.set(key, listener);
+        listeners.set(ws.id, listener);
         ws.send(socketInfo(`Subscribed to ${message.gameId}`))
       } else if (message.action === "unsubscribe" && isSubscribed) {
-        const listener = listeners.get(key)!;
+        const listener = listeners.get(ws.id)!;
 
         game.unsubscribe(listener);
-        listeners.delete(key);
+        listeners.delete(ws.id);
 
         ws.send(socketInfo(`Unsubscribed from ${message.gameId}`))
       } else {
         ws.send(socketFailure(`Tried to subscribe to an already subscribed game or unsubscribe from unsubscribed game`));
       }
     },
-    // TODO - unsubscribe from all stuff on close
     close(ws) {
       const games = ws.data.store.games;
       const listeners = ws.data.store.listeners;
 
-      const keysToKill = listeners.keys().filter((k) => k.startsWith(ws.id));
-    },
-    error(ws) {
+      if (listeners.has(ws.id)) {
+        const listener = listeners.get(ws.id)!;
 
+        games.forEach((game) => {
+          game.unsubscribe(listener);
+        });
+      }
     },
   })
 
