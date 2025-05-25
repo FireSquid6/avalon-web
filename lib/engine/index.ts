@@ -2,6 +2,7 @@ import { z } from "zod";
 
 // type alias for code readability purposes
 
+
 export const ruleEnum = z.enum([ 
   "Lady of the Lake",
   "Oberon",
@@ -38,7 +39,8 @@ export type Player = z.infer<typeof playerSchema>;
 export const roundSchema = z.object({
   monarch: z.string(), // playerId of monarch
   questNumber: z.number(),
-  ladyUsed: z.boolean(),
+  ladyTarget: z.optional(z.string()),
+  ladyUser: z.optional(z.string()),
   nominatedPlayers: z.optional(z.array(z.string())),
 
   votes: z.map(z.string(), z.enum(["Approve", "Reject"])),

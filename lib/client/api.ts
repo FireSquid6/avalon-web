@@ -1,0 +1,9 @@
+import { treaty } from "@elysiajs/eden";
+import type { App } from "@/lib/server/api";
+
+
+export function getTreaty() {
+  const eden = treaty<App>("/api");
+
+  return eden.api;
+}

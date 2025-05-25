@@ -1,4 +1,4 @@
-import { GameState, Knowledge } from ".";
+import { GameState } from ".";
 import { GameAction } from "./actions";
 import { performAssassination, performLady, performNominate, performQuest, performStart, performVote } from "./mutators";
 
@@ -18,28 +18,13 @@ export class ProcessError {
   }
 }
 
-export class ActionResult {
-  newState: GameState;
-  newKnowledge: Record<string, Knowledge[]>;
-
-  constructor(state: GameState, knowledge?: Record<string, Knowledge[]>) {
-    this.newState = state;
-
-    if (knowledge !== undefined) {
-      this.newKnowledge = knowledge;
-    } else {
-      this.newKnowledge = {};
-    }
-  }
-}
 
 export type ProcessResult =
   | ProcessError
-  | ActionResult
+  | GameState
 
 export interface ProcessInputs<T extends GameAction> {
   state: GameState,
-  knowledge: Record<string, Knowledge[]>,
   action: T,
   actorId: string,
 }
@@ -48,13 +33,11 @@ export function processAction<T extends GameAction>(inputs: ProcessInputs<T>): P
   try {
     const mutableInputs: ProcessInputs<T> = {
       state: structuredClone(inputs.state),
-      knowledge: structuredClone(inputs.knowledge),
       actorId: inputs.actorId,
       action: inputs.action,
     }
 
     const state = structuredClone(inputs.state);
-    const knowledge = structuredClone(inputs.knowledge);
     const actorId = inputs.actorId;
     const action = inputs.action;
 
@@ -62,7 +45,6 @@ export function processAction<T extends GameAction>(inputs: ProcessInputs<T>): P
       case "vote":
         performVote({
           state,
-          knowledge,
           action,
           actorId,
         })
@@ -70,7 +52,6 @@ export function processAction<T extends GameAction>(inputs: ProcessInputs<T>): P
       case "lady":
         performLady({
           state,
-          knowledge,
           action,
           actorId,
         })
@@ -78,7 +59,6 @@ export function processAction<T extends GameAction>(inputs: ProcessInputs<T>): P
       case "quest":
         performQuest({
           state,
-          knowledge,
           action,
           actorId,
         })
@@ -86,7 +66,6 @@ export function processAction<T extends GameAction>(inputs: ProcessInputs<T>): P
       case "start":
         performStart({
           state,
-          knowledge,
           action,
           actorId,
         })
@@ -94,7 +73,6 @@ export function processAction<T extends GameAction>(inputs: ProcessInputs<T>): P
       case "nominate":
         performNominate({
           state,
-          knowledge,
           action,
           actorId,
         })
@@ -102,7 +80,6 @@ export function processAction<T extends GameAction>(inputs: ProcessInputs<T>): P
       case "assassinate":
         performAssassination({
           state,
-          knowledge,
           action,
           actorId,
         })
@@ -111,7 +88,7 @@ export function processAction<T extends GameAction>(inputs: ProcessInputs<T>): P
         throw new Error("Bad action: ", action);
     }
 
-    return new ActionResult(mutableInputs.state, mutableInputs.knowledge);
+    return mutableInputs.state;
   } catch (e) {
     if (e instanceof ProcessError) {
       return e;

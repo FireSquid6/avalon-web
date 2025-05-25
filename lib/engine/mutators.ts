@@ -1,8 +1,7 @@
 // all mutators take in a ProcessInputs object and can mutate it
 // they can also at any time throw an error
-import { GameState, Knowledge } from ".";
 import { AssassinationAction, LadyAction, NominateAction, QuestAction, StartAction, VoteAction } from "./actions";
-import { getRolesForRuleset, validateRuleeset, rulesetHas, getNextIntendedAction, newRound, getQuestInformation, getFailedVotes, getScore, getTeam } from "./logic";
+import { getRolesForRuleset, validateRuleeset, rulesetHas, getNextIntendedAction, newRound, getQuestInformation, getFailedVotes, getScore, shuffleArray } from "./logic";
 import { ProcessError, ProcessInputs } from "./process";
 
 
@@ -17,7 +16,7 @@ import { ProcessError, ProcessInputs } from "./process";
 
 
 export function performStart<T extends StartAction>(inputs: ProcessInputs<T>) {
-  const { state, knowledge, actorId } = inputs;
+  const { state, actorId } = inputs;
 
   if (state.gameMaster !== actorId) {
     throw new ProcessError("client", "The game master must start the game");
@@ -42,8 +41,6 @@ export function performStart<T extends StartAction>(inputs: ProcessInputs<T>) {
 
     state.hiddenRoles.set(player.id, role)
   }
-
-  resetKnowledge(state, knowledge)
 
   state.status = "in-progress";
   shuffleArray(state.tableOrder);
@@ -168,7 +165,7 @@ export function performQuest<T extends QuestAction>(inputs: ProcessInputs<T>) {
     const questNumber = round.questNumber;
     const needsToUseLady = rulesetHas(state.ruleset, "Lady of the Lake")
       && questNumber > 1
-      && !round.ladyUsed
+      && round.ladyTarget === undefined
 
     if (!needsToUseLady) {
       newRound(state);
@@ -191,7 +188,7 @@ export function performQuest<T extends QuestAction>(inputs: ProcessInputs<T>) {
 }
 
 export function performLady<T extends LadyAction>(inputs: ProcessInputs<T>) {
-  const { state, knowledge, action, actorId } = inputs;
+  const { state, action, actorId } = inputs;
   const intendedAction = getNextIntendedAction(state)
 
   if (intendedAction !== "lady") {
@@ -202,26 +199,11 @@ export function performLady<T extends LadyAction>(inputs: ProcessInputs<T>) {
     throw new ProcessError("client", "You do not have the lady of the lake");
   }
 
-  const role = state.hiddenRoles.get(action.playerId)!;
-  const team = getTeam(role);
-
-  const newKnowledge: Knowledge = {
-    playerId: action.playerId,
-    info: {
-      type: "team",
-      team,
-    }
-  }
-
-  if (knowledge[actorId] === undefined) {
-    knowledge[actorId] = [newKnowledge];
-  } else {
-    knowledge[actorId].push(newKnowledge);
-  }
-
   const round = state.rounds[state.rounds.length - 1]!;
-  round.ladyUsed = true;
+  round.ladyUser = actorId;
+  round.ladyTarget = action.playerId
   state.ladyHolder = action.playerId;
+
   newRound(state);
 }
 
@@ -248,84 +230,4 @@ export function performAssassination<T extends AssassinationAction>(inputs: Proc
     : "Arthurian Victory"
 }
 
-function resetKnowledge(state: GameState, knowledgeMap: Record<string, Knowledge[]>) {
-  const showTeammateRoles = rulesetHas(state.ruleset, "Visible Teammate Roles");
-
-  for (const [player, role] of state.hiddenRoles) {
-    const knowledge: Knowledge[] = [];
-
-    switch (role) {
-      case "Mordredic Servant":
-      case "Assassin":
-      case "Mordred":
-      case "Morgana":
-        for (const p of state.hiddenRoles.keys()) {
-          const r = state.hiddenRoles.get(p)!;
-
-          if (r === "Assassin" || r === "Mordred" || r === "Morgana" || r === "Mordredic Servant") {
-            if (showTeammateRoles) {
-              knowledge.push({
-                playerId: p,
-                info: {
-                  type: "role",
-                  role: r,
-                }
-              });
-            } else {
-              knowledge.push({
-                playerId: p,
-                info: {
-                  type: "team",
-                  team: "Mordredic",
-                }
-              });
-            }
-          }
-        }
-        break;
-      case "Percival":
-        for (const p of state.hiddenRoles.keys()) {
-          const r = state.hiddenRoles.get(p)!
-
-          if (r === "Merlin" || r === "Morgana") {
-            knowledge.push({
-              playerId: p,
-              info: {
-                type: "percivalic sight",
-              },
-            });
-          }
-        }
-        break;
-      case "Merlin":
-        for (const p of state.hiddenRoles.keys()) {
-          const r = state.hiddenRoles.get(p)!;
-
-          if (r === "Morgana" || r === "Assassin" || r === "Oberon" || r === "Mordredic Servant") {
-            knowledge.push({
-              playerId: p,
-              info: {
-                type: "team",
-                team: "Mordredic",
-              },
-            });
-          }
-
-        }
-        break;
-    }
-
-    shuffleArray(knowledge);
-    knowledgeMap[player] = knowledge;
-  }
-
-}
-
-function shuffleArray<T>(array: T[]) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]]; // Swap elements
-  }
-  return array;
-}
 

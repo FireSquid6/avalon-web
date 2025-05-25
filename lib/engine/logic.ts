@@ -1,4 +1,4 @@
-import type { GameState, Quest, Role, Rule, Player } from ".";
+import type { GameState, Quest, Role, Rule, Player, Knowledge } from ".";
 import { playerCounts, questInfo } from "./data";
 import { ProcessError } from "./process";
 
@@ -193,7 +193,7 @@ export function getNextIntendedAction(state: GameState): IntendedAction {
   const needsToUseLady = rulesetHas(state.ruleset, "Lady of the Lake")
     && questNumber >= 2
     && questNumber <= 4
-    && !currentRound.ladyUsed
+    && currentRound.ladyTarget === undefined
 
   if (needsToUseLady) {
     return "lady";
@@ -224,7 +224,6 @@ export function newRound(state: GameState) {
       {
         monarch: state.tableOrder[0],
         questNumber: 1,
-        ladyUsed: false,
 
         votes: new Map(),
       }
@@ -239,7 +238,7 @@ export function newRound(state: GameState) {
   state.rounds.push({
     monarch: state.tableOrder[monarchIndex],
     questNumber: didLastRound ? lastRound.questNumber + 1 : lastRound.questNumber,
-    ladyUsed: false,
+
     votes: new Map(),
   });
 }
@@ -269,7 +268,7 @@ export function getFailedVotes(state: GameState): number {
   return failed;
 }
 
-export function getScore(state: GameState): {fails: number, passes: number} {
+export function getScore(state: GameState): { fails: number, passes: number } {
   let fails: number = 0;
   let passes: number = 0;
 
@@ -292,6 +291,111 @@ export function getScore(state: GameState): {fails: number, passes: number} {
     passes,
   }
 }
+
+export function generateKnowledgeMap(state: GameState) {
+  const showTeammateRoles = rulesetHas(state.ruleset, "Visible Teammate Roles");
+  const knowledgeMap: Record<string, Knowledge[]> = {};
+
+  for (const [player, role] of state.hiddenRoles) {
+    const knowledge: Knowledge[] = [];
+
+    switch (role) {
+      case "Mordredic Servant":
+      case "Assassin":
+      case "Mordred":
+      case "Morgana":
+        for (const p of state.hiddenRoles.keys()) {
+          const r = state.hiddenRoles.get(p)!;
+
+          if (r === "Assassin" || r === "Mordred" || r === "Morgana" || r === "Mordredic Servant") {
+            if (showTeammateRoles) {
+              knowledge.push({
+                playerId: p,
+                info: {
+                  type: "role",
+                  role: r,
+                }
+              });
+            } else {
+              knowledge.push({
+                playerId: p,
+                info: {
+                  type: "team",
+                  team: "Mordredic",
+                }
+              });
+            }
+          }
+        }
+        break;
+      case "Percival":
+        for (const p of state.hiddenRoles.keys()) {
+          const r = state.hiddenRoles.get(p)!
+
+          if (r === "Merlin" || r === "Morgana") {
+            knowledge.push({
+              playerId: p,
+              info: {
+                type: "percivalic sight",
+              },
+            });
+          }
+        }
+        break;
+      case "Merlin":
+        for (const p of state.hiddenRoles.keys()) {
+          const r = state.hiddenRoles.get(p)!;
+
+          if (r === "Morgana" || r === "Assassin" || r === "Oberon" || r === "Mordredic Servant") {
+            knowledge.push({
+              playerId: p,
+              info: {
+                type: "team",
+                team: "Mordredic",
+              },
+            });
+          }
+
+        }
+        break;
+    }
+
+    shuffleArray(knowledge);
+    knowledgeMap[player] = knowledge;
+  }
+
+
+  for (const round of state.rounds) {
+    if (round.ladyTarget === undefined || round.ladyUser === undefined) {
+      continue;
+    }
+
+    const role = state.hiddenRoles.get(round.ladyTarget)!;
+    const team = getTeam(role);
+    
+    // this may result in duplicates (i.e. an evil player investigates their own teammate)
+    // this is intentional, as it allows the player an indication that they did actually
+    // "use" the lady of the lake, even though it gives the same information
+    knowledgeMap[round.ladyUser].push({
+      playerId: round.ladyTarget,
+      info: {
+        type: "team",
+        team: team,
+      }
+    });
+  }
+
+  return knowledgeMap
+}
+
+export function shuffleArray<T>(array: T[]) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+  }
+  return array;
+}
+
 
 export function getTeam(role: Role): "Mordredic" | "Arthurian" {
   switch (role) {

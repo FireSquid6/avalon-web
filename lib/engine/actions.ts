@@ -44,7 +44,7 @@ export const startActionSchema = z.object({
 });
 export type StartAction = z.infer<typeof startActionSchema>;
 
-export const gameActions = z.discriminatedUnion("kind", [
+export const gameActionSchema = z.discriminatedUnion("kind", [
   voteActionSchema,
   nominateActionSchema,
   questActionSchema,
@@ -53,4 +53,4 @@ export const gameActions = z.discriminatedUnion("kind", [
   startActionSchema,
 ]);
 
-export type GameAction = z.infer<typeof gameActions>;
+export type GameAction = z.infer<typeof gameActionSchema>;
