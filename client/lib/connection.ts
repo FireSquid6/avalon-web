@@ -1,6 +1,6 @@
 import { GameState, Knowledge } from "../engine";
-import { makeMessage, responseSchema } from "../server/messages";
-import { Api } from "./api";
+import { makeMessage, responseSchema } from "../server/server/messages";
+import { Api } from "../../frontend/apirver/client/api";
 import { EdenWS } from "@elysiajs/eden/treaty";
 
 export type ConnectionListener = (data: {
