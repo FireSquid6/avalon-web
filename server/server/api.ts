@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { Elysia, t } from 'elysia'
-import { ruleEnum, type GameState } from "@/lib/engine";
+import { ruleEnum, type GameState } from "@/backend/engine";
 import { randomUUID } from 'crypto';
-import { generateKnowledgeMap, getBlankState } from '@/lib/engine/logic';
-import { gameActionSchema } from "@/lib/engine/actions";
-import { processAction, ProcessError } from "@/lib/engine/process";
-import { viewStateAs } from "@/lib/engine/view";
+import { generateKnowledgeMap, getBlankState } from '@/backend/engine/logic';
+import { gameActionSchema } from "@/backend/engine/actions";
+import { processAction, ProcessError } from "@/backend/engine/process";
+import { viewStateAs } from "@/backend/engine/view";
 import { messageSchema, socketFailure, socketInfo, stateResponse } from "./messages";
 
 type GameListener = (updatedState: GameState) => void;

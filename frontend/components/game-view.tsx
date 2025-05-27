@@ -1,6 +1,6 @@
-import { GameState, Knowledge } from "@/lib/engine";
-import { GameAction } from "@/lib/engine/actions";
-import { ProcessError } from "@/lib/engine/process";
+import { GameState, Knowledge } from "@/backend/engine";
+import { GameAction } from "@/backend/engine/actions";
+import { ProcessError } from "@/backend/engine/process";
 
 interface GameViewProps {
   knowledge: Knowledge[];
