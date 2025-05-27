@@ -3,7 +3,13 @@ import type { App } from "@/server/api";
 
 
 export function getTreaty() {
-  const eden = treaty<App>("/api");
+  const apiUrl = process.env.VITE_API_URL;
+  
+  if (apiUrl === undefined) {
+    throw new Error("apiUrl was undefined. Your environment variables are configured incorrectly");
+  }
+
+  const eden = treaty<App>(apiUrl);
   return eden;
 }
 
