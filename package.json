@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "frontend": "vite --port 4000",
-    "backed": "bun run scripts/backend.ts",
-    "build": "vite build && tsc",
+    "backend": "bun run scripts/start-server.ts",
+    "build": "tsc && vite build && bun run scripts/build.ts",
     "serve": "vite preview"
   },
   "dependencies": {

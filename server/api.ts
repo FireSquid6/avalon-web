@@ -7,6 +7,7 @@ import { gameActionSchema } from "@/engine/actions";
 import { processAction, ProcessError } from "@/engine/process";
 import { viewStateAs } from "@/engine/view";
 import { messageSchema, socketFailure, socketInfo, stateResponse } from "./protocol";
+import { simpleLogger } from "./logger";
 
 type GameListener = (updatedState: GameState) => void;
 
@@ -43,7 +44,8 @@ class Game {
 }
 
 
-export const api = new Elysia({ prefix: '/api' })
+export const api = new Elysia()
+  .use(simpleLogger())
   .state("games", new Map<string, Game>())
   .state("listeners", new Map<string, GameListener>())
   .post("/games/:id/interact", (ctx) => {
