@@ -1,5 +1,5 @@
 import { treaty } from "@elysiajs/eden";
-import type { App } from "@/backend/server/api";
+import type { App } from "@/server/api";
 
 
 export function getTreaty() {

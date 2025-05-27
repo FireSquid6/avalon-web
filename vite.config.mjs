@@ -14,8 +14,8 @@ export default defineConfig({
     TanStackRouterVite({ 
       autoCodeSplitting: true,
       quotesStyle: "double",
-      routesDirectory: "./frontend/routes",
-      generatedRouteTree: "./frontend/routeTree.gen.ts",
+      routesDirectory: "./client/routes",
+      generatedRouteTree: "./client/routeTree.gen.ts",
       routeFileIgnorePrefix: "-",
     }), 
     viteReact(), 

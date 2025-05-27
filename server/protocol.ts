@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { GameState, gameStateSchema, Knowledge, knowledgeSchema } from "../../engine";
+import { GameState, gameStateSchema, Knowledge, knowledgeSchema } from "@/engine";
 
 export const messageSchema = z.object({
   playerId: z.string(),

@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test";
-import type { Rule } from "@/backend/engine";
-import { validateRuleeset } from "@/backend/engine/logic";
+import type { Rule } from "@/engine";
+import { validateRuleeset } from "@/engine/logic";
 
 
 const tests: { ruleset: Rule[], players: number, passes: boolean }[] = [

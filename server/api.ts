@@ -6,7 +6,7 @@ import { generateKnowledgeMap, getBlankState } from '@/engine/logic';
 import { gameActionSchema } from "@/engine/actions";
 import { processAction, ProcessError } from "@/engine/process";
 import { viewStateAs } from "@/engine/view";
-import { messageSchema, socketFailure, socketInfo, stateResponse } from "./messages";
+import { messageSchema, socketFailure, socketInfo, stateResponse } from "./protocol";
 
 type GameListener = (updatedState: GameState) => void;
 
