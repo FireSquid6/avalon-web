@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { TextInput } from "../components/form"
 import { useState } from "react"
 import { getTreaty } from "../lib/api";
-import { redirect } from "elysia";
 
 export const Route = createFileRoute("/")({
   component: Home,
