@@ -9,6 +9,7 @@ import { viewStateAs } from "engine/view";
 import { messageSchema, socketFailure, socketInfo, stateResponse } from "./protocol";
 import { simpleLogger } from "./logger";
 import { cors } from "@elysiajs/cors";
+import type { Config } from "./config";
 
 type GameListener = (updatedState: GameState) => void;
 
@@ -54,11 +55,12 @@ class Game {
   }
 }
 
-export const api = new Elysia()
+export const app = new Elysia()
   .use(simpleLogger())
   .use(cors())
   .state("games", new Map<string, Game>())
   .state("listeners", new Map<string, GameListener>())
+  .state("config", {} as Config)
   .derive((ctx) => {
     const data = ctx.cookie["token"];
 
@@ -210,4 +212,4 @@ export const api = new Elysia()
     },
   })
 
-export type App = typeof api;
+export type App = typeof app;
