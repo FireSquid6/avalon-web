@@ -10,6 +10,8 @@ import { messageSchema, socketFailure, socketInfo, stateResponse } from "./proto
 import { simpleLogger } from "./logger";
 import { cors } from "@elysiajs/cors";
 import type { Config } from "./config";
+import type { Db } from "./db";
+import { getSessionWithToken } from "./db/auth";
 
 type GameListener = (updatedState: GameState) => void;
 
@@ -61,25 +63,81 @@ export const app = new Elysia()
   .state("games", new Map<string, Game>())
   .state("listeners", new Map<string, GameListener>())
   .state("config", {} as Config)
-  .derive((ctx) => {
-    const data = ctx.cookie["token"];
+  .state("db", {} as Db)
+  .derive(({ cookie: { auth }, set, store: { db, games } }) => {
+    const forceAuthenticated = async () => {
+      if (!auth) {
+        set.status = "Unauthorized";
+        throw new Error("No cookie");
+      }
+      const token = auth.value;
 
-    if (!data) {
+      if (!token) {
+        set.status = "Unauthorized";
+        throw new Error("No token in cookie");
+      }
+
+      const session = await getSessionWithToken(db, token);
+
+      if (!session) {
+        set.status = "Unauthorized";
+        throw new Error("Token doesn't represent a valid session");
+      }
+
+      if (session.session.expiresAt <= new Date()) {
+        set.status = "Unauthorized";
+        throw new Error("Token is expired");
+      }
+
+      return session;
+    }
+
+    const forceInGame = async (gameId: string) => {
+      const { user, session } = await forceAuthenticated();
+      const game = games.get(gameId);
+
+      if (!game) {
+        set.status = "Not Found";
+        throw new Error("Game does not exist");
+      }
+
+      if (game.peek().players.find((u) => u.id === user.username) === undefined) {
+        set.status = "Unauthorized";
+        throw new Error("You must be in this game to perform that action");
+      }
+
+      return {
+        user,
+        session,
+        game,
+      }
 
     }
 
+    return {
+      forceAuthenticated,
+      forceInGame,
+    }
+
   })
-  .post("/games/:id/interact", (ctx) => {
+  .post("/games/:id/motion", (ctx) => {
     return ctx.status("Not Implemented");
     // perform chat and highlights
   })
-  .get("/open-games", (ctx) => {
-    if (Math.random() < 0.5) {
-      return ctx.status("Internal Server Error", "Holy shit I hate this gay ass lib");
-    }
-    return "Hello!";
-
-  })
+  // kinda a diabolical one liner if I do say so myself
+  // unreadable though. It does what you think it would
+  .get("/open-games", ({ store: { games } }) => games.values().toArray()
+    .map((g) => g.peek())
+    .filter((g) => g.status === "waiting")
+    .map((g): GameInfo => {
+      return {
+        id: g.id,
+        requiresPassword: g.password !== undefined,
+        gameMaster: g.gameMaster,
+        status: "waiting",
+      }
+    })
+  )
   .post("/games", ({ body, store }) => {
     const ruleset = z.array(ruleEnum).parse(body.ruleset);
     const gameId = randomUUID();
@@ -95,7 +153,8 @@ export const app = new Elysia()
       playerId: t.String(),
     }),
   })
-  .post("/games/:id/act", ({ params, body, status, store: { games } }) => {
+  .post("/games/:id/act", async ({ params, body, status, forceAuthenticated, store: { games } }) => {
+    const { user } = await forceAuthenticated();
     const game = games.get(params.id);
 
     if (!game) {
@@ -169,7 +228,7 @@ export const app = new Elysia()
 
       if (game === undefined) {
         ws.send(socketFailure(`Game ${message.gameId} not found`));
-        
+
         return;
       }
 

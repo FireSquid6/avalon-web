@@ -1,3 +1,4 @@
+import type { InferSelectModel } from "drizzle-orm";
 import { int, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 
@@ -6,6 +7,7 @@ export const usersTable = sqliteTable("users", {
   email: text().notNull().unique(),
   hashedPassword: text().notNull(),
 });
+export type User = InferSelectModel<typeof usersTable>;
 
 export const profilesTable = sqliteTable("profile", {
   username: text().primaryKey().unique().references(() => usersTable.username),
@@ -23,3 +25,11 @@ export const participationstable = sqliteTable("participations", {
   gameId: text().notNull().references(() => completedGames.id),
   username: text().notNull().references(() => usersTable.username),
 });
+
+export const sessionsTable = sqliteTable("sessions", {
+  token: text().notNull().primaryKey().unique(),
+  expiresAt: int({ mode: "timestamp_ms" }).notNull(),
+  username: text().notNull().references(() => usersTable.username)
+});
+
+export type Session = InferSelectModel<typeof sessionsTable>;
