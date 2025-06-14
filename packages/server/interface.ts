@@ -11,44 +11,25 @@ export function getTreaty(address: string) {
   return treaty<App>(address);
 }
 
+async function test() {
+  const treaty = getTreaty("");
+  const res = unwrap(await treaty["open-games"].get());
 
 
-export type CustomTreatyResponse<Res extends Record<number, unknown>> =
-  | {
-      data: Res[200]
-      error: null
-      response: Response
-      status: number
-      headers: BunFetchRequestInit["headers"]
-    }
-  | {
-      data: null
-      error: Exclude<keyof Res, 200> extends never
-        ? {
-            status: any
-            value: any
-          }
-        : {
-            [Status in keyof Res]: {
-              status: Status
-              value: Res[Status]
-            }
-          }[Exclude<keyof Res, 200>]
-      response: Response
-      status: number
-      headers: BunFetchRequestInit["headers"]
-    }
+}
 
-export function unwrap<T>(res: CustomTreatyResponse<Record<number, T | null>>): T {
+type StatusResponse<T, E> = {
+  200: T
+} & Record<Exclude<number, 200>, E>;
+
+export function unwrap<T, E>(res: Treaty.TreatyResponse<StatusResponse<T, E>>): T {
   if (res.error !== null) {
-    throw new Error(`Error fetching ${res.response.url} with status ${res.status}: ${res.error}`);
-  }
-  if (res.data === null) {
-    throw new Error(`Error fetching ${res.response.url} with status ${res.status}: data was null`)
+    throw new Error(`Error fetching from ${res.response.url}: ${res.error}`);
   }
   if (res.status !== 200) {
-    throw new Error(`Error fetching ${res.response.url} with status ${res.status}: Unknown. Bad response but no error.`);
+    throw new Error(`Error fetching from ${res.response.url}: Got status ${res.status}`)
   }
 
-  return res.data
+  // trust me bro
+  return res.data as T;
 }
