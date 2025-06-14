@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { Elysia, t } from "elysia"
-import { ruleEnum, type GameState } from "engine";
+import { ruleEnum, type GameInfo, type GameState } from "engine";
 import { randomUUID } from "crypto";
 import { generateKnowledgeMap, getBlankState } from "engine/logic";
 import { gameActionSchema } from "engine/actions";
@@ -8,7 +8,7 @@ import { processAction, ProcessError } from "engine/process";
 import { viewStateAs } from "engine/view";
 import { messageSchema, socketFailure, socketInfo, stateResponse } from "./protocol";
 import { simpleLogger } from "./logger";
-import { cors } from "elysiajs/cors";
+import { cors } from "@elysiajs/cors";
 
 type GameListener = (updatedState: GameState) => void;
 
@@ -42,17 +42,41 @@ class Game {
   peek(): GameState {
     return this.state;
   }
-}
 
+  getInfo(): GameInfo {
+    return {
+      id: this.state.id,
+      requiresPassword: this.state.password !== undefined,
+      status: this.state.status,
+      gameMaster: this.state.gameMaster,
+    }
+
+  }
+}
 
 export const api = new Elysia()
   .use(simpleLogger())
   .use(cors())
   .state("games", new Map<string, Game>())
   .state("listeners", new Map<string, GameListener>())
+  .derive((ctx) => {
+    const data = ctx.cookie["token"];
+
+    if (!data) {
+
+    }
+
+  })
   .post("/games/:id/interact", (ctx) => {
     return ctx.status("Not Implemented");
     // perform chat and highlights
+  })
+  .get("/open-games", (ctx) => {
+    if (Math.random() < 0.5) {
+      return ctx.status("Internal Server Error", "Holy shit I hate this gay ass lib");
+    }
+    return "Hello!";
+
   })
   .post("/games", ({ body, store }) => {
     const ruleset = z.array(ruleEnum).parse(body.ruleset);

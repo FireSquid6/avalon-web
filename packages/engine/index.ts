@@ -59,6 +59,7 @@ export const gameStateSchema = z.object({
   id: z.string(),
   status: z.enum(["in-progress", "finished", "waiting"]),
   players: z.array(playerSchema),
+  password: z.optional(z.string()),
   tableOrder: z.array(z.string()),  // first playerId is the starting monarch
   monarchIndex: z.number(),
   ladyHolder: z.optional(z.string()),
@@ -80,6 +81,13 @@ export const gameStateSchema = z.object({
   assassinationTarget: z.optional(z.string()),
 });
 export type GameState = z.infer<typeof gameStateSchema>;
+
+export interface GameInfo {
+  id: string;
+  requiresPassword: boolean;
+  gameMaster: string;
+  status: "in-progress" | "finished" | "waiting";
+}
 
 // knowledge given to a specific player
 export const knowledgeSchema = z.object({
