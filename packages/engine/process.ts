@@ -1,5 +1,5 @@
-import { GameState } from ".";
-import { GameAction } from "./actions";
+import type { GameState } from ".";
+import type { GameAction } from "./actions";
 import { performAssassination, performLady, performNominate, performQuest, performStart, performVote } from "./mutators";
 
 export class ProcessError {

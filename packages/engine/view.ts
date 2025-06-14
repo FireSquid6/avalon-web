@@ -1,4 +1,4 @@
-import { GameState } from ".";
+import type{ GameState } from ".";
 
 export function viewStateAs(givenState: GameState, playerId: string): GameState {
   const state = structuredClone(givenState);
@@ -11,7 +11,7 @@ export function viewStateAs(givenState: GameState, playerId: string): GameState 
 
   if (state.rounds.length !== 0) {
     // if voting isn't complete, don't show votes
-    const round = state.rounds[state.rounds.length - 1];
+    const round = state.rounds[state.rounds.length - 1]!;
     
     if (round.votes.size !== state.players.length) {
       for (const k of round.votes.keys()) {

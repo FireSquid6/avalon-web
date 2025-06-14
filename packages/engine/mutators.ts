@@ -1,8 +1,8 @@
 // all mutators take in a ProcessInputs object and can mutate it
 // they can also at any time throw an error
-import { AssassinationAction, LadyAction, NominateAction, QuestAction, StartAction, VoteAction } from "./actions";
+import type { AssassinationAction, LadyAction, NominateAction, QuestAction, StartAction, VoteAction } from "./actions";
 import { getRolesForRuleset, validateRuleeset, rulesetHas, getNextIntendedAction, newRound, getQuestInformation, getFailedVotes, getScore, shuffleArray } from "./logic";
-import { ProcessError, ProcessInputs } from "./process";
+import { ProcessError, type ProcessInputs } from "./process";
 
 
 // general structure:
@@ -63,7 +63,7 @@ export function performNominate<T extends NominateAction>(inputs: ProcessInputs<
     throw new ProcessError("client", "Should have monarch nominating right now");
   }
 
-  const round = state.rounds[state.rounds.length - 1];
+  const round = state.rounds[state.rounds.length - 1]!;
 
   if (round.monarch !== actorId) {
     throw new ProcessError("client", "Only monarch can nominate players");

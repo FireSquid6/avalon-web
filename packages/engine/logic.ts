@@ -222,7 +222,7 @@ export function newRound(state: GameState) {
   if (state.rounds.length === 0) {
     state.rounds.push(
       {
-        monarch: state.tableOrder[0],
+        monarch: state.tableOrder[0]!,
         questNumber: 1,
 
         votes: new Map(),
@@ -236,7 +236,7 @@ export function newRound(state: GameState) {
   const didLastRound = lastRound.quest !== undefined;
 
   state.rounds.push({
-    monarch: state.tableOrder[monarchIndex],
+    monarch: state.tableOrder[monarchIndex]!,
     questNumber: didLastRound ? lastRound.questNumber + 1 : lastRound.questNumber,
 
     votes: new Map(),
@@ -376,7 +376,7 @@ export function generateKnowledgeMap(state: GameState) {
     // this may result in duplicates (i.e. an evil player investigates their own teammate)
     // this is intentional, as it allows the player an indication that they did actually
     // "use" the lady of the lake, even though it gives the same information
-    knowledgeMap[round.ladyUser].push({
+    knowledgeMap[round.ladyUser]!.push({
       playerId: round.ladyTarget,
       info: {
         type: "team",
@@ -391,7 +391,7 @@ export function generateKnowledgeMap(state: GameState) {
 export function shuffleArray<T>(array: T[]) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+    [array[i], array[j]] = [array[j]!, array[i]!]; // Swap elements
   }
   return array;
 }
