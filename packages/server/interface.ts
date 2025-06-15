@@ -2,21 +2,19 @@
 // otherwise, the server must be run in a bun environment. This is best
 // done through docker
 
-import type { App } from "./api";
+import type { App } from "./routes";
 import { treaty, type Treaty } from "@elysiajs/eden";
 
 export type AvalonTreaty = ReturnType<typeof getTreaty>
 
 export function getTreaty(address: string) {
-  return treaty<App>(address);
+  return treaty<App>(address, {
+    fetch: {
+      credentials: "include",
+    }
+  });
 }
 
-async function test() {
-  const treaty = getTreaty("");
-  const res = unwrap(await treaty["open-games"].get());
-
-
-}
 
 type StatusResponse<T, E> = {
   200: T
