@@ -13,7 +13,7 @@ export function SignInButton() {
   }
 
   return (
-    <Link to="/">
+    <Link to="/" className="btn btn-primary">
       {authState.username}
     </Link>
   )

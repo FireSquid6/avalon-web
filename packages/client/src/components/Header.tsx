@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router"
+import { SignInButton } from "./SignInButton"
 
 export function Header() {
   return (
@@ -9,9 +10,7 @@ export function Header() {
         </Link>
       </div>
       <div className="navbar-end">
-        <Link to="/auth" className="btn btn-primary">
-          Sign In
-        </Link>
+        <SignInButton />
       </div>
     </header>
   )
