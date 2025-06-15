@@ -6,12 +6,13 @@ import { generateKnowledgeMap, getBlankState } from "engine/logic";
 import { gameActionSchema } from "engine/actions";
 import { processAction, ProcessError } from "engine/process";
 import { viewStateAs } from "engine/view";
-import { messageSchema, socketFailure, socketInfo, stateResponse } from "./protocol";
+import { messageSchema, socketFailure, socketInfo, stateResponse, type SocketMessage } from "./protocol";
 import { simpleLogger } from "./logger";
 import { cors } from "@elysiajs/cors";
 import type { Config } from "./config";
 import type { Db } from "./db";
-import { getSessionWithToken } from "./db/auth";
+import { createSession, createUser, getProfile, getSessionWithToken, userExists, validateEmail, validatePassword, validateUsername } from "./db/auth";
+
 
 type GameListener = (updatedState: GameState) => void;
 
@@ -57,6 +58,7 @@ class Game {
   }
 }
 
+// TODO - rate limit
 export const app = new Elysia()
   .use(simpleLogger())
   .use(cors())
@@ -111,12 +113,29 @@ export const app = new Elysia()
         session,
         game,
       }
+    }
+    const validateMessage = async (message: SocketMessage): Promise<string | true> => {
+      const session = await getSessionWithToken(db, message.sessionToken);
 
+      if (session === null) {
+        return "No session exists";
+      }
+
+      if (session.user.username !== message.playerId) {
+        return "Session does not match user";
+      }
+
+      if (session.session.expiresAt <= new Date()) {
+        return "Session is expired";
+      }
+
+      return true;
     }
 
     return {
       forceAuthenticated,
       forceInGame,
+      validateMessage,
     }
 
   })
@@ -138,10 +157,12 @@ export const app = new Elysia()
       }
     })
   )
-  .post("/games", ({ body, store }) => {
+  .post("/games", async ({ body, store, forceAuthenticated }) => {
+    const { user } = await forceAuthenticated();
+
     const ruleset = z.array(ruleEnum).parse(body.ruleset);
     const gameId = randomUUID();
-    const state = getBlankState(gameId, body.playerId, ruleset);
+    const state = getBlankState(gameId, user.username, ruleset);
 
     store.games.set(gameId, new Game(state));
 
@@ -150,16 +171,52 @@ export const app = new Elysia()
   }, {
     body: t.Object({
       ruleset: t.Array(t.String()),
-      playerId: t.String(),
     }),
   })
-  .post("/games/:id/act", async ({ params, body, status, forceAuthenticated, store: { games } }) => {
+  .post("/games/:id/join", async ({ params, store: { games }, body, status, forceAuthenticated }) => {
     const { user } = await forceAuthenticated();
     const game = games.get(params.id);
+    const password = body?.password ?? "";
 
-    if (!game) {
-      return status("Not Found");
+    if (game === undefined) {
+      return status("Not Found")
     }
+
+    const state = game.peek();
+
+    if (state.status !== "waiting") {
+      return status("Bad Request", "Game has already started");
+    }
+
+    if (!(state.password !== undefined && state.password === password)) {
+      return status("Unauthorized", "Incorrect password");
+    }
+
+    if (state.players.length >= 10) {
+      return status("Unauthorized", "Game is full");
+    }
+
+    state.players.push({
+      displayName: user.username,
+      id: user.username,
+    });
+    state.tableOrder.push(user.username);
+    game.update(state);
+
+    const view = viewStateAs(state, user.username);
+    const knowledgeMap = generateKnowledgeMap(state);
+
+    return {
+      state: view,
+      knowledge: knowledgeMap ?? [],
+    }
+  }, {
+    body: t.Optional(t.Object({
+      password: t.String(),
+    }))
+  }) 
+  .post("/games/:id/act", async ({ params, body, status, forceInGame }) => {
+    const { user, game } = await forceInGame(params.id);
 
     const state = game.peek();
 
@@ -172,7 +229,7 @@ export const app = new Elysia()
     const result = processAction({
       state,
       action,
-      actorId: body.playerId,
+      actorId: user.username,
     });
 
     if (result instanceof ProcessError) {
@@ -186,33 +243,23 @@ export const app = new Elysia()
     game.update(result);
   }, {
     body: t.Object({
-      playerId: t.String(),
       action: t.Any(),
     }),
   })
-  .get("/games/:id/state", ({ store, params, status, body }) => {
-    const game = store.games.get(params.id);
-
-    if (game === undefined) {
-      return status("Not Found");
-    }
+  .get("/games/:id/state", async ({ forceInGame, params }) => {
+    const { user, game } = await forceInGame(params.id);
 
     const state = game.peek();
     const knowledgeMap = generateKnowledgeMap(state);
 
     // we return an "incomplete" version of the state
     // that hides roles and incomplete votes
-    const view = viewStateAs(state, body.playerId);
-
+    const view = viewStateAs(state, user.username);
 
     return {
       state: view,
       knowledge: knowledgeMap ?? [],
     }
-  }, {
-    body: t.Object({
-      playerId: t.String(),
-    })
   })
   .ws("/stream", {
     // TODO - new rule: each client can only be connected to ONE game
@@ -223,12 +270,17 @@ export const app = new Elysia()
       const json = JSON.parse(rawMessage as string);
       const message = messageSchema.parse(json);
 
+      const validationError = ws.data.validateMessage(message);
+      if (typeof validationError === "string") {
+        ws.send(socketFailure(validationError));
+        return;
+      }
+
       const isSubscribed = listeners.has(ws.id);
       const game = games.get(message.gameId);
 
       if (game === undefined) {
         ws.send(socketFailure(`Game ${message.gameId} not found`));
-
         return;
       }
 
@@ -270,5 +322,59 @@ export const app = new Elysia()
       }
     },
   })
+  .get("/users/:username", async ({ params, status, store: { db }}) => {
+    const profile = await getProfile(db, params.username);
+
+    if (profile === null) {
+      return status("Not Found");
+    }
+
+    return profile;
+  })
+  .post("/users", async ({ body, status, store: { db } }) => {
+    if (await userExists(db, body.username, body.email)) {
+      return status("Bad Request", "Username or email already taken. Try a different one.");
+    }
+
+    const errors = [validateEmail(body.email), validatePassword(body.password), validateUsername(body.username)].filter((e) => e !== null);
+
+    if (errors.length !== 0) {
+      return status("Bad Request", `Validation error: ${errors.join(", ")}`);
+    }
+
+
+    const hashedPassword = Bun.password.hashSync(body.password)
+    // TODO - configure whether to automatically verify or not
+    const user = await createUser(db, body.username, body.email, hashedPassword, true);
+    return user;
+
+  }, {
+    body: t.Object({
+      username: t.String(),
+      email: t.String(),
+      password: t.String(),
+    })
+  })
+  .post("/login", async ({ body, status, store: { db }, cookie: { auth } }) => {
+    const session = await createSession(db, body.email, body.password);
+
+    if (session === null) {
+      await new Promise((r) => setTimeout(r, 2000));
+      return status("Bad Request", "Invalid email or password");
+    }
+
+    auth?.set({
+      expires: session.session.expiresAt,
+      value: session.session.token,
+    });
+
+    return session.session;
+  }, {
+    body: t.Object({
+      email: t.String(),
+      password: t.String(),
+    })
+  })
+  // TODO - reset password with email
 
 export type App = typeof app;

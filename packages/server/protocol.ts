@@ -1,9 +1,10 @@
 import { z } from "zod"
-import { GameState, gameStateSchema, Knowledge, knowledgeSchema } from "@/engine";
+import { type GameState, gameStateSchema, type Knowledge, knowledgeSchema } from "engine";
 
 export const messageSchema = z.object({
   playerId: z.string(),
   gameId: z.string(),
+  sessionToken: z.string(),
   action: z.enum(["subscribe", "unsubscribe"]),
 });
 export type SocketMessage = z.infer<typeof messageSchema>;

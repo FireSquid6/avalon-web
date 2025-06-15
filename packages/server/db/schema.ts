@@ -6,11 +6,14 @@ export const usersTable = sqliteTable("users", {
   username: text().primaryKey().notNull().unique(),
   email: text().notNull().unique(),
   hashedPassword: text().notNull(),
+  verified: int({ mode: "boolean" }).notNull(),
 });
 export type User = InferSelectModel<typeof usersTable>;
 
 export const profilesTable = sqliteTable("profile", {
   username: text().primaryKey().unique().references(() => usersTable.username),
+  avatarId: int(),
+  bio: text(),
   // ... TODO
 });
 
