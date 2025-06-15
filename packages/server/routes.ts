@@ -355,7 +355,7 @@ export const app = new Elysia()
       password: t.String(),
     })
   })
-  .post("/login", async ({ body, status, store: { db }, cookie: { auth } }) => {
+  .post("/sessions", async ({ body, status, store: { db }, cookie: { auth, username } }) => {
     const session = await createSession(db, body.email, body.password);
 
     if (session === null) {
@@ -367,6 +367,10 @@ export const app = new Elysia()
       expires: session.session.expiresAt,
       value: session.session.token,
     });
+    username?.set({
+      expires: session.session.expiresAt,
+      value: session.user.username,
+    });
 
     return session.session;
   }, {
@@ -374,6 +378,9 @@ export const app = new Elysia()
       email: t.String(),
       password: t.String(),
     })
+  })
+  .get("/whoami", async () => {
+
   })
   // TODO - reset password with email
 

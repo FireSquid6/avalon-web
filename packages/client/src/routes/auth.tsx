@@ -1,25 +1,43 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
+import { usePushError } from "../lib/errors"
+import { login, createUser } from "../lib/auth"
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
 })
-
-async function signIn(email: string, password: string) {
-  // TODO: Implement sign in logic
-  console.log("Sign in:", { email, password })
-}
-
-async function signUp(username: string, email: string, password: string) {
-  // TODO: Implement sign up logic
-  console.log("Sign up:", { username, email, password })
-}
 
 function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [username, setUsername] = useState("")
+  const pushError = usePushError();
+
+  const signIn = async (email: string, password: string) => {
+    const err = await login(email, password); 
+
+    if (err !== "OK") {
+      pushError(err);
+      return;
+    }
+
+  }
+
+  const signUp = async (username: string, email: string, password: string) => {
+    const createErr = await createUser(username, email, password);
+    if (createErr !== "OK") {
+      pushError(createErr);
+      return;
+    }
+
+    const signInErr = await login(email, password);
+    if (signInErr !== "OK") {
+      pushError(signInErr);
+      return;
+    }
+
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -29,6 +47,10 @@ function AuthPage() {
     } else {
       await signIn(email, password)
     }
+
+    setUsername("");
+    setPassword("");
+    setEmail("");
   }
 
   return (
