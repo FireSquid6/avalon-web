@@ -12,6 +12,7 @@ import { cors } from "@elysiajs/cors";
 import type { Config } from "./config";
 import type { Db } from "./db";
 import { createSession, createUser, getProfile, getSessionWithToken, userExists, validateEmail, validatePassword, validateUsername } from "./db/auth";
+import { Stream } from "@elysiajs/stream";
 
 
 type GameListener = (updatedState: GameState) => void;
@@ -208,7 +209,7 @@ export const app = new Elysia()
 
     return {
       state: view,
-      knowledge: knowledgeMap ?? [],
+      knowledge: knowledgeMap[user.username] ?? [],
     }
   }, {
     body: t.Optional(t.Object({
@@ -258,10 +259,10 @@ export const app = new Elysia()
 
     return {
       state: view,
-      knowledge: knowledgeMap ?? [],
+      knowledge: knowledgeMap[user.username] ?? [],
     }
   })
-  .ws("/stream", {
+  .ws("/socket", {
     // TODO - new rule: each client can only be connected to ONE game
     message(ws, rawMessage) {
       const games = ws.data.store.games;

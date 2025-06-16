@@ -12,7 +12,7 @@ export interface UnauthenticatedState {
 
 export type AuthState = AuthenticatedState | UnauthenticatedState;
 
-function getAuthState(): AuthState {
+export function getAuthState(): AuthState {
   const authenticated = Cookies.get("auth") !== undefined;
   const username = Cookies.get("username")
 
@@ -37,3 +37,8 @@ export function useAuth() {
 }
 
 
+
+
+export function getAuthToken(): string | undefined {
+
+}
