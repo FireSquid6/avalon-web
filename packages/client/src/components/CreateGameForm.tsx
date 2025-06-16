@@ -4,7 +4,7 @@ import { RulesetCreator } from './RulesetCreator';
 import { validateRuleset } from 'engine/logic';
 
 interface CreateGameFormProps {
-  onCreateGame?: (ruleset: Rule[], password?: string, maxPlayers?: number) => void;
+  onCreateGame?: (ruleset: Rule[], maxPlayers: number, password?: string) => void;
 }
 
 export function CreateGameForm({ onCreateGame }: CreateGameFormProps) {
@@ -19,7 +19,7 @@ export function CreateGameForm({ onCreateGame }: CreateGameFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validationError === true && onCreateGame) {
-      onCreateGame(ruleset, isPrivate ? password.trim() : undefined, maxPlayers);
+      onCreateGame(ruleset, maxPlayers, isPrivate ? password.trim() : undefined);
     }
   };
 

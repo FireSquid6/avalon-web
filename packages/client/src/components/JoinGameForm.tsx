@@ -45,7 +45,7 @@ export function JoinGameForm({ onJoinGame }: JoinGameFormProps) {
             </label>
             <input
               type="password"
-              placeholder="Enter game password"
+              placeholder="Enter game password (empty if public)"
               className="input input-bordered"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

@@ -4,23 +4,35 @@ import { JoinGameForm } from "../components/JoinGameForm"
 import { GameList } from "../components/GameList"
 import type { Rule } from "engine"
 import { useAvailableGames } from "../lib/hooks"
+import { createGame, joinGame } from "../lib/game"
+import { usePushError } from "../lib/errors"
 
 export const Route = createFileRoute("/")({
   component: Index,
 })
 
 function Index() {
-  const handleCreateGame = async (ruleset: Rule[], password?: string) => {
-    console.log("Creating game with ruleset:", ruleset, "password:", password);
-  };
+  const pushError = usePushError();
+  const handleCreate = async (ruleset: Rule[], maxPlayers: number, password?: string) => {
+    const data = await createGame(ruleset, maxPlayers, password);
 
-  const handleJoinGameForm = async (gameId: string, password: string) => {
-    console.log("Joining game:", gameId, "with password:", password);
-  };
+    if (data instanceof Error) {
+      pushError(data);
+      return;
+    }
 
-  const handleJoinGameFromList = (gameId: string) => {
-    console.log("Joining game from list:", gameId);
-  };
+    // TODO
+  }
+
+  const handleJoin = async (gameId: string, password?: string) => {
+    const data = await joinGame(gameId, password);
+
+    if (data instanceof Error) {
+      pushError(data);
+      return;
+    }
+  }
+
   const games = useAvailableGames();
 
   return (
@@ -33,11 +45,11 @@ function Index() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        <CreateGameForm onCreateGame={handleCreateGame} />
-        <JoinGameForm onJoinGame={handleJoinGameForm} />
+        <CreateGameForm onCreateGame={handleCreate} />
+        <JoinGameForm onJoinGame={handleJoin} />
       </div>
 
-      <GameList games={games} onJoinGame={handleJoinGameFromList} />
+      <GameList games={games} onJoinGame={(id) => handleJoin(id)} />
     </div>
   )
 }

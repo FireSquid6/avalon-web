@@ -142,13 +142,15 @@ export function getRolesForRuleset(ruleset: Rule[], playerCount: number): Role[]
   return roles;
 }
 
-export function getBlankState(id: string, gameMasterId: string, ruleset: Rule[]): GameState {
+export function getBlankState(id: string, gameMasterId: string, ruleset: Rule[], maxPlayers: number, password?: string): GameState {
   return {
     id,
     status: "waiting",
     players: [],
     tableOrder: [],
     ruleset,
+    password,
+    expectedPlayers: maxPlayers,
     gameMaster: gameMasterId,
     rounds: [],
     monarchIndex: 0,

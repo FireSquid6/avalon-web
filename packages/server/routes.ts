@@ -170,8 +170,9 @@ export const app = new Elysia()
     const { user } = await forceAuthenticated();
 
     const ruleset = z.array(ruleEnum).parse(body.ruleset);
+    // TODO - generate nicer looking ids.
     const gameId = randomUUID();
-    const state = getBlankState(gameId, user.username, ruleset);
+    const state = getBlankState(gameId, user.username, ruleset, body.maxPlayers, body.password);
 
     store.games.set(gameId, new Game(state));
 
@@ -180,6 +181,8 @@ export const app = new Elysia()
   }, {
     body: t.Object({
       ruleset: t.Array(t.String()),
+      maxPlayers: t.Number(),
+      password: t.Optional(t.String()),
     }),
   })
   .post("/games/:id/join", async ({ params, store: { games }, body, status, forceAuthenticated }) => {

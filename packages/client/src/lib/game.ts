@@ -10,8 +10,8 @@ export interface GameData {
   knowledge: Knowledge[],
 }
 
-export async function createGame(ruleset: Rule[]): Promise<Error | GameData> {
-  const { data: id, error } = await treaty.games.post({ ruleset })
+export async function createGame(ruleset: Rule[], maxPlayers: number, password?: string): Promise<Error | GameData> {
+  const { data: id, error } = await treaty.games.post({ ruleset, maxPlayers, password })
 
   if (error) {
     return new Error(`Error creating game: ${error.status} - ${error.value}`);
