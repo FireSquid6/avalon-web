@@ -2,7 +2,8 @@ import type { GameAction } from "engine/actions";
 import { treaty } from "./treaty";
 import { type GameState, type Knowledge, type Rule } from "engine";
 import { makeMessage, responseSchema } from "server/protocol";
-import { getAuthState, getAuthToken } from "./hooks";
+import { getAuthState } from "./hooks";
+import { getAuthToken } from "./auth";
 
 export interface GameData {
   state: GameState,

@@ -13,6 +13,7 @@ export const ruleEnum = z.enum([
   "Quickshot Assassin",
   "Visible Teammate Roles",
   "Lancelot",
+  "Targeting",
 ]);
 export type Rule = z.infer<typeof ruleEnum>;
 

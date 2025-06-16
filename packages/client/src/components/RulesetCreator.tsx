@@ -4,13 +4,10 @@ import type { Rule } from 'engine';
 const AVAILABLE_RULES: Rule[] = [
   "Lady of the Lake",
   "Oberon", 
-  "Morgause",
   "Mordred",
   "Percival and Morgana",
-  "Excalibur",
   "Quickshot Assassin",
   "Visible Teammate Roles",
-  "Lancelot",
 ];
 
 interface RulesetCreatorProps {

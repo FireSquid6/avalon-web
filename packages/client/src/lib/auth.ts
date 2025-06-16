@@ -1,3 +1,4 @@
+import Cookies from "js-cookie";
 import { treaty } from "./treaty";
 
 export async function createUser(username: string, email: string, password: string): Promise<Error | "OK"> {
@@ -27,4 +28,8 @@ export async function login(email: string, password: string): Promise<Error | "O
 
   return "OK"
 
+}
+
+export function getAuthToken(): string | undefined {
+  return Cookies.get("auth");
 }
