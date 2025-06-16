@@ -12,7 +12,6 @@ import { cors } from "@elysiajs/cors";
 import type { Config } from "./config";
 import type { Db } from "./db";
 import { createSession, createUser, getProfile, getSessionWithToken, userExists, validateEmail, validatePassword, validateUsername } from "./db/auth";
-import { Stream } from "@elysiajs/stream";
 
 
 type GameListener = (updatedState: GameState) => void;

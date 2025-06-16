@@ -1,7 +1,6 @@
 import type { GameAction } from "engine/actions";
 import { treaty } from "./treaty";
-import { knowledgeSchema, type GameState, type Knowledge, type Rule } from "engine";
-import type { WebSocketClient } from "vite";
+import { type GameState, type Knowledge, type Rule } from "engine";
 import { makeMessage, responseSchema } from "server/protocol";
 import { getAuthState, getAuthToken } from "./hooks";
 

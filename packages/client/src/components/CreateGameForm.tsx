@@ -1,22 +1,25 @@
 import { useState } from 'react';
 import type { Rule } from 'engine';
 import { RulesetCreator } from './RulesetCreator';
+import { validateRuleeset } from 'engine/logic';
 
 interface CreateGameFormProps {
-  onCreateGame?: (ruleset: Rule[], password?: string) => void;
+  onCreateGame?: (ruleset: Rule[], password?: string, maxPlayers?: number) => void;
 }
 
 export function CreateGameForm({ onCreateGame }: CreateGameFormProps) {
   const [isPrivate, setIsPrivate] = useState(false);
   const [password, setPassword] = useState('');
   const [ruleset, setRuleset] = useState<Rule[]>([]);
+  const [maxPlayers, setMaxPlayers] = useState(10);
 
-  const isFormValid = ruleset.length > 0 && (!isPrivate || password.trim() !== '');
+  const validationError = validateRuleeset(ruleset, maxPlayers);
+  const isFormValid = validationError === true;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (isFormValid && onCreateGame) {
-      onCreateGame(ruleset, isPrivate ? password.trim() : undefined);
+    if (validationError === true && onCreateGame) {
+      onCreateGame(ruleset, isPrivate ? password.trim() : undefined, maxPlayers);
     }
   };
 
@@ -56,8 +59,26 @@ export function CreateGameForm({ onCreateGame }: CreateGameFormProps) {
             </div>
           )}
 
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text">Max Players</span>
+            </label>
+            <input
+              type="number"
+              min="5"
+              max="10"
+              className="input input-bordered"
+              value={maxPlayers}
+              onChange={(e) => setMaxPlayers(Number(e.target.value))}
+            />
+          </div>
+
           <div>
             <RulesetCreator onRulesetChange={setRuleset} />
+          </div>
+
+          <div className={isFormValid ? "text-success" : "text-error"}>
+            {isFormValid ? `Valid ruleset for ${maxPlayers} players` : validationError}
           </div>
 
           <button
