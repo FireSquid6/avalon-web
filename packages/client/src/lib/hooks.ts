@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
+import type { GameInfo } from "engine";
+import useSWR from "swr";
+import { usePushError } from "./errors";
+import { treaty } from "./treaty";
 
 export interface AuthenticatedState {
   type: "authenticated";
@@ -38,7 +42,23 @@ export function useAuth() {
 
 
 
+export function useAvailableGames(): GameInfo[] {
+  const pushError = usePushError();
+  const fetcher = async () => {
+    const { data, error } = await treaty.opengames.get();
 
-export function getAuthToken(): string | undefined {
+    if (error !== null){
+      throw new Error(`Error fetching open games: ${error.status} - ${error.result}`)
+    }
 
+    return data as GameInfo[];
+  }
+
+  const { data, error } = useSWR("/opengames", fetcher);
+
+  if (error) {
+    pushError(error instanceof Error ? error : new Error(`Unkown error: ${error}`));
+  }
+
+  return data ?? [];
 }

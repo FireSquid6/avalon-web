@@ -53,6 +53,9 @@ class Game {
       requiresPassword: this.state.password !== undefined,
       status: this.state.status,
       gameMaster: this.state.gameMaster,
+      currentPlayers: this.state.players.length,
+      maxPlayers: this.state.expectedPlayers,
+      ruleset: this.state.ruleset,
     }
 
   }
@@ -61,7 +64,6 @@ class Game {
 // TODO - rate limit
 export const app = new Elysia()
   .use(simpleLogger())
-  .use(cors())
   .state("games", new Map<string, Game>())
   .state("listeners", new Map<string, GameListener>())
   .state("config", {} as Config)
@@ -145,18 +147,25 @@ export const app = new Elysia()
   })
   // kinda a diabolical one liner if I do say so myself
   // unreadable though. It does what you think it would
-  .get("/open-games", ({ store: { games } }) => games.values().toArray()
-    .map((g) => g.peek())
-    .filter((g) => g.status === "waiting")
-    .map((g): GameInfo => {
+  .get("/opengames", ({ store: { games } }) => {
+    const openGames = games.values().toArray()
+      .map((g) => g.peek())
+      .filter((g) => g.status === "waiting")
+
+    const gameInfo = openGames.map((g): GameInfo => {
       return {
         id: g.id,
         requiresPassword: g.password !== undefined,
         gameMaster: g.gameMaster,
         status: "waiting",
+        ruleset: g.ruleset,
+        maxPlayers: g.expectedPlayers,
+        currentPlayers: g.players.length,
       }
     })
-  )
+
+    return gameInfo
+  })
   .post("/games", async ({ body, store, forceAuthenticated }) => {
     const { user } = await forceAuthenticated();
 
@@ -215,7 +224,7 @@ export const app = new Elysia()
     body: t.Optional(t.Object({
       password: t.String(),
     }))
-  }) 
+  })
   .post("/games/:id/act", async ({ params, body, status, forceInGame }) => {
     const { user, game } = await forceInGame(params.id);
 
@@ -323,7 +332,7 @@ export const app = new Elysia()
       }
     },
   })
-  .get("/users/:username", async ({ params, status, store: { db }}) => {
+  .get("/users/:username", async ({ params, status, store: { db } }) => {
     const profile = await getProfile(db, params.username);
 
     if (profile === null) {
@@ -383,6 +392,6 @@ export const app = new Elysia()
   .get("/whoami", async () => {
 
   })
-  // TODO - reset password with email
+// TODO - reset password with email
 
 export type App = typeof app;

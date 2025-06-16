@@ -86,6 +86,9 @@ export type GameState = z.infer<typeof gameStateSchema>;
 export interface GameInfo {
   id: string;
   requiresPassword: boolean;
+  currentPlayers: number;
+  maxPlayers: number;
+  ruleset: Rule[];
   gameMaster: string;
   status: "in-progress" | "finished" | "waiting";
 }

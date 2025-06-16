@@ -1,14 +1,8 @@
-import type { Rule } from 'engine';
+import type { GameInfo } from 'engine';
 
-interface GameListItem {
-  gameId: string;
-  playerCount: number;
-  maxPlayers: number;
-  ruleset: Rule[];
-}
 
 interface GameListProps {
-  games: GameListItem[];
+  games: GameInfo[];
   onJoinGame?: (gameId: string) => void;
 }
 
@@ -44,21 +38,21 @@ export function GameList({ games, onJoinGame }: GameListProps) {
               </thead>
               <tbody>
                 {games.map((game) => (
-                  <tr key={game.gameId}>
+                  <tr key={game.id}>
                     <td>
                       <span className="font-mono text-sm">
-                        {game.gameId.slice(0, 8)}...
+                        {game.id.slice(0, 8)}...
                       </span>
                     </td>
                     <td>
                       <span className="badge badge-outline">
-                        {game.playerCount}/{game.maxPlayers}
+                        {game.currentPlayers}/{game.maxPlayers}
                       </span>
                     </td>
                     <td>
                       <div className="flex flex-wrap gap-1">
                         {game.ruleset.length === 0 ? (
-                          <span className="text-base-content/50 text-sm">Standard</span>
+                          <span className="text-base-content/50 text-sm">Vanilla</span>
                         ) : (
                           game.ruleset.slice(0, 3).map((rule) => (
                             <span key={rule} className="badge badge-primary badge-sm">
@@ -76,7 +70,7 @@ export function GameList({ games, onJoinGame }: GameListProps) {
                     <td>
                       <button
                         className="btn btn-primary btn-sm"
-                        onClick={() => handleJoinGame(game.gameId)}
+                        onClick={() => handleJoinGame(game.id)}
                       >
                         Join
                       </button>

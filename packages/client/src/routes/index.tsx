@@ -2,31 +2,40 @@ import { createFileRoute } from "@tanstack/react-router"
 import { CreateGameForm } from "../components/CreateGameForm"
 import { JoinGameForm } from "../components/JoinGameForm"
 import { GameList } from "../components/GameList"
-import type { Rule } from "engine"
+import type { GameInfo, Rule } from "engine"
 
 export const Route = createFileRoute("/")({
   component: Index,
 })
 
 // Dummy data for testing
-const dummyGames = [
+const dummyGames: GameInfo[] = [
   {
-    gameId: "abc123-def456-ghi789",
-    playerCount: 3,
+    id: "abc123-def456-ghi789",
+    currentPlayers: 3,
     maxPlayers: 10,
     ruleset: ["Lady of the Lake", "Percival and Morgana", "Mordred"] as Rule[],
+    requiresPassword: false,
+    status: "waiting",
+    gameMaster: "someone",
   },
   {
-    gameId: "xyz789-uvw456-rst123",
-    playerCount: 5,
+    id: "xyz789-uvw456-rst123",
+    currentPlayers: 5,
     maxPlayers: 8,
     ruleset: ["Oberon", "Excalibur"] as Rule[],
+    requiresPassword: false,
+    status: "waiting",
+    gameMaster: "someone",
   },
   {
-    gameId: "mno345-pqr678-stu901",
-    playerCount: 2,
+    id: "mno345-pqr678-stu901",
+    currentPlayers: 2,
     maxPlayers: 6,
     ruleset: [] as Rule[],
+    requiresPassword: false,
+    status: "waiting",
+    gameMaster: "someone",
   },
 ];
 
