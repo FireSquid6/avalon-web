@@ -1,6 +1,6 @@
 import type { GameState } from ".";
 import type { GameAction } from "./actions";
-import { performAssassination, performLady, performNominate, performQuest, performStart, performVote } from "./mutators";
+import { performAssassination, performLady, performNominate, performQuest, performRulesetModification, performStart, performVote } from "./mutators";
 
 export class ProcessError {
   reason: string | Error;
@@ -79,6 +79,13 @@ export function processAction<T extends GameAction>(inputs: ProcessInputs<T>): P
         break;
       case "assassinate":
         performAssassination({
+          state,
+          action,
+          actorId,
+        })
+        break;
+      case "ruleset":
+        performRulesetModification({
           state,
           action,
           actorId,

@@ -1,7 +1,7 @@
 // all mutators take in a ProcessInputs object and can mutate it
 // they can also at any time throw an error
-import type { AssassinationAction, LadyAction, NominateAction, QuestAction, StartAction, VoteAction } from "./actions";
-import { getRolesForRuleset, validateRuleeset, rulesetHas, getNextIntendedAction, newRound, getQuestInformation, getFailedVotes, getScore, shuffleArray } from "./logic";
+import type { AssassinationAction, LadyAction, NominateAction, QuestAction, RulesetModifiaction, StartAction, VoteAction } from "./actions";
+import { getRolesForRuleset, validateRuleset, rulesetHas, getNextIntendedAction, newRound, getQuestInformation, getFailedVotes, getScore, shuffleArray } from "./logic";
 import { ProcessError, type ProcessInputs } from "./process";
 
 
@@ -22,7 +22,7 @@ export function performStart<T extends StartAction>(inputs: ProcessInputs<T>) {
     throw new ProcessError("client", "The game master must start the game");
   }
 
-  const validated = validateRuleeset(state.ruleset, state.players.length);
+  const validated = validateRuleset(state.ruleset, state.players.length);
 
   if (validated !== true) {
     throw new ProcessError("server", validated);
@@ -30,6 +30,10 @@ export function performStart<T extends StartAction>(inputs: ProcessInputs<T>) {
 
   if (state.status !== "waiting") {
     throw new ProcessError("client", `Tried to start game that was already ${state.status}`);
+  }
+
+  if (state.players.length !== state.expectedPlayers) {
+    throw new ProcessError("client", `Need ${state.expectedPlayers} players, but only have ${state.players.length}`);
   }
 
   const roles = getRolesForRuleset(state.ruleset, state.players.length);
@@ -230,4 +234,20 @@ export function performAssassination<T extends AssassinationAction>(inputs: Proc
     : "Arthurian Victory"
 }
 
+export function performRulesetModification<T extends RulesetModifiaction>(inputs: ProcessInputs<T>) {
+  const { state, action, actorId } = inputs;
 
+  if (actorId !== state.gameMaster) {
+    throw new ProcessError("client", "You must be the game master to do this");
+  }
+
+  const validation = validateRuleset(action.ruleset, action.maxPlayers);
+
+  if (validation !== true) {
+    throw new ProcessError("client", `Invalid ruleset for ${action.maxPlayers}: ${action.ruleset}`);
+  }
+
+  state.ruleset = action.ruleset;
+  state.expectedPlayers = action.maxPlayers;
+
+}

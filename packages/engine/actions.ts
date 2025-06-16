@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ruleEnum } from ".";
 
 // actions to be taken:
 // Interaction
@@ -44,6 +45,13 @@ export const startActionSchema = z.object({
 });
 export type StartAction = z.infer<typeof startActionSchema>;
 
+export const rulesetModification = z.object({
+  kind: z.literal("ruleset"),
+  ruleset: z.array(ruleEnum),
+  maxPlayers: z.number(),
+})
+export type RulesetModifiaction = z.infer<typeof rulesetModification>;
+
 export const gameActionSchema = z.discriminatedUnion("kind", [
   voteActionSchema,
   nominateActionSchema,
@@ -51,6 +59,8 @@ export const gameActionSchema = z.discriminatedUnion("kind", [
   ladyActionSchema,
   assassinateActionSchema,
   startActionSchema,
+  rulesetModification,
 ]);
 
 export type GameAction = z.infer<typeof gameActionSchema>;
+

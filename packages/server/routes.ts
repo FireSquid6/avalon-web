@@ -177,6 +177,7 @@ export const app = new Elysia()
     const { user } = await forceAuthenticated();
     const game = games.get(params.id);
     const password = body?.password ?? "";
+    // TODO: block join if game is full
 
     if (game === undefined) {
       return status("Not Found")

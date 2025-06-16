@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Rule } from 'engine';
 import { RulesetCreator } from './RulesetCreator';
-import { validateRuleeset } from 'engine/logic';
+import { validateRuleset } from 'engine/logic';
 
 interface CreateGameFormProps {
   onCreateGame?: (ruleset: Rule[], password?: string, maxPlayers?: number) => void;
@@ -13,7 +13,7 @@ export function CreateGameForm({ onCreateGame }: CreateGameFormProps) {
   const [ruleset, setRuleset] = useState<Rule[]>([]);
   const [maxPlayers, setMaxPlayers] = useState(10);
 
-  const validationError = validateRuleeset(ruleset, maxPlayers);
+  const validationError = validateRuleset(ruleset, maxPlayers);
   const isFormValid = validationError === true;
 
   const handleSubmit = (e: React.FormEvent) => {

@@ -59,6 +59,7 @@ export const gameStateSchema = z.object({
   id: z.string(),
   status: z.enum(["in-progress", "finished", "waiting"]),
   players: z.array(playerSchema),
+  expectedPlayers: z.number(),
   password: z.optional(z.string()),
   tableOrder: z.array(z.string()),  // first playerId is the starting monarch
   monarchIndex: z.number(),

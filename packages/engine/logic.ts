@@ -2,7 +2,7 @@ import type { GameState, Quest, Role, Rule, Player, Knowledge } from ".";
 import { playerCounts, questInfo } from "./data";
 import { ProcessError } from "./process";
 
-export function validateRuleeset(ruleset: Rule[], playerCount: number): string | true {
+export function validateRuleset(ruleset: Rule[], playerCount: number): string | true {
   if (hasDuplicates(ruleset)) {
     return `Ruleset has duplicate rules. All rules should be unique`;
   }
