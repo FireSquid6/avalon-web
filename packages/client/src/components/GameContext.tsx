@@ -1,5 +1,4 @@
 import { useContext, createContext } from "react";
-import type { GameData } from "../lib/game";
 import type { GameState, Knowledge } from "engine";
 import type { GameAction } from "engine/actions";
 
@@ -13,7 +12,7 @@ export interface GameContext {
 }
 
 
-export function useGameContext(): GameData {
+export function useGameContext(): GameContext {
   const data = useContext(gameContext);
 
   if (data === null) {

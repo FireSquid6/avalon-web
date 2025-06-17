@@ -2,8 +2,18 @@ import { useGameContext } from "./GameContext";
 
 export function DebugGameRender() {
   const { state, knowledge } = useGameContext();
-  const stateJson = JSON.stringify(state, null, 2);
   const knowledgeJson = JSON.stringify(knowledge, null, 2);
+
+  const renderableState: any = structuredClone(state);
+
+  renderableState.hiddenRoles = Array.from(renderableState.hiddenRoles);
+
+  for (const round of renderableState.rounds) {
+    round.votes = Array.from(round.votes);
+  }
+
+
+  const stateJson = JSON.stringify(renderableState, null, 2);
 
   return (
     <div className="m-4">

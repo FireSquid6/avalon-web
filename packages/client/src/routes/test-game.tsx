@@ -6,11 +6,12 @@ import { processAction, ProcessError } from 'engine/process'
 import { useState } from 'react'
 import { GameContextProvider } from '../components/GameContext'
 import { DebugGameRender } from '../components/GameRender'
-import { viewStateAs } from 'engine/view'
 import { usePushError } from '../lib/errors'
 import { Modal } from '../components/Modal'
 import { DebugActions } from '../components/DebugActions'
 import { DropdownInput } from '../components/DropdownInput'
+import { GameRender } from '../components/game'
+import { viewStateAs } from 'engine/view'
 
 export const Route = createFileRoute('/test-game')({
   component: RouteComponent,
@@ -57,7 +58,12 @@ function RouteComponent() {
   const view = viewStateAs(state, viewingUser);
 
   return (
-    <>
+    <GameContextProvider data={{
+      state: view,
+      knowledge: knowledge,
+      viewingUser,
+      act,
+    }}>
       <Modal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
@@ -73,6 +79,8 @@ function RouteComponent() {
           />
 
           <DebugActions act={act} />
+
+          <DebugGameRender />
         </div>
       </Modal>
       <div className="fixed top-0 right-0">
@@ -80,15 +88,8 @@ function RouteComponent() {
           Debug
         </button>
       </div>
-      <GameContextProvider data={{
-        state: view,
-        knowledge: knowledge,
-        viewingUser,
-        act,
-      }}>
-        <DebugGameRender />
-      </GameContextProvider>
-    </>
+      <GameRender />
+    </GameContextProvider>
   )
 
 

@@ -63,7 +63,6 @@ export const gameStateSchema = z.object({
   expectedPlayers: z.number(),
   password: z.optional(z.string()),
   tableOrder: z.array(z.string()),  // first playerId is the starting monarch
-  monarchIndex: z.number(),
   ladyHolder: z.optional(z.string()),
 
   gameMaster: z.string(),
@@ -97,6 +96,7 @@ export interface GameInfo {
 // knowledge given to a specific player
 export const knowledgeSchema = z.object({
   playerId: z.string(),
+  source: z.enum(["lady", "initial"]),
   info: z.discriminatedUnion("type", [
     z.object({
       type: z.literal("team"),

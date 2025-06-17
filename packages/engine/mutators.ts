@@ -55,7 +55,7 @@ export function performStart<T extends StartAction>(inputs: ProcessInputs<T>) {
   }
 
   // TODO: add the first round
-  state.rounds = [];
+  newRound(state);
 }
 
 export function performNominate<T extends NominateAction>(inputs: ProcessInputs<T>) {
@@ -164,6 +164,7 @@ export function performQuest<T extends QuestAction>(inputs: ProcessInputs<T>) {
     return;
   }
 
+  round.quest.completed = true;
   if (round.questNumber < 5) {
     const questNumber = round.questNumber;
     const needsToUseLady = rulesetHas(state.ruleset, "Lady of the Lake")

@@ -153,7 +153,6 @@ export function getBlankState(id: string, gameMasterId: string, ruleset: Rule[],
     expectedPlayers: maxPlayers,
     gameMaster: gameMasterId,
     rounds: [],
-    monarchIndex: 0,
     hiddenRoles: new Map(),
   }
 }
@@ -313,6 +312,7 @@ export function generateKnowledgeMap(state: GameState) {
             if (showTeammateRoles) {
               knowledge.push({
                 playerId: p,
+                source: "initial",
                 info: {
                   type: "role",
                   role: r,
@@ -321,6 +321,7 @@ export function generateKnowledgeMap(state: GameState) {
             } else {
               knowledge.push({
                 playerId: p,
+                source: "initial",
                 info: {
                   type: "team",
                   team: "Mordredic",
@@ -337,6 +338,7 @@ export function generateKnowledgeMap(state: GameState) {
           if (r === "Merlin" || r === "Morgana") {
             knowledge.push({
               playerId: p,
+              source: "initial",
               info: {
                 type: "percivalic sight",
               },
@@ -351,6 +353,7 @@ export function generateKnowledgeMap(state: GameState) {
           if (r === "Morgana" || r === "Assassin" || r === "Oberon" || r === "Mordredic Servant") {
             knowledge.push({
               playerId: p,
+              source: "initial",
               info: {
                 type: "team",
                 team: "Mordredic",
@@ -361,6 +364,17 @@ export function generateKnowledgeMap(state: GameState) {
         }
         break;
     }
+
+    knowledge.filter((k) => k.playerId !== player)
+
+    knowledge.push({
+      playerId: player,
+      source: "initial",
+      info: {
+        type: "role",
+        role: state.hiddenRoles.get(player)!,
+      }
+    })
 
     shuffleArray(knowledge);
     knowledgeMap[player] = knowledge;
@@ -380,6 +394,7 @@ export function generateKnowledgeMap(state: GameState) {
     // "use" the lady of the lake, even though it gives the same information
     knowledgeMap[round.ladyUser]!.push({
       playerId: round.ladyTarget,
+      source: "lady",
       info: {
         type: "team",
         team: team,
@@ -413,9 +428,4 @@ export function getTeam(role: Role): "Mordredic" | "Arthurian" {
     case "Arthurian Servant":
       return "Arthurian";
   }
-}
-
-export function getAvailableActions(state: GameState, playerId: string ) {
-
-
 }
