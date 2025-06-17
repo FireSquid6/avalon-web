@@ -1,5 +1,6 @@
 import React from 'react';
 import { PlayerIcon } from './PlayerIcon';
+import type { Role } from 'engine';
 
 export interface Player {
   id: string;
@@ -10,16 +11,19 @@ export interface Player {
   isMonarch?: boolean;
   isCurrentPlayer?: boolean;
   hasLady?: boolean;
+  role?: Role
 }
 
 interface PlayerCircleProps {
   players: Player[];
   radius?: number;
+  centerText?: string;
 }
 
 export const PlayerCircle: React.FC<PlayerCircleProps> = ({
   players,
   radius = 150,
+  centerText,
 }) => {
   const calculatePosition = (index: number, total: number) => {
     // Start from top (12 o'clock) and go clockwise
@@ -52,6 +56,7 @@ export const PlayerCircle: React.FC<PlayerCircleProps> = ({
         >
           <PlayerIcon
             username={player.username}
+            role={player.role}
             iconColor={player.iconColor}
             assassinated={player.assassinated}
             nominated={player.nominated}
@@ -61,6 +66,15 @@ export const PlayerCircle: React.FC<PlayerCircleProps> = ({
           />
         </div>
       ))}
+      
+      {/* Center text */}
+      {centerText && (
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          <div className="text-center text-white font-semibold text-lg">
+            {centerText}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

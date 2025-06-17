@@ -3,6 +3,7 @@ export interface QuestWithResult {
   failsRequired: number;
   players: number;
   result: "Success" | "Failure" | "Pending";
+  failsGiven: number;
 }
 
 interface QuestListProps {
@@ -44,7 +45,7 @@ export function Quest({ quests }: QuestListProps) {
               {quest.failsRequired} fail{quest.failsRequired !== 1 ? 's' : ''} required
             </span>
             <span className={`ml-auto font-medium ${getQuestStatusColor(quest.result)}`}>
-              {quest.result}
+              {quest.result}{quest.result === "Failure" ? ` with ${quest.failsGiven} fails` : ""}
             </span>
           </div>
         ))}

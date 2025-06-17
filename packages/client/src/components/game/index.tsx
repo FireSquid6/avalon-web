@@ -46,6 +46,7 @@ export function GameRender() {
       isMonarch: isMonarch,
       hasLady: state.ladyHolder === id,
       isCurrentPlayer: id === viewingUser,
+      role: state.hiddenRoles.get(id),
     }
   })
 
@@ -67,8 +68,9 @@ export function GameRender() {
       centerText = "The lady of the lake is revealing truth...";
       break;
     case "complete":
+    case "none":
       // ugh nested switch statements ew ew ew
-      switch (state.result!) {
+      switch (state.result) {
         case "Deadlock":
           centerText = "Avalon has fallen into civil disorder. The forces of Modred are victorious."
           break;
@@ -118,6 +120,7 @@ export function GameRender() {
       failsRequired: q.failsRequired,
       players: q.players,
       result: result,
+      failsGiven: roundWithQuest?.quest?.failCards ?? 0,
     }
   });
 
@@ -145,7 +148,7 @@ export function GameRender() {
     <>
       {/* Central table */}
       <div className="my-8">
-        <PlayerCircle players={players} radius={radius} />
+        <PlayerCircle players={players} radius={radius} centerText={centerText}/>
       </div>
       {/* Game Info */}
 
@@ -191,7 +194,7 @@ function getAvailableActions(state: GameState, knowledge: Knowledge[], id: strin
       }
       break;
     case "lady":
-      if (currentRound?.ladyUser === id) {
+      if (state.ladyHolder === "") {
         actions.push("lady");
       }
       break;

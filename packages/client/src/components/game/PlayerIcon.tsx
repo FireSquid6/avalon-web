@@ -1,3 +1,4 @@
+import type { Role } from 'engine';
 import React from 'react';
 
 interface PlayerIconProps {
@@ -8,6 +9,30 @@ interface PlayerIconProps {
   isMonarch?: boolean;
   hasLady?: boolean;
   isCurrentPlayer?: boolean;
+  role?: Role;
+}
+
+function roleToEmoji(role: Role): string {
+  switch (role) {
+    case "Assassin":
+      return "🥷 ";
+    case "Merlin":
+      return "🧙‍♂️"  ;
+    case "Percival":
+      return "👦";
+    case "Mordredic Servant":
+      return "🔴";
+    case "Arthurian Servant":
+      return "🔵";
+    case "Oberon":
+      return "🧟";
+    case "Mordred":
+      return "🧛";
+    case "Morgana":
+      return "🧝‍♀️";
+    case "Lancelot":
+      return "💂";
+  }
 }
 
 export const PlayerIcon: React.FC<PlayerIconProps> = ({
@@ -18,6 +43,7 @@ export const PlayerIcon: React.FC<PlayerIconProps> = ({
   hasLady = false,
   isMonarch = false,
   isCurrentPlayer = true,
+  role = undefined,
 }) => {
   const getIconColorClass = () => {
     if (assassinated) return 'bg-gray-400';
@@ -75,8 +101,13 @@ export const PlayerIcon: React.FC<PlayerIconProps> = ({
 
         {/* Lady of the lake */}
         {hasLady && (
-          <div className="absolute -right-8 top-1/2 transform -translate-y-1/2" title="This player has the Lady of the Lake token">
+          <div className="absolute -left-8 top-1/2 transform -translate-y-1/2" title="This player has the Lady of the Lake token">
             <span className="text-xl">🧚‍♀️</span>
+          </div>
+        )}
+        {role && (
+          <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2" title={`This player was ${role}`}>
+            <span className="text-2xl">{roleToEmoji(role)}</span>
           </div>
         )}
       </div>
@@ -85,6 +116,7 @@ export const PlayerIcon: React.FC<PlayerIconProps> = ({
       <span className={`text-sm font-medium text-gray-100`}>
         {username}
       </span>
+
     </div>
   );
 };

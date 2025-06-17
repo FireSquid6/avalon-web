@@ -42,7 +42,6 @@ function RouteComponent() {
   const pushError = usePushError();
 
   const act = (a: GameAction) => {
-    console.log("Performing action...");
     const result = processAction({ state, action: a, actorId: viewingUser });
 
     if (result instanceof ProcessError) {
@@ -53,9 +52,39 @@ function RouteComponent() {
     console.log(result);
     setState(result);
   }
+
+  const batchVote = (vote: "Approve" | "Reject") => {
+    let newState = state;
+    for (const player of players) {
+      const result = processAction({
+        state: newState,
+        action: {
+          kind: "vote",
+          vote: vote,
+        },
+        actorId: player,
+      });
+
+      if (result instanceof ProcessError) {
+        pushError(new Error(`Engine error: ${result.type} - ${result.reason}`))
+        return;
+      }
+      newState = result;
+    }
+    setState(newState);
+  }
+
   const map = generateKnowledgeMap(state);
   const knowledge = map[viewingUser] ?? [];
   const view = viewStateAs(state, viewingUser);
+
+  const quickReject = () => {
+    batchVote("Reject");
+  }
+
+  const quickApprove = () => {
+    batchVote("Approve");
+  }
 
   return (
     <GameContextProvider data={{
@@ -71,6 +100,23 @@ function RouteComponent() {
         title="Debug Menu"
       >
         <div className="flex flex-col">
+          <div className="flex flex-row">
+            <button 
+              className="btn btn-primary m-2"
+              type="button"
+              onClick={quickApprove}
+            >
+              Quick Approve
+            </button>
+            <button 
+              className="btn btn-primary m-2"
+              type="button"
+              onClick={quickReject}
+            >
+              Quick Reject
+            </button>
+
+          </div>
           <DropdownInput
             label="Selected Player"
             value={viewingUser}
