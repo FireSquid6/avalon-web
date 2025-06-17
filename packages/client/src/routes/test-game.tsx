@@ -8,6 +8,9 @@ import { GameContextProvider } from '../components/GameContext'
 import { DebugGameRender } from '../components/GameRender'
 import { viewStateAs } from 'engine/view'
 import { usePushError } from '../lib/errors'
+import { Modal } from '../components/Modal'
+import { DebugActions } from '../components/DebugActions'
+import { DropdownInput } from '../components/DropdownInput'
 
 export const Route = createFileRoute('/test-game')({
   component: RouteComponent,
@@ -34,9 +37,11 @@ function getInitialState() {
 function RouteComponent() {
   const [state, setState] = useState<GameState>(getInitialState());
   const [viewingUser, setViewingUser] = useState<string>("Jonathan");
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const pushError = usePushError();
 
   const act = (a: GameAction) => {
+    console.log("Performing action...");
     const result = processAction({ state, action: a, actorId: viewingUser });
 
     if (result instanceof ProcessError) {
@@ -44,14 +49,37 @@ function RouteComponent() {
       return;
     }
 
+    console.log(result);
     setState(result);
   }
   const map = generateKnowledgeMap(state);
-  const view = viewStateAs(state, viewingUser);
   const knowledge = map[viewingUser] ?? [];
+  const view = viewStateAs(state, viewingUser);
 
   return (
     <>
+      <Modal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        position="top-left"
+        title="Debug Menu"
+      >
+        <div className="flex flex-col">
+          <DropdownInput
+            label="Selected Player"
+            value={viewingUser}
+            onChange={(s) => setViewingUser(s)}
+            options={players}
+          />
+
+          <DebugActions act={act} />
+        </div>
+      </Modal>
+      <div className="fixed top-0 right-0">
+        <button className="btn btn-primary" onClick={() => setIsOpen(true)}>
+          Debug
+        </button>
+      </div>
       <GameContextProvider data={{
         state: view,
         knowledge: knowledge,

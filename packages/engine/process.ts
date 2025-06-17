@@ -31,12 +31,6 @@ export interface ProcessInputs<T extends GameAction> {
 
 export function processAction<T extends GameAction>(inputs: ProcessInputs<T>): ProcessResult {
   try {
-    const mutableInputs: ProcessInputs<T> = {
-      state: structuredClone(inputs.state),
-      actorId: inputs.actorId,
-      action: inputs.action,
-    }
-
     const state = structuredClone(inputs.state);
     const actorId = inputs.actorId;
     const action = inputs.action;
@@ -95,7 +89,7 @@ export function processAction<T extends GameAction>(inputs: ProcessInputs<T>): P
         throw new Error("Bad action: ", action);
     }
 
-    return mutableInputs.state;
+    return state;
   } catch (e) {
     if (e instanceof ProcessError) {
       return e;

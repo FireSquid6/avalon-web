@@ -182,6 +182,7 @@ export function DebugActions({ act }: { act: (a: GameAction) => void }) {
 
       <button 
         className="btn btn-primary"
+        type="button"
         onClick={handleSubmit}
       >
         Execute Action

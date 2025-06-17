@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 type ModalPosition = "center" | "top-left" | "top-right" | "bottom-left" | "bottom-right";
 
