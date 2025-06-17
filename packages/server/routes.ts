@@ -7,11 +7,11 @@ import { gameActionSchema } from "engine/actions";
 import { processAction, ProcessError } from "engine/process";
 import { viewStateAs } from "engine/view";
 import { messageSchema, socketFailure, socketInfo, stateResponse, type SocketMessage } from "./protocol";
-import { simpleLogger } from "./logger";
-import { cors } from "@elysiajs/cors";
+import { loggerPlugin } from "./logger";
 import type { Config } from "./config";
 import type { Db } from "./db";
 import { createSession, createUser, getProfile, getSessionWithToken, userExists, validateEmail, validatePassword, validateUsername } from "./db/auth";
+import { cors } from "@elysiajs/cors";
 
 
 type GameListener = (updatedState: GameState) => void;
@@ -63,7 +63,8 @@ class Game {
 
 // TODO - rate limit
 export const app = new Elysia()
-  .use(simpleLogger())
+  .use(loggerPlugin)
+  .use(cors())
   .state("games", new Map<string, Game>())
   .state("listeners", new Map<string, GameListener>())
   .state("config", {} as Config)
@@ -71,42 +72,50 @@ export const app = new Elysia()
   .derive(({ cookie: { auth }, set, store: { db, games } }) => {
     const forceAuthenticated = async () => {
       if (!auth) {
-        set.status = "Unauthorized";
+        set.status = 401;
         throw new Error("No cookie");
       }
       const token = auth.value;
 
       if (!token) {
-        set.status = "Unauthorized";
+        set.status = 401;
         throw new Error("No token in cookie");
       }
 
       const session = await getSessionWithToken(db, token);
 
       if (!session) {
-        set.status = "Unauthorized";
+        set.status = 401;
         throw new Error("Token doesn't represent a valid session");
       }
 
       if (session.session.expiresAt <= new Date()) {
-        set.status = "Unauthorized";
+        set.status = 401;
         throw new Error("Token is expired");
       }
 
       return session;
     }
+    const getAuthStatus = async () => {
+      const token = auth?.value;
 
+      if (!token) {
+        return null;
+      }
+
+      return await getSessionWithToken(db, token);
+    }
     const forceInGame = async (gameId: string) => {
       const { user, session } = await forceAuthenticated();
       const game = games.get(gameId);
 
       if (!game) {
-        set.status = "Not Found";
+        set.status = 404;
         throw new Error("Game does not exist");
       }
 
       if (game.peek().players.find((u) => u.id === user.username) === undefined) {
-        set.status = "Unauthorized";
+        set.status = 401;
         throw new Error("You must be in this game to perform that action");
       }
 
@@ -135,6 +144,7 @@ export const app = new Elysia()
     }
 
     return {
+      getAuthStatus,
       forceAuthenticated,
       forceInGame,
       validateMessage,
@@ -150,7 +160,7 @@ export const app = new Elysia()
   .get("/opengames", ({ store: { games } }) => {
     const openGames = games.values().toArray()
       .map((g) => g.peek())
-      .filter((g) => g.status === "waiting")
+      .filter((g) => g.status === "waiting");
 
     const gameInfo = openGames.map((g): GameInfo => {
       return {
@@ -166,16 +176,23 @@ export const app = new Elysia()
 
     return gameInfo
   })
-  .post("/games", async ({ body, store, forceAuthenticated }) => {
+  .post("/games", async ({ body, set, store, forceAuthenticated }) => {
     const { user } = await forceAuthenticated();
 
     const ruleset = z.array(ruleEnum).parse(body.ruleset);
     // TODO - generate nicer looking ids.
     const gameId = randomUUID();
     const state = getBlankState(gameId, user.username, ruleset, body.maxPlayers, body.password);
+    state.players.push({
+      displayName: user.username,
+      id: user.username,
+    });
+    state.tableOrder.push(user.username);
 
     store.games.set(gameId, new Game(state));
 
+    console.log("Returning, everything is great!");
+    set.status = 200;
     return gameId;
 
   }, {
@@ -276,6 +293,9 @@ export const app = new Elysia()
   })
   .ws("/socket", {
     // TODO - new rule: each client can only be connected to ONE game
+    open(ws) {  
+      console.log("New connecition:", ws.id);
+    },
     message(ws, rawMessage) {
       const games = ws.data.store.games;
       const listeners = ws.data.store.listeners;
@@ -323,6 +343,7 @@ export const app = new Elysia()
       }
     },
     close(ws) {
+      console.log("Closed connecition:", ws.id);
       const games = ws.data.store.games;
       const listeners = ws.data.store.listeners;
 

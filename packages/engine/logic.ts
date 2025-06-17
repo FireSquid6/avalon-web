@@ -414,3 +414,8 @@ export function getTeam(role: Role): "Mordredic" | "Arthurian" {
       return "Arthurian";
   }
 }
+
+export function getAvailableActions(state: GameState, playerId: string ) {
+
+
+}

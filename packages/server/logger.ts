@@ -1,13 +1,18 @@
-import { Elysia } from "elysia";
+import Elysia from "elysia";
 
-export function simpleLogger() {
-
-  return new Elysia()
-    .onRequest((ctx) => {
-      const method = ctx.request.method;
-      const url = new URL(ctx.request.url);
-
-
-      console.log(`--> ${method} ${url.pathname}`);
-    })
+function logResponse(method: string, path: string, code: number | string) {
+  console.log(`- ${method} ${path} -> ${code}`);
 }
+
+export const loggerPlugin = new Elysia()
+  .onAfterResponse({ as: "global" }, (ctx) => {
+    const method = ctx.request.method;
+    const path = ctx.path;
+    const status = ctx.set.status;
+    logResponse(method, path, status ?? 500);
+  })
+  .onError({ as: "global" }, (ctx) => {
+    const method = ctx.request.method;
+    const path = ctx.path;
+    logResponse(method, path, ctx.code)
+  })

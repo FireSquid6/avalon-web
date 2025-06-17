@@ -8,6 +8,7 @@ export function startServer(config: Config) {
   const db = getDb(config);
 
   app.store.config = config;
+  app.store.games = new Map();
   app.store.db = db;
 
   app.listen(4320, () => {

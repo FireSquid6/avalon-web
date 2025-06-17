@@ -4,6 +4,7 @@ import { type GameState, type Knowledge, type Rule } from "engine";
 import { makeMessage, responseSchema } from "server/protocol";
 import { getAuthState } from "./hooks";
 import { getAuthToken } from "./auth";
+import { getBlankState } from "engine/logic";
 
 export interface GameData {
   state: GameState,
@@ -58,27 +59,40 @@ export interface GameClient {
   act(action: GameAction): void;
   listen(listener: Listener): () => void;
   stop(): void;
+  refreshData(): Promise<void>;
   active(): boolean;
 }
 
+
 // not making this a class is more convienient since we can do an async contructor
-export function getGameClient(id: string, initialData: GameData, onError?: (e: Error) => void): GameClient {
-  let data = initialData;
+export function getGameClient(id: string, onError?: (e: Error) => void): GameClient {
+  if (!onError) {
+    onError = (e: Error) => console.log(e);
+  }
+  let data: GameData = { state: getBlankState(id, "loading...", [], 10), knowledge: [] };
   let active = false;
   const listeners: Listener[] = []
 
   const socket = treaty.socket.subscribe().ws;
-  const token = getAuthToken();
+  const token = getAuthToken() ?? "";
   const auth = getAuthState();
-
-  if (auth.type !== "authenticated" || token === undefined) {
-    throw new Error("Error creating game client: not authenticated");
-  }
 
   const dispatch = (e: ClientEvent) => {
     for (const l of listeners) {
       l(e);
     }
+  }
+
+  const refreshData = async () => {
+    const { data: fetchedData, error } = await treaty.games({ id: id }).state.get();
+
+    if (error !== null) {
+      onError(new Error(`Error fetching game state: ${error.status} - ${error.value}`));
+      return;
+    }
+
+    data = fetchedData;
+    dispatch({ type: "state", data });
   }
 
   socket.onmessage = (e) => {
@@ -109,7 +123,7 @@ export function getGameClient(id: string, initialData: GameData, onError?: (e: E
   socket.onopen = () => {
     socket.send(makeMessage({
       sessionToken: token,
-      playerId: auth.username,
+      playerId: (auth.type === "authenticated") ? auth.username : "anonymous-spectator",
       gameId: id,
       action: "subscribe",
     }));
@@ -125,6 +139,8 @@ export function getGameClient(id: string, initialData: GameData, onError?: (e: E
     }
   }
 
+  // we want to immediately refresh
+  refreshData();
 
   return {
     active() {
@@ -154,12 +170,11 @@ export function getGameClient(id: string, initialData: GameData, onError?: (e: E
     stop() {
       socket.send(makeMessage({
         sessionToken: token,
-        playerId: auth.username,
+        playerId: (auth.type === "authenticated") ? auth.username : "anonymous-spectator",
         gameId: id,
         action: "unsubscribe",
       }))
-    }
+    },
+    refreshData
   }
 }
-
-

@@ -13,6 +13,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const pushError = usePushError();
+  const navigate = Route.useNavigate(); 
   const handleCreate = async (ruleset: Rule[], maxPlayers: number, password?: string) => {
     const data = await createGame(ruleset, maxPlayers, password);
 
@@ -21,7 +22,12 @@ function Index() {
       return;
     }
 
-    // TODO
+    navigate({
+      to: "/game/$gameId",
+      params: {
+        gameId: data.state.id,
+      }
+    });
   }
 
   const handleJoin = async (gameId: string, password?: string) => {
@@ -31,6 +37,13 @@ function Index() {
       pushError(data);
       return;
     }
+
+    navigate({
+      to: "/game/$gameId",
+      params: {
+        gameId: data.state.id,
+      }
+    })
   }
 
   const games = useAvailableGames();

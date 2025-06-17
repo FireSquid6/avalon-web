@@ -4,6 +4,8 @@ import type { GameInfo } from "engine";
 import useSWR from "swr";
 import { usePushError } from "./errors";
 import { treaty } from "./treaty";
+import { type GameClient, type GameData } from "./game";
+import type { GameAction } from "engine/actions";
 
 export interface AuthenticatedState {
   type: "authenticated";
@@ -33,21 +35,19 @@ export function useAuth() {
 
   useEffect(() => {
     setState(getAuthState());
-    
+
   }, [])
 
   return state;
 
 }
 
-
-
 export function useAvailableGames(): GameInfo[] {
   const pushError = usePushError();
   const fetcher = async () => {
     const { data, error } = await treaty.opengames.get();
 
-    if (error !== null){
+    if (error !== null) {
       throw new Error(`Error fetching open games: ${error.status} - ${error.result}`)
     }
 
@@ -62,3 +62,30 @@ export function useAvailableGames(): GameInfo[] {
 
   return data ?? [];
 }
+
+
+export function useGame(client: GameClient): { data: GameData, connected: boolean, act: (action: GameAction) => void } {
+  const [data, setData] = useState<GameData>(client.peek());
+  const [connected, setConnected] = useState<boolean>(client.active());
+
+  useEffect(() => {
+    const unsubscribe = client.listen((e) => {
+      switch (e.type) {
+        case "state":
+          setData(e.data);
+          break;
+        case "active":
+          setConnected(e.active);
+          break;
+        case "motion":
+          console.log("Motion recieved");
+          break;
+      }
+    });
+
+    return unsubscribe();
+  }, [])
+
+  return  { data, connected, act: client.act };
+}
+

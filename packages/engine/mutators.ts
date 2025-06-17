@@ -54,9 +54,8 @@ export function performStart<T extends StartAction>(inputs: ProcessInputs<T>) {
     state.ladyHolder = state.tableOrder[state.tableOrder.length - 1];
   }
 
-  // add the first round
-  state.rounds = [
-  ];
+  // TODO: add the first round
+  state.rounds = [];
 }
 
 export function performNominate<T extends NominateAction>(inputs: ProcessInputs<T>) {
