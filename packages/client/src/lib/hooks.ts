@@ -4,7 +4,7 @@ import type { GameInfo } from "engine";
 import useSWR from "swr";
 import { usePushError } from "./errors";
 import { treaty } from "./treaty";
-import { type GameClient, type GameData } from "./game";
+import { client, type GameClient, type GameData } from "./game";
 import type { GameAction } from "engine/actions";
 
 export interface AuthenticatedState {
@@ -109,6 +109,40 @@ export function useGame(client: GameClient): { data: GameData, connected: boolea
   }, [])
 
   return  { data, connected, act: client.act };
+}
+
+export function useGameSubscription(gameId: string): { data: GameData, connected: boolean, act: (action: GameAction) => void } {
+  const [data, setData] = useState<GameData>(client.peekStateOrBlank(gameId));
+  const [connected, setConnected] = useState<boolean>(client.peekConnected());
+  const pushError = usePushError();
+
+  useEffect(() => {
+    client.subscribeToGame(gameId);
+
+    const unlisten = client.listen((e) => {
+      switch (e.type) {
+        case "active":
+          setConnected(e.active);
+          break;
+        case "error":
+          pushError(e.error);
+          break;
+        case "state": 
+          setData(e.data);
+          break;
+        case "motion":
+          console.log("Recieved motion");
+          break;
+      }
+
+    })
+    return unlisten;
+  }, [])
+
+  const act = (action: GameAction) => {
+    client.act(id, action);
+  }
+
 }
 
 export interface ScreenSize {
