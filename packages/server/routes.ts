@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { Elysia, t } from "elysia"
 import { ruleEnum, type GameInfo, type GameState } from "engine";
-import { randomUUID } from "crypto";
 import { generateKnowledgeMap, getBlankState } from "engine/logic";
 import { gameActionSchema } from "engine/actions";
 import { processAction, ProcessError } from "engine/process";
@@ -209,7 +208,7 @@ export const app = new Elysia()
 
     const ruleset = z.array(ruleEnum).parse(body.ruleset);
     // TODO - generate nicer looking ids.
-    const gameId = randomUUID();
+    const gameId = randomGameId();
     const state = getBlankState(gameId, user.username, ruleset, body.maxPlayers, body.password);
     state.players.push({
       displayName: user.username,
@@ -455,7 +454,12 @@ export const app = new Elysia()
 // TODO - reset password with email
 
 function randomGameId(): string {
-
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < 8; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
 }
 
 

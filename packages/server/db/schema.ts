@@ -1,3 +1,4 @@
+import type { GameState } from "engine";
 import type { InferSelectModel } from "drizzle-orm";
 import { int, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
@@ -15,6 +16,11 @@ export const profilesTable = sqliteTable("profile", {
   avatarId: int(),
   bio: text(),
   // ... TODO
+});
+
+export const games = sqliteTable("games", {
+  id: text().notNull().primaryKey().unique(),
+  state: text({ mode: "json" }).$type<GameState>(),
 });
 
 export const completedGames = sqliteTable("games", {
