@@ -9,6 +9,7 @@ export function startServer(config: Config) {
 
   app.store.config = config;
   app.store.games = new Map();
+  app.store.listeners = new Map();
   app.store.db = db;
 
   app.listen(4320, () => {

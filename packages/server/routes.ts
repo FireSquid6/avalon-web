@@ -25,16 +25,20 @@ class Game {
   }
 
   update(state: GameState) {
+    console.log("Updating game state...");
     this.state = state;
 
     for (const listener of this.listeners) {
+      console.log("Calling listener", listener);
       listener(this.state);
     }
   }
 
   subscribe(listener: GameListener): () => void {
+    console.log("Subscribing", listener);
     this.listeners.push(listener);
     return () => {
+      console.log("Unsubscribing", listener)
       this.listeners = this.listeners.filter((l) => l !== listener);
     }
   }
@@ -215,7 +219,6 @@ export const app = new Elysia()
 
     store.games.set(gameId, new Game(state));
 
-    console.log("Returning, everything is great!");
     set.status = 200;
     return gameId;
 
@@ -321,53 +324,59 @@ export const app = new Elysia()
   })
   .ws("/socket", {
     // TODO - new rule: each client can only be connected to ONE game
-    open(ws) {  
+    open(ws) {
       console.log("New connecition:", ws.id);
     },
     message(ws, rawMessage) {
-      const games = ws.data.store.games;
-      const listeners = ws.data.store.listeners;
+      try {
+        console.log("Got the raw message", rawMessage);
+        const games = ws.data.store.games;
+        const listeners = ws.data.store.listeners;
 
-      const json = JSON.parse(rawMessage as string);
-      const message = messageSchema.parse(json);
+        const message = messageSchema.parse(rawMessage);
+        console.log("Recieved", message);
 
-      const validationError = ws.data.validateMessage(message);
-      if (typeof validationError === "string") {
-        ws.send(socketFailure(validationError));
-        return;
-      }
-
-      const isSubscribed = listeners.has(ws.id);
-      const game = games.get(message.gameId);
-
-      if (game === undefined) {
-        ws.send(socketFailure(`Game ${message.gameId} not found`));
-        return;
-      }
-
-
-      if (message.action === "subscribe" && !isSubscribed) {
-        const listener: GameListener = (state) => {
-          const view = viewStateAs(state, message.playerId);
-          const knowledgeMap = generateKnowledgeMap(state);
-
-          const knowledge = knowledgeMap[message.playerId] ?? [];
-
-          ws.send(stateResponse(view, knowledge));
+        const validationError = ws.data.validateMessage(message);
+        if (typeof validationError === "string") {
+          ws.send(socketFailure(validationError));
+          return;
         }
 
-        game.subscribe(listener);
-        listeners.set(ws.id, listener);
-        ws.send(socketInfo(`Subscribed to ${message.gameId}`))
-      } else if (message.action === "unsubscribe" && isSubscribed) {
-        const listener = listeners.get(ws.id)!;
+        const isSubscribed = listeners.has(ws.id);
+        const game = games.get(message.gameId);
 
-        game.unsubscribe(listener);
-        listeners.delete(ws.id);
+        if (game === undefined) {
+          ws.send(socketFailure(`Game ${message.gameId} not found`));
+          return;
+        }
 
-        ws.send(socketInfo(`Unsubscribed from ${message.gameId}`))
-      } else {
-        ws.send(socketFailure(`Tried to subscribe to an already subscribed game or unsubscribe from unsubscribed game`));
+
+        if (message.action === "subscribe" && !isSubscribed) {
+          const listener: GameListener = (state) => {
+            const view = viewStateAs(state, message.playerId);
+            const knowledgeMap = generateKnowledgeMap(state);
+
+            const knowledge = knowledgeMap[message.playerId] ?? [];
+
+            console.log("Sending new state...");
+            ws.send(stateResponse(view, knowledge));
+          }
+
+          game.subscribe(listener);
+          listeners.set(ws.id, listener);
+          ws.send(socketInfo(`Subscribed to ${message.gameId}`))
+        } else if (message.action === "unsubscribe" && isSubscribed) {
+          const listener = listeners.get(ws.id)!;
+
+          game.unsubscribe(listener);
+          listeners.delete(ws.id);
+
+          ws.send(socketInfo(`Unsubscribed from ${message.gameId}`))
+        } else {
+          ws.send(socketFailure(`Tried to subscribe to an already subscribed game or unsubscribe from unsubscribed game`));
+        }
+      } catch (e) {
+        console.log("Unexpected error:", e);
       }
     },
     close(ws) {

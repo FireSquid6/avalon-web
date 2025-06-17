@@ -241,6 +241,10 @@ export function performRulesetModification<T extends RulesetModifiaction>(inputs
     throw new ProcessError("client", "You must be the game master to do this");
   }
 
+  if (state.status !== "waiting") {
+    throw new ProcessError("client", "Game has already started. You can't modify the ruleset")
+  }
+
   const validation = validateRuleset(action.ruleset, action.maxPlayers);
 
   if (validation !== true) {

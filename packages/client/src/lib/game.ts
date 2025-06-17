@@ -64,7 +64,7 @@ export interface GameClient {
 }
 
 
-// not making this a class is more convienient since we can do an async contructor
+// TODO - make this a global singleton class with a hook `useGameClient(id)` that connects to a specific id
 export function getGameClient(id: string, onError?: (e: Error) => void): GameClient {
   if (!onError) {
     onError = (e: Error) => console.log(e);
@@ -96,6 +96,7 @@ export function getGameClient(id: string, onError?: (e: Error) => void): GameCli
   }
 
   socket.onmessage = (e) => {
+    console.log("Recieved reponse:", e.data);
     const response = responseSchema.parse(JSON.parse(e.data));
 
     switch (response.type) {
@@ -121,6 +122,7 @@ export function getGameClient(id: string, onError?: (e: Error) => void): GameCli
   }
 
   socket.onopen = () => {
+    console.log("Sending subscription message...");
     socket.send(makeMessage({
       sessionToken: token,
       playerId: (auth.type === "authenticated") ? auth.username : "anonymous-spectator",
