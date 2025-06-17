@@ -36,6 +36,7 @@ export function GameRender() {
       isMonarch = lastRound.monarch === id;
     }
 
+
     return {
       id,
       username: id,
@@ -43,6 +44,7 @@ export function GameRender() {
       assassinated,
       nominated: isNominated,
       isMonarch: isMonarch,
+      hasLady: state.ladyHolder === id,
       isCurrentPlayer: id === viewingUser,
     }
   })

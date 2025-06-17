@@ -6,6 +6,7 @@ interface PlayerIconProps {
   assassinated?: boolean;
   nominated?: boolean;
   isMonarch?: boolean;
+  hasLady?: boolean;
   isCurrentPlayer?: boolean;
 }
 
@@ -14,6 +15,7 @@ export const PlayerIcon: React.FC<PlayerIconProps> = ({
   iconColor,
   assassinated = false,
   nominated = false,
+  hasLady = false,
   isMonarch = false,
   isCurrentPlayer = true,
 }) => {
@@ -66,8 +68,15 @@ export const PlayerIcon: React.FC<PlayerIconProps> = ({
         
         {/* Sword for nomination */}
         {nominated && !assassinated && (
-          <div className="absolute -right-5 top-1/2 transform -translate-y-1/2">
+          <div className="absolute -right-8 top-1/2 transform -translate-y-1/2">
             <span className="text-xl">⚔️</span>
+          </div>
+        )}
+
+        {/* Lady of the lake */}
+        {hasLady && (
+          <div className="absolute -right-8 top-1/2 transform -translate-y-1/2">
+            <span className="text-xl">🧚‍♀️</span>
           </div>
         )}
       </div>

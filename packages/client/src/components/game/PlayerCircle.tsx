@@ -9,6 +9,7 @@ export interface Player {
   nominated?: boolean;
   isMonarch?: boolean;
   isCurrentPlayer?: boolean;
+  hasLady?: boolean;
 }
 
 interface PlayerCircleProps {
@@ -56,6 +57,7 @@ export const PlayerCircle: React.FC<PlayerCircleProps> = ({
             nominated={player.nominated}
             isMonarch={player.isMonarch}
             isCurrentPlayer={player.isCurrentPlayer}
+            hasLady={player.hasLady}
           />
         </div>
       ))}

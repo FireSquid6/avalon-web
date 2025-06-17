@@ -52,7 +52,7 @@ export function KnowledgeModal({ knowledge, viewingUserId }: KnowledgeModalProps
   return (
     <>
       <button
-        className="btn btn-info btn-sm"
+        className="btn btn-info"
         onClick={() => setIsModalOpen(true)}
       >
         Secret Knowledge ({filteredKnowledge.length})

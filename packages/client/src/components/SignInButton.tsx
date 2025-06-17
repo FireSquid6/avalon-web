@@ -14,7 +14,7 @@ export function SignInButton() {
 
   return (
     <Link to="/" className="btn btn-primary">
-      {authState.username}
+      {authState.username}'s Profile
     </Link>
   )
 
