@@ -49,6 +49,50 @@ export function GameRender() {
     }
   })
 
+  let centerText = "";
+  switch (getNextIntendedAction(state)) {
+    case "assassinate":
+      centerText = "Assassin is picking their final target...";
+      break;
+    case "nominate":
+      centerText = "The monarch is discussing and nominating...";
+      break;
+    case "quest":
+      centerText = "The quest is ongoing...";
+      break;
+    case "vote":
+      centerText = "Players still voting...";
+      break;
+    case "lady":
+      centerText = "The lady of the lake is revealing truth...";
+      break;
+    case "complete":
+      // ugh nested switch statements ew ew ew
+      switch (state.result!) {
+        case "Deadlock":
+          centerText = "Avalon has fallen into civil disorder. The forces of Modred are victorious."
+          break;
+        case "Arthurian Victory":
+          centerText = "The Arthurian forces prevail!";
+          break;
+        case "Mordredic Victory":
+          centerText = "The forces of Morderd are victorious.";
+          break;
+        case "Assassination":
+          centerText = "Merlin was assassinated. The forces of Mordred are victorious.";
+          break;
+      }
+      break;
+    case "start":
+      if (state.players.length < state.expectedPlayers) {
+        centerText = `Waiting for players (${state.players.length} / ${state.expectedPlayers})...`;
+      } else {
+        centerText = `Waiting for ${state.gameMaster} to start the game...`;
+      }
+      break;
+  }
+
+
   const radius = Math.min(((screenSize.width - 100) / 2), 350);
   let nominationCount = 0;
   const questInfo = getQuestInformation(state.players.length);

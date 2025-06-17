@@ -53,7 +53,7 @@ export const PlayerIcon: React.FC<PlayerIconProps> = ({
           
           {/* Assassination X */}
           {assassinated && (
-            <div className="absolute inset-0 flex items-center justify-center">
+            <div className="absolute inset-0 flex items-center justify-center" title="This player has been assassinated">
               <span className="text-2xl">💀</span>
             </div>
           )}
@@ -61,21 +61,21 @@ export const PlayerIcon: React.FC<PlayerIconProps> = ({
         
         {/* Crown for monarch */}
         {isMonarch && !assassinated && (
-          <div className="absolute -top-5 left-1/2 transform -translate-x-1/2">
+          <div className="absolute -top-5 left-1/2 transform -translate-x-1/2" title="This player is the monarch">
             <span className="text-2xl">👑</span>
           </div>
         )}
         
         {/* Sword for nomination */}
         {nominated && !assassinated && (
-          <div className="absolute -right-8 top-1/2 transform -translate-y-1/2">
+          <div className="absolute -right-8 top-1/2 transform -translate-y-1/2" title="This player is nominated for a quest">
             <span className="text-xl">⚔️</span>
           </div>
         )}
 
         {/* Lady of the lake */}
         {hasLady && (
-          <div className="absolute -right-8 top-1/2 transform -translate-y-1/2">
+          <div className="absolute -right-8 top-1/2 transform -translate-y-1/2" title="This player has the Lady of the Lake token">
             <span className="text-xl">🧚‍♀️</span>
           </div>
         )}
