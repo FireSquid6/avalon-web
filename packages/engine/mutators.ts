@@ -43,7 +43,7 @@ export function performStart<T extends StartAction>(inputs: ProcessInputs<T>) {
   for (const player of state.players) {
     const role = roles.pop()!;
 
-    state.hiddenRoles.set(player.id, role)
+    state.hiddenRoles[player.id] = role
   }
 
   state.status = "in-progress";

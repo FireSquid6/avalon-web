@@ -86,31 +86,6 @@ export function useJoinedGames(): GameInfo[] {
 }
 
 
-export function useGame(client: GameClient): { data: GameData, connected: boolean, act: (action: GameAction) => void } {
-  const [data, setData] = useState<GameData>(client.peek());
-  const [connected, setConnected] = useState<boolean>(client.active());
-
-  useEffect(() => {
-    const unsubscribe = client.listen((e) => {
-      switch (e.type) {
-        case "state":
-          setData(e.data);
-          break;
-        case "active":
-          setConnected(e.active);
-          break;
-        case "motion":
-          console.log("Motion recieved");
-          break;
-      }
-    });
-
-    return unsubscribe();
-  }, [])
-
-  return  { data, connected, act: client.act };
-}
-
 export function useGameSubscription(gameId: string): { data: GameData, connected: boolean, act: (action: GameAction) => void } {
   const [data, setData] = useState<GameData>(client.peekStateOrBlank(gameId));
   const [connected, setConnected] = useState<boolean>(client.peekConnected());
@@ -140,7 +115,13 @@ export function useGameSubscription(gameId: string): { data: GameData, connected
   }, [])
 
   const act = (action: GameAction) => {
-    client.act(id, action);
+    client.act(gameId, action);
+  }
+
+  return {
+    data,
+    connected,
+    act,
   }
 
 }

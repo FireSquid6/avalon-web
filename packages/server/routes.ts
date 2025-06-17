@@ -329,7 +329,6 @@ export const app = new Elysia()
     },
     message(ws, rawMessage) {
       try {
-        console.log("Got the raw message", rawMessage);
         const games = ws.data.store.games;
         const listeners = ws.data.store.listeners;
 
@@ -454,5 +453,10 @@ export const app = new Elysia()
 
   })
 // TODO - reset password with email
+
+function randomGameId(): string {
+
+}
+
 
 export type App = typeof app;
