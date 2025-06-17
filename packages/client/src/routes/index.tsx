@@ -6,6 +6,7 @@ import type { Rule } from "engine"
 import { useAvailableGames } from "../lib/hooks"
 import { createGame, joinGame } from "../lib/game"
 import { usePushError } from "../lib/errors"
+import { JoinedGames } from "../components/JoinedGames"
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -56,7 +57,7 @@ function Index() {
           The resistance needs you. Create or join a game to begin.
         </p>
       </div>
-
+      <JoinedGames />
       <div className="grid md:grid-cols-2 gap-6">
         <CreateGameForm onCreateGame={handleCreate} />
         <JoinGameForm onJoinGame={handleJoin} />

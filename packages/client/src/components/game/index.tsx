@@ -14,6 +14,7 @@ import { KnowledgeModal } from './KnowledgeModal';
 export function GameRender() {
   const { state, act, knowledge, viewingUser } = useGameContext();
   const screenSize = useScreenSize();
+  console.log(state);
 
   const lastRound = state.rounds[state.rounds.length - 1];
   const players: Player[] = state.tableOrder.map((id) => {
@@ -23,7 +24,7 @@ export function GameRender() {
     let isNominated = false;
 
     if (lastRound) {
-      const vote = lastRound.votes.get(id);
+      const vote = lastRound.votes[id];
 
       if (vote) {
         color = vote === "Approve" ? "white" : "black";
@@ -46,7 +47,7 @@ export function GameRender() {
       isMonarch: isMonarch,
       hasLady: state.ladyHolder === id,
       isCurrentPlayer: id === viewingUser,
-      role: state.hiddenRoles.get(id),
+      role: state.hiddenRoles[id] 
     }
   })
 
@@ -97,7 +98,7 @@ export function GameRender() {
 
   const radius = Math.min(((screenSize.width - 100) / 2), 350);
   let nominationCount = 0;
-  const questInfo = getQuestInformation(state.players.length);
+  const questInfo = getQuestInformation(state.players.length < 5 ? 5 : state.players.length);
 
   if (lastRound) {
     nominationCount = questInfo[lastRound.questNumber - 1].players;
@@ -128,11 +129,11 @@ export function GameRender() {
   const requiredApproves = Math.ceil(state.players.length / 2);
 
   for (const round of state.rounds) {
-    if (round.votes.size < state.players.length) {
+    if (Object.keys(round.votes).length < state.players.length) {
       continue;
     }
     let approves: number = 0;
-    for (const r of round.votes.values()) {
+    for (const r of Object.values(round.votes)) {
       if (r === "Approve") {
         approves += 1;
       }
@@ -189,7 +190,7 @@ function getAvailableActions(state: GameState, knowledge: Knowledge[], id: strin
       }
       break;
     case "vote":
-      if (currentRound?.votes.get(id) === undefined) {
+      if (currentRound?.votes[id] === undefined) {
         actions.push("vote");
       }
       break;

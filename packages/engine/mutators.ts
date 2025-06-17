@@ -92,20 +92,20 @@ export function performVote<T extends VoteAction>(inputs: ProcessInputs<T>) {
 
   const currentRound = state.rounds[state.rounds.length - 1]!;
 
-  if (currentRound.votes.keys().find((p) => p === actorId) !== undefined) {
+  if (Object.keys(currentRound.votes).find((p) => p === actorId) !== undefined) {
     throw new ProcessError("client", "You have already voted for this quest");
   }
 
-  currentRound.votes.set(actorId, action.vote);
+  currentRound.votes[actorId] = action.vote;
 
   // if we aren't done voting yet, just continue!
-  if (currentRound.votes.size < state.players.length) {
+  if (Object.keys(currentRound.votes).length < state.players.length) {
     return;
   }
 
   const requiredApproves = Math.ceil(state.players.length / 2);
   let approves: number = 0;
-  for (const r of currentRound.votes.values()) {
+  for (const r of Object.values(currentRound.votes)) {
     if (r === "Approve") {
       approves += 1;
     }
@@ -214,7 +214,7 @@ export function performLady<T extends LadyAction>(inputs: ProcessInputs<T>) {
 export function performAssassination<T extends AssassinationAction>(inputs: ProcessInputs<T>) {
   const { state, action, actorId } = inputs;
 
-  if (state.hiddenRoles.get(actorId) !== "Assassin") {
+  if (state.hiddenRoles[actorId] !== "Assassin") {
     throw new ProcessError("client", "You are not the assassin");
   }
 
@@ -229,7 +229,7 @@ export function performAssassination<T extends AssassinationAction>(inputs: Proc
   state.status = "finished";
   state.assassinationTarget = action.playerId;
 
-  state.result = state.hiddenRoles.get(state.assassinationTarget) === "Merlin"
+  state.result = state.hiddenRoles[state.assassinationTarget] === "Merlin"
     ? "Assassination"
     : "Arthurian Victory"
 }

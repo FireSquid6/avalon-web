@@ -153,7 +153,7 @@ export function getBlankState(id: string, gameMasterId: string, ruleset: Rule[],
     expectedPlayers: maxPlayers,
     gameMaster: gameMasterId,
     rounds: [],
-    hiddenRoles: new Map(),
+    hiddenRoles: {},
   }
 }
 
@@ -182,7 +182,7 @@ export function getNextIntendedAction(state: GameState): IntendedAction {
   }
 
 
-  if (currentRound.votes.size < state.players.length) {
+  if (Object.keys(currentRound.votes).length < state.players.length) {
     return "vote";
   }
 
@@ -226,7 +226,7 @@ export function newRound(state: GameState) {
         monarch: state.tableOrder[0]!,
         questNumber: 1,
 
-        votes: new Map(),
+        votes: {},
       }
     );
     return;
@@ -240,7 +240,7 @@ export function newRound(state: GameState) {
     monarch: state.tableOrder[monarchIndex]!,
     questNumber: didLastRound ? lastRound.questNumber + 1 : lastRound.questNumber,
 
-    votes: new Map(),
+    votes: {},
   });
 }
 
@@ -248,14 +248,14 @@ export function getFailedVotes(state: GameState): number {
   let failed: number = 0;
 
   for (const round of state.rounds) {
-    const voted = round.votes.size === state.players.length;
+    const voted = Object.keys(round.votes).length === state.players.length;
     if (!voted) {
       continue;
     }
 
     const requiredApproves = Math.ceil(state.players.length / 2);
     let approves: number = 0;
-    for (const r of round.votes.values()) {
+    for (const r of Object.values(round.votes)) {
       if (r === "Approve") {
         approves += 1;
       }
@@ -297,7 +297,8 @@ export function generateKnowledgeMap(state: GameState) {
   const showTeammateRoles = rulesetHas(state.ruleset, "Visible Teammate Roles");
   const knowledgeMap: Record<string, Knowledge[]> = {};
 
-  for (const [player, role] of state.hiddenRoles) {
+  for (const player of Object.keys(state.hiddenRoles)) {
+    const role = state.hiddenRoles[player];
     const knowledge: Knowledge[] = [];
 
     switch (role) {
@@ -305,8 +306,8 @@ export function generateKnowledgeMap(state: GameState) {
       case "Assassin":
       case "Mordred":
       case "Morgana":
-        for (const p of state.hiddenRoles.keys()) {
-          const r = state.hiddenRoles.get(p)!;
+        for (const p of Object.keys(state.hiddenRoles)) {
+          const r = state.hiddenRoles[p];
 
           if (r === "Assassin" || r === "Mordred" || r === "Morgana" || r === "Mordredic Servant") {
             if (showTeammateRoles) {
@@ -332,8 +333,8 @@ export function generateKnowledgeMap(state: GameState) {
         }
         break;
       case "Percival":
-        for (const p of state.hiddenRoles.keys()) {
-          const r = state.hiddenRoles.get(p)!
+        for (const p of Object.keys(state.hiddenRoles)) {
+          const r = state.hiddenRoles[p];
 
           if (r === "Merlin" || r === "Morgana") {
             knowledge.push({
@@ -347,8 +348,8 @@ export function generateKnowledgeMap(state: GameState) {
         }
         break;
       case "Merlin":
-        for (const p of state.hiddenRoles.keys()) {
-          const r = state.hiddenRoles.get(p)!;
+        for (const p of Object.keys(state.hiddenRoles)) {
+          const r = state.hiddenRoles[p];
 
           if (r === "Morgana" || r === "Assassin" || r === "Oberon" || r === "Mordredic Servant") {
             knowledge.push({
@@ -372,7 +373,7 @@ export function generateKnowledgeMap(state: GameState) {
       source: "initial",
       info: {
         type: "role",
-        role: state.hiddenRoles.get(player)!,
+        role: state.hiddenRoles[player]!,
       }
     })
 
@@ -386,7 +387,7 @@ export function generateKnowledgeMap(state: GameState) {
       continue;
     }
 
-    const role = state.hiddenRoles.get(round.ladyTarget)!;
+    const role = state.hiddenRoles[round.ladyTarget]!;
     const team = getTeam(role);
     
     // this may result in duplicates (i.e. an evil player investigates their own teammate)

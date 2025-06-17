@@ -64,6 +64,28 @@ export function useAvailableGames(): GameInfo[] {
 }
 
 
+export function useJoinedGames(): GameInfo[] {
+  const pushError = usePushError();
+  const fetcher = async () => {
+    const { data, error } = await treaty.joinedgames.get();
+
+    if (error !== null) {
+      throw new Error(`Error fetching joined games: ${error.status} - ${error.result}`)
+    }
+
+    return data as GameInfo[];
+  }
+
+  const { data, error } = useSWR("/joinedgames", fetcher);
+
+  if (error) {
+    pushError(error instanceof Error ? error : new Error(`Unkown error: ${error}`));
+  }
+
+  return data ?? [];
+}
+
+
 export function useGame(client: GameClient): { data: GameData, connected: boolean, act: (action: GameAction) => void } {
   const [data, setData] = useState<GameData>(client.peek());
   const [connected, setConnected] = useState<boolean>(client.active());

@@ -44,7 +44,7 @@ export const roundSchema = z.object({
   ladyUser: z.optional(z.string()),
   nominatedPlayers: z.optional(z.array(z.string())),
 
-  votes: z.map(z.string(), z.enum(["Approve", "Reject"])),
+  votes: z.record(z.string(), z.enum(["Approve", "Reject"])),
 
   quest: z.optional(z.object({
     failCards: z.number(),
@@ -77,7 +77,7 @@ export const gameStateSchema = z.object({
   result: z.optional(z.enum(["Arthurian Victory", "Mordredic Victory", "Assassination", "Deadlock"])),
 
   // hidden roles are not provided to the client unless the game is over
-  hiddenRoles: z.map(z.string(), roleEnum),
+  hiddenRoles: z.record(z.string(), roleEnum),
 
   assassinationTarget: z.optional(z.string()),
 });

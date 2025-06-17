@@ -157,12 +157,36 @@ export const app = new Elysia()
   })
   // kinda a diabolical one liner if I do say so myself
   // unreadable though. It does what you think it would
-  .get("/opengames", ({ store: { games } }) => {
+  .get("/opengames", async ({ getAuthStatus, store: { games } }) => {
+    const auth = await getAuthStatus();
     const openGames = games.values().toArray()
       .map((g) => g.peek())
-      .filter((g) => g.status === "waiting");
+      .filter((g) => g.status === "waiting"
+        && g.players.find(({ id }) => id === auth?.user.username) === undefined
+      );
 
     const gameInfo = openGames.map((g): GameInfo => {
+      return {
+        id: g.id,
+        requiresPassword: g.password !== undefined,
+        gameMaster: g.gameMaster,
+        status: "waiting",
+        ruleset: g.ruleset,
+        maxPlayers: g.expectedPlayers,
+        currentPlayers: g.players.length,
+      }
+    })
+
+    return gameInfo
+  })
+  .get("/joinedgames", async ({ forceAuthenticated, store: { games } }) => {
+    const { user } = await forceAuthenticated();
+
+    const joinedGames = games.values().toArray()
+      .map((g) => g.peek())
+      .filter((g) => g.players.find(({ id }) => id === user.username) !== undefined)
+
+    const gameInfo = joinedGames.map((g): GameInfo => {
       return {
         id: g.id,
         requiresPassword: g.password !== undefined,
@@ -218,12 +242,16 @@ export const app = new Elysia()
       return status("Bad Request", "Game has already started");
     }
 
-    if (!(state.password !== undefined && state.password === password)) {
+    if (state.password !== undefined && password !== state.password) {
       return status("Unauthorized", "Incorrect password");
     }
 
-    if (state.players.length >= 10) {
+    if (state.players.length >= state.expectedPlayers) {
       return status("Unauthorized", "Game is full");
+    }
+
+    if (state.players.find((p) => p.id === user.username) !== undefined) {
+      return status("Bad Request", "You are already in this game!");
     }
 
     state.players.push({
