@@ -9,7 +9,7 @@ import { messageSchema, socketFailure, socketInfo, stateResponse, type SocketMes
 import { loggerPlugin } from "./logger";
 import type { Config } from "./config";
 import type { Db } from "./db";
-import { createSession, createUser, getProfile, getSessionWithToken, userExists, validateEmail, validatePassword, validateUsername } from "./db/auth";
+import { createSession, createUser, deleteSesssion, getProfile, getSessionWithToken, userExists, validateEmail, validatePassword, validateUsername } from "./db/auth";
 import { cors } from "@elysiajs/cors";
 
 
@@ -447,6 +447,14 @@ export const app = new Elysia()
       email: t.String(),
       password: t.String(),
     })
+  })
+  .post("/signout", async ({ forceAuthenticated, store: { db }, cookie: { auth, username } }) => {
+    const { session } = await forceAuthenticated();
+
+    await deleteSesssion(db, session.token);
+
+    auth?.remove();
+    username?.remove();
   })
   .get("/whoami", async () => {
 

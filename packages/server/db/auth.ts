@@ -2,9 +2,7 @@ import { usersTable, sessionsTable, profilesTable } from "./schema";
 import type { User, Session } from "./schema";
 import type { Db } from "./index";
 import { eq, or } from "drizzle-orm";
-import type { InferSelectModel } from "drizzle-orm";
 
-type Profile = InferSelectModel<typeof profilesTable>;
 
 export function validateUsername(username: string): string | null {
   if (typeof username !== 'string') return "Username must be a string";
@@ -126,12 +124,10 @@ export async function createSession(db: Db, email: string, password: string): Pr
   };
 }
 
-export async function getProfile(db: Db, username: string): Promise<Profile | null> {
-  const profiles = await db
-    .select()
-    .from(profilesTable)
-    .where(eq(profilesTable.username, username))
-    .limit(1);
 
-  return profiles.length > 0 ? profiles[0]! : null;
+
+export async function deleteSesssion(db: Db, sessionToken: string) {
+  await db
+    .delete(sessionsTable)
+    .where(eq(sessionsTable.token, sessionToken));
 }
