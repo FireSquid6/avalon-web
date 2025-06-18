@@ -101,11 +101,6 @@ export class GameClient {
           break;
         case "chat":
           const { gameId, sent, userId, content, id: messageId } = response.message;
-          if (!this.chats[gameId]) {
-            this.chats[gameId] = [];
-            await this.pullChatMessages(gameId);
-          }
-
           this.chats[gameId].push({
             id: messageId,
             sent: new Date(sent),
@@ -114,7 +109,7 @@ export class GameClient {
             content,
           });
 
-          this.dispatch({ type: "chat", chats: this.chats[gameId]})
+          this.dispatch({ type: "chat", chats: this.chats[gameId] })
       }
 
     }
@@ -158,6 +153,10 @@ export class GameClient {
     });
   }
 
+  peekChat(gameId: string): Message[] {
+    return this.chats[gameId] ?? [];
+  }
+
   async subscribeToGame(gameId: string, initialData?: GameData) {
     // we want to subscribe to the game if we aren't yet
     if (!this.subscribedGames.has(gameId)) {
@@ -168,6 +167,7 @@ export class GameClient {
 
       await this.waitForConnection();
       console.log("Subscribing to the game...");
+      await this.pullChatMessages(gameId);
 
       this.socket.send(makeMessage({
         playerId: this.username,

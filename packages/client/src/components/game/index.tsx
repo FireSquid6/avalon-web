@@ -9,10 +9,11 @@ import { Quest, type QuestWithResult } from "./Quest";
 import { getNextIntendedAction, getQuestInformation, rulesetHas } from 'engine/logic';
 import { VoteTracker } from './VoteTracker';
 import { KnowledgeModal } from './KnowledgeModal';
+import { ChatWindow } from '../ChatWindow';
 
 
 export function GameRender() {
-  const { state, act, knowledge, viewingUser } = useGameContext();
+  const { state, act, chat, messages, knowledge, viewingUser } = useGameContext();
   const screenSize = useScreenSize();
   console.log(state);
 
@@ -168,6 +169,7 @@ export function GameRender() {
         availableActions={getAvailableActions(state, knowledge, viewingUser)}
         extras={<KnowledgeModal knowledge={knowledge} viewingUserId={viewingUser} /> }
       />
+      <ChatWindow messages={messages} viewingUser={viewingUser} onSendMessage={chat} />
     </>
   )
 }

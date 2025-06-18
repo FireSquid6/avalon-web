@@ -99,7 +99,7 @@ interface GameSubscriptionResponse {
 export function useGameSubscription(gameId: string): GameSubscriptionResponse {
   const [data, setData] = useState<GameData>(client.peekStateOrBlank(gameId));
   const [connected, setConnected] = useState<boolean>(client.peekConnected());
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(client.peekChat(gameId));
   const pushError = usePushError();
 
   useEffect(() => {

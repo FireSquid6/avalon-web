@@ -12,10 +12,10 @@ function RouteComponent() {
   const auth = useAuth();
 
   const username = auth.type === "authenticated" ? auth.username : "anonymous-user";
-  const { data: { state, knowledge }, act, connected }  = useGameSubscription(gameId);
+  const { data: { state, knowledge }, act, connected, messages, chat }  = useGameSubscription(gameId);
 
   return (
-    <GameContextProvider data={{ state, knowledge, act, viewingUser: username }}>
+    <GameContextProvider data={{ state, knowledge, act, viewingUser: username, chat, messages }}>
       <p>{connected ? "Connected to" : "Disconnected from"} game {state.id}</p>
       <GameRender />
     </GameContextProvider>

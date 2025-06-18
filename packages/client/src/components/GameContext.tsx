@@ -1,6 +1,7 @@
 import { useContext, createContext } from "react";
 import type { GameState, Knowledge } from "engine";
 import type { GameAction } from "engine/actions";
+import type { Message } from "server/db/schema";
 
 const gameContext = createContext<GameContext | null>(null);
 
@@ -9,6 +10,8 @@ export interface GameContext {
   knowledge: Knowledge[];
   viewingUser: string;
   act: (action: GameAction) => void;
+  chat: (message: string) => void;
+  messages: Message[];
 }
 
 
