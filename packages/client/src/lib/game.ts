@@ -5,6 +5,7 @@ import { makeMessage, responseSchema } from "server/protocol";
 import { getAuthState } from "./hooks";
 import { getAuthToken } from "./auth";
 import { getBlankState } from "engine/logic";
+import type { Message } from "server/db/schema";
 
 export interface GameData {
   state: GameState,
@@ -50,7 +51,8 @@ export type ClientEvent =
     id: string;
     data: GameData;
   } | {
-    type: "motion";
+    type: "chat";
+    chats: Message[];
   } | {
     type: "active";
     active: boolean;
@@ -64,6 +66,7 @@ export type Listener = (arg0: ClientEvent) => void;
 
 export class GameClient {
   private gameData: Map<string, GameData> = new Map();
+  private chats: Record<string, Message[]> = {};
   private connected: boolean = false;
   private token: string;
   private username: string;
@@ -77,7 +80,7 @@ export class GameClient {
     this.username = auth.type === "authenticated" ? auth.username : "anonymous-spectator";
 
     this.socket = treaty.socket.subscribe().ws;
-    this.socket.onmessage = (e) => {
+    this.socket.onmessage = async (e) => {
       const response = responseSchema.parse(JSON.parse(e.data));
 
       switch (response.type) {
@@ -96,6 +99,22 @@ export class GameClient {
           console.log("Dispatching new state...");
           this.dispatch({ type: "state", id, data });
           break;
+        case "chat":
+          const { gameId, sent, userId, content, id: messageId } = response.message;
+          if (!this.chats[gameId]) {
+            this.chats[gameId] = [];
+            await this.pullChatMessages(gameId);
+          }
+
+          this.chats[gameId].push({
+            id: messageId,
+            sent: new Date(sent),
+            gameId,
+            userId,
+            content,
+          });
+
+          this.dispatch({ type: "chat", chats: this.chats[gameId]})
       }
 
     }
@@ -108,7 +127,20 @@ export class GameClient {
       this.dispatch({ type: "active", active: false });
       this.dispatch({ type: "error", error: new Error(`Socket disconnected: ${e.reason}`) });
     }
+  }
 
+  async pullChatMessages(gameId: string) {
+    const { data, error } = await treaty.games({ id: gameId }).chat.get();
+
+    if (error !== null) {
+      this.dispatch({
+        type: "error",
+        error: new Error(`Error fetching chat messages: ${error.status} - ${error.value}`),
+      });
+    }
+
+    //@ts-ignore
+    this.chats[gameId] = data;
   }
 
   async waitForConnection(): Promise<void> {

@@ -6,6 +6,7 @@ import { usePushError } from "./errors";
 import { treaty } from "./treaty";
 import { client, type GameClient, type GameData } from "./game";
 import type { GameAction } from "engine/actions";
+import type { Message } from "server/db/schema";
 
 export interface AuthenticatedState {
   type: "authenticated";
@@ -86,9 +87,19 @@ export function useJoinedGames(): GameInfo[] {
 }
 
 
-export function useGameSubscription(gameId: string): { data: GameData, connected: boolean, act: (action: GameAction) => void } {
+interface GameSubscriptionResponse {
+  data: GameData;
+  connected: boolean;
+  act: (action: GameAction) => void;
+  chat: (content: string) => void;
+  messages: Message[];
+
+}
+
+export function useGameSubscription(gameId: string): GameSubscriptionResponse {
   const [data, setData] = useState<GameData>(client.peekStateOrBlank(gameId));
   const [connected, setConnected] = useState<boolean>(client.peekConnected());
+  const [messages, setMessages] = useState<Message[]>([]);
   const pushError = usePushError();
 
   useEffect(() => {
@@ -105,8 +116,8 @@ export function useGameSubscription(gameId: string): { data: GameData, connected
         case "state": 
           setData(e.data);
           break;
-        case "motion":
-          console.log("Recieved motion");
+        case "chat":
+          setMessages(e.chats);
           break;
       }
 
@@ -118,10 +129,18 @@ export function useGameSubscription(gameId: string): { data: GameData, connected
     client.act(gameId, action);
   }
 
+  const chat = async (content: string) => {
+    await treaty.games({ id: gameId }).chat.post({
+      message: content,
+    });
+  }
+
   return {
     data,
     connected,
+    messages,
     act,
+    chat,
   }
 
 }

@@ -16,6 +16,7 @@ import { GameObserver } from "./game";
 import { createGame, getJoinedGamesByUser, getWaitingGames } from "./db/game";
 import type { GameListener } from "./game";
 import { createMessage, lastNMessages } from "./db/chat";
+import type { Message } from "./db/schema";
 
 // TODO - rate limit
 export const app = new Elysia()
@@ -116,13 +117,15 @@ export const app = new Elysia()
 
     const msg = await createMessage(db, params.id, user.username, message);
     await observer.chat(params.id, msg);
+
+    return msg;
   }, {
     body: t.Object({
       message: t.String(),
     })
   })
-  .get("/games/:id/chat", async ({ store: { db }, params }) => {
-    return await lastNMessages(db, params.id);
+  .get("/games/:id/chat", ({ store: { db }, params }): Promise<Message[]> => {
+    return lastNMessages(db, params.id);
   })
   .get("/opengames", async ({ getAuthStatus, store: { db } }) => {
     const auth = await getAuthStatus();
