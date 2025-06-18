@@ -83,7 +83,7 @@ export async function createUser(db: Db, username: string, email: string, hashed
     .insert(profilesTable)
     .values({
       username,
-      avatarId: null,
+      centerString: null,
       bio: null
     });
 

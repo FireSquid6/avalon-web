@@ -48,7 +48,7 @@ export function useAvailableGames(): GameInfo[] {
     const { data, error } = await treaty.opengames.get();
 
     if (error !== null) {
-      throw new Error(`Error fetching open games: ${error.status} - ${error.result}`)
+      throw new Error(`Error fetching open games: ${error.status} - ${error.value}`)
     }
 
     return data as GameInfo[];
@@ -70,7 +70,7 @@ export function useJoinedGames(): GameInfo[] {
     const { data, error } = await treaty.joinedgames.get();
 
     if (error !== null) {
-      throw new Error(`Error fetching joined games: ${error.status} - ${error.result}`)
+      throw new Error(`Error fetching joined games: ${error.status} - ${error.value}`)
     }
 
     return data as GameInfo[];

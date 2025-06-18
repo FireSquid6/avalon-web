@@ -41,7 +41,7 @@ export function GameList({ games, onJoinGame }: GameListProps) {
                   <tr key={game.id}>
                     <td>
                       <span className="font-mono text-sm">
-                        {game.id.slice(0, 8)}...
+                        {game.id}
                       </span>
                     </td>
                     <td>

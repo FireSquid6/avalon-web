@@ -59,11 +59,14 @@ export const gameRoundsTable = sqliteTable("game_rounds", {
   }>(),
 });
 
-export const participationsTable = sqliteTable("participations", {
+export const chatMessages = sqliteTable("chat_messages", {
   id: text().notNull().primaryKey().unique(),
   gameId: text().notNull().references(() => gamesTable.id),
-  username: text().notNull().references(() => usersTable.username),
+  userId: text().notNull().references(() => usersTable.username),
+  sent: int({ mode: "timestamp_ms" }).notNull(),
+  content: text().notNull(),
 });
+export type Message = InferSelectModel<typeof chatMessages>;
 
 export const sessionsTable = sqliteTable("sessions", {
   token: text().notNull().primaryKey().unique(),

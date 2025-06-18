@@ -1,7 +1,7 @@
-import { eq, and, isNull } from "drizzle-orm";
+import { eq, and, or, isNull } from "drizzle-orm";
 import type { GameState, Round, Rule, Role } from "engine";
 import type { Db } from "./index";
-import { gamesTable, gamePlayersTable, gameRoundsTable, participationsTable } from "./schema";
+import { gamesTable, gamePlayersTable, gameRoundsTable } from "./schema";
 
 // Convert database records to GameState
 async function dbToGameState(db: Db, gameId: string): Promise<GameState | null> {
@@ -107,9 +107,9 @@ async function gameStateToDb(db: Db, gameState: GameState): Promise<void> {
 // Get all finished games by a certain user
 export async function getFinishedGamesByUser(db: Db, username: string): Promise<GameState[]> {
   const participations = await db
-    .select({ gameId: participationsTable.gameId })
-    .from(participationsTable)
-    .where(eq(participationsTable.username, username));
+    .select({ gameId: gamePlayersTable.gameId })
+    .from(gamePlayersTable)
+    .where(eq(gamePlayersTable.playerId, username));
   
   const gameIds = participations.map(p => p.gameId);
   if (gameIds.length === 0) return [];
@@ -137,19 +137,21 @@ export async function getFinishedGamesByUser(db: Db, username: string): Promise<
 // Get all joined games by a certain user (in-progress or waiting)
 export async function getJoinedGamesByUser(db: Db, username: string): Promise<GameState[]> {
   const participations = await db
-    .select({ gameId: participationsTable.gameId })
-    .from(participationsTable)
-    .where(eq(participationsTable.username, username));
+    .select()
+    .from(gamePlayersTable)
+    .where(eq(gamePlayersTable.playerId, username));
   
   const gameIds = participations.map(p => p.gameId);
-  if (gameIds.length === 0) return [];
 
+  console.log(gameIds)
+
+  if (gameIds.length === 0) return [];
   const games = await db
     .select()
     .from(gamesTable)
-    .where(and(
+    .where(or(
       eq(gamesTable.status, "in-progress"),
-      // Filter for joined games in application logic for now
+      eq(gamesTable.status, "waiting"),
     ));
 
   const joinedGames = games.filter(game => gameIds.includes(game.id));
@@ -164,7 +166,7 @@ export async function getJoinedGamesByUser(db: Db, username: string): Promise<Ga
 }
 
 // Get all currently waiting games without a password
-export async function getWaitingGames(db: Db, limit: number = 10): Promise<GameState[]> {
+export async function getWaitingGames(db: Db, filteredUser?: string, limit: number = 10): Promise<GameState[]> {
   const games = await db
     .select()
     .from(gamesTable)
@@ -177,7 +179,17 @@ export async function getWaitingGames(db: Db, limit: number = 10): Promise<GameS
   const results: GameState[] = [];
   for (const game of games) {
     const gameState = await dbToGameState(db, game.id);
-    if (gameState) results.push(gameState);
+
+    if (!gameState) {
+      continue;
+    }
+    const hasPlayer = gameState.players.find((p) => p.id === filteredUser) !== undefined;
+
+    if (hasPlayer) {
+      continue;
+    }
+
+    results.push(gameState);
   }
   
   return results;
@@ -186,23 +198,6 @@ export async function getWaitingGames(db: Db, limit: number = 10): Promise<GameS
 // Update a game's state
 export async function updateGameState(db: Db, gameState: GameState): Promise<void> {
   await gameStateToDb(db, gameState);
-  
-  // Update participations table if game is finished
-  if (gameState.status === "finished") {
-    // Clear existing participations
-    await db.delete(participationsTable).where(eq(participationsTable.gameId, gameState.id));
-    
-    // Add participations for all players
-    if (gameState.players.length > 0) {
-      await db.insert(participationsTable).values(
-        gameState.players.map(player => ({
-          id: `${gameState.id}-${player.id}`,
-          gameId: gameState.id,
-          username: player.id, // Assuming player.id is the username
-        }))
-      );
-    }
-  }
 }
 
 // Create a new game

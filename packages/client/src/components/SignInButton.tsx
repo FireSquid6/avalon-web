@@ -29,7 +29,7 @@ export function SignInButton() {
           </Link>
         </li>
         <li>
-          <Link to="/auth/signout" className="justify-start">
+          <Link to="/signout" className="justify-start">
             Sign Out
           </Link>
         </li>

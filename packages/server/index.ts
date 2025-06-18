@@ -2,13 +2,14 @@ import { app } from "./routes"
 import type { Config } from "./config";
 import { getConfigFromFile } from "./config";
 import { getDb } from "./db";
+import { GameObserver } from "./game";
 
 
 export function startServer(config: Config) {
   const db = getDb(config);
 
   app.store.config = config;
-  app.store.games = new Map();
+  app.store.observer = new GameObserver(db);
   app.store.listeners = new Map();
   app.store.db = db;
 

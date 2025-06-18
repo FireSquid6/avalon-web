@@ -16,7 +16,7 @@ function RouteComponent() {
 
   return (
     <GameContextProvider data={{ state, knowledge, act, viewingUser: username }}>
-      <p>{connected ? "Connected" : "Disconnected"}</p>
+      <p>{connected ? "Connected to" : "Disconnected from"} game {state.id}</p>
       <GameRender />
     </GameContextProvider>
   )

@@ -22,7 +22,7 @@ export function performStart<T extends StartAction>(inputs: ProcessInputs<T>) {
     throw new ProcessError("client", "The game master must start the game");
   }
 
-  const validated = validateRuleset(state.ruleset, state.players.length);
+  const validated = validateRuleset(state.ruleset, state.expectedPlayers);
 
   if (validated !== true) {
     throw new ProcessError("server", validated);

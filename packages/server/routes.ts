@@ -1,78 +1,31 @@
 import { z } from "zod";
 import { Elysia, t } from "elysia"
-import { ruleEnum, type GameInfo, type GameState } from "engine";
+import { ruleEnum, type GameInfo } from "engine";
 import { generateKnowledgeMap, getBlankState } from "engine/logic";
 import { gameActionSchema } from "engine/actions";
 import { processAction, ProcessError } from "engine/process";
 import { viewStateAs } from "engine/view";
-import { messageSchema, socketFailure, socketInfo, stateResponse, type SocketMessage } from "./protocol";
+import { chatResponse, messageSchema, socketFailure, socketInfo, stateResponse, type SocketMessage } from "./protocol";
 import { loggerPlugin } from "./logger";
 import type { Config } from "./config";
 import type { Db } from "./db";
-import { createSession, createUser, deleteSesssion, getProfile, getSessionWithToken, userExists, validateEmail, validatePassword, validateUsername } from "./db/auth";
+import { createSession, createUser, deleteSesssion, getSessionWithToken, userExists, validateEmail, validatePassword, validateUsername } from "./db/auth";
 import { cors } from "@elysiajs/cors";
-
-
-type GameListener = (updatedState: GameState) => void;
-
-class Game {
-  private state: GameState;
-  private listeners: GameListener[] = [];
-
-  constructor(state: GameState) {
-    this.state = state;
-  }
-
-  update(state: GameState) {
-    console.log("Updating game state...");
-    this.state = state;
-
-    for (const listener of this.listeners) {
-      console.log("Calling listener", listener);
-      listener(this.state);
-    }
-  }
-
-  subscribe(listener: GameListener): () => void {
-    console.log("Subscribing", listener);
-    this.listeners.push(listener);
-    return () => {
-      console.log("Unsubscribing", listener)
-      this.listeners = this.listeners.filter((l) => l !== listener);
-    }
-  }
-
-  unsubscribe(listener: GameListener) {
-    this.listeners = this.listeners.filter((l) => l !== listener);
-  }
-
-  peek(): GameState {
-    return this.state;
-  }
-
-  getInfo(): GameInfo {
-    return {
-      id: this.state.id,
-      requiresPassword: this.state.password !== undefined,
-      status: this.state.status,
-      gameMaster: this.state.gameMaster,
-      currentPlayers: this.state.players.length,
-      maxPlayers: this.state.expectedPlayers,
-      ruleset: this.state.ruleset,
-    }
-
-  }
-}
+import { getProfile } from "./db/profile";
+import { GameObserver } from "./game";
+import { createGame, getJoinedGamesByUser, getWaitingGames } from "./db/game";
+import type { GameListener } from "./game";
+import { createMessage, lastNMessages } from "./db/chat";
 
 // TODO - rate limit
 export const app = new Elysia()
   .use(loggerPlugin)
   .use(cors())
-  .state("games", new Map<string, Game>())
+  .state("observer", {} as GameObserver)
   .state("listeners", new Map<string, GameListener>())
   .state("config", {} as Config)
   .state("db", {} as Db)
-  .derive(({ cookie: { auth }, set, store: { db, games } }) => {
+  .derive(({ cookie: { auth }, set, store: { db, observer } }) => {
     const forceAuthenticated = async () => {
       if (!auth) {
         set.status = 401;
@@ -110,14 +63,14 @@ export const app = new Elysia()
     }
     const forceInGame = async (gameId: string) => {
       const { user, session } = await forceAuthenticated();
-      const game = games.get(gameId);
+      const state = await observer.peek(gameId);
 
-      if (!game) {
+      if (!state) {
         set.status = 404;
         throw new Error("Game does not exist");
       }
 
-      if (game.peek().players.find((u) => u.id === user.username) === undefined) {
+      if (state.players.find((u) => u.id === user.username) === undefined) {
         set.status = 401;
         throw new Error("You must be in this game to perform that action");
       }
@@ -125,7 +78,7 @@ export const app = new Elysia()
       return {
         user,
         session,
-        game,
+        state,
       }
     }
     const validateMessage = async (message: SocketMessage): Promise<string | true> => {
@@ -154,19 +107,28 @@ export const app = new Elysia()
     }
 
   })
-  .post("/games/:id/motion", (ctx) => {
-    return ctx.status("Not Implemented");
-    // perform chat and highlights
+  .post("/games/:id/chat", async ({ forceInGame, store: { db, observer }, status, params, body: { message } }) => {
+    const { user } = await forceInGame(params.id);
+
+    if (message.length > 1000) {
+      return status(400, "Messages must be less than 1000 characters long");
+    }
+
+    const msg = await createMessage(db, params.id, user.username, message);
+    await observer.chat(params.id, msg);
+  }, {
+    body: t.Object({
+      message: t.String(),
+    })
   })
-  // kinda a diabolical one liner if I do say so myself
-  // unreadable though. It does what you think it would
-  .get("/opengames", async ({ getAuthStatus, store: { games } }) => {
+  .get("/games/:id/chat", async ({ store: { db }, params }) => {
+    return await lastNMessages(db, params.id);
+  })
+  .get("/opengames", async ({ getAuthStatus, store: { db } }) => {
     const auth = await getAuthStatus();
-    const openGames = games.values().toArray()
-      .map((g) => g.peek())
-      .filter((g) => g.status === "waiting"
-        && g.players.find(({ id }) => id === auth?.user.username) === undefined
-      );
+    const username = auth?.user.username;
+    const openGames = await getWaitingGames(db, username, 50);
+
 
     const gameInfo = openGames.map((g): GameInfo => {
       return {
@@ -182,12 +144,10 @@ export const app = new Elysia()
 
     return gameInfo
   })
-  .get("/joinedgames", async ({ forceAuthenticated, store: { games } }) => {
+  .get("/joinedgames", async ({ forceAuthenticated, store: { db } }) => {
     const { user } = await forceAuthenticated();
 
-    const joinedGames = games.values().toArray()
-      .map((g) => g.peek())
-      .filter((g) => g.players.find(({ id }) => id === user.username) !== undefined)
+    const joinedGames = await getJoinedGamesByUser(db, user.username);
 
     const gameInfo = joinedGames.map((g): GameInfo => {
       return {
@@ -216,7 +176,7 @@ export const app = new Elysia()
     });
     state.tableOrder.push(user.username);
 
-    store.games.set(gameId, new Game(state));
+    await createGame(store.db, state);
 
     set.status = 200;
     return gameId;
@@ -228,17 +188,15 @@ export const app = new Elysia()
       password: t.Optional(t.String()),
     }),
   })
-  .post("/games/:id/join", async ({ params, store: { games }, body, status, forceAuthenticated }) => {
+  .post("/games/:id/join", async ({ params, store: { observer }, body, status, forceAuthenticated }) => {
     const { user } = await forceAuthenticated();
-    const game = games.get(params.id);
+    const state = await observer.peek(params.id);
     const password = body?.password ?? "";
     // TODO: block join if game is full
 
-    if (game === undefined) {
+    if (state === null) {
       return status("Not Found")
     }
-
-    const state = game.peek();
 
     if (state.status !== "waiting") {
       return status("Bad Request", "Game has already started");
@@ -261,7 +219,7 @@ export const app = new Elysia()
       id: user.username,
     });
     state.tableOrder.push(user.username);
-    game.update(state);
+    observer.update(state);
 
     const view = viewStateAs(state, user.username);
     const knowledgeMap = generateKnowledgeMap(state);
@@ -275,10 +233,8 @@ export const app = new Elysia()
       password: t.String(),
     }))
   })
-  .post("/games/:id/act", async ({ params, body, status, forceInGame }) => {
-    const { user, game } = await forceInGame(params.id);
-
-    const state = game.peek();
+  .post("/games/:id/act", async ({ params, store: { observer }, body, status, forceInGame }) => {
+    const { user, state } = await forceInGame(params.id);
 
     const { data: action, error, success } = gameActionSchema.safeParse(body.action);
 
@@ -300,25 +256,30 @@ export const app = new Elysia()
       }
     }
 
-    game.update(result);
+    observer.update(state);
   }, {
     body: t.Object({
       action: t.Any(),
     }),
   })
-  .get("/games/:id/state", async ({ forceInGame, params }) => {
-    const { user, game } = await forceInGame(params.id);
+  .get("/games/:id/state", async ({ getAuthStatus, store: { observer }, status, params }) => {
+    const auth = await getAuthStatus();
+    const username = auth?.user.username ?? "anonymous-spectator";
+    const state = await observer.peek(params.id);
 
-    const state = game.peek();
+    if (!state) {
+      return status(404, "Game not found");
+    }
+
     const knowledgeMap = generateKnowledgeMap(state);
 
     // we return an "incomplete" version of the state
     // that hides roles and incomplete votes
-    const view = viewStateAs(state, user.username);
+    const view = viewStateAs(state, username);
 
     return {
       state: view,
-      knowledge: knowledgeMap[user.username] ?? [],
+      knowledge: knowledgeMap[username] ?? [],
     }
   })
   .ws("/socket", {
@@ -326,10 +287,10 @@ export const app = new Elysia()
     open(ws) {
       console.log("New connecition:", ws.id);
     },
-    message(ws, rawMessage) {
+    async message(ws, rawMessage) {
       try {
-        const games = ws.data.store.games;
         const listeners = ws.data.store.listeners;
+        const observer = ws.data.store.observer;
 
         const message = messageSchema.parse(rawMessage);
         console.log("Recieved", message);
@@ -341,32 +302,40 @@ export const app = new Elysia()
         }
 
         const isSubscribed = listeners.has(ws.id);
-        const game = games.get(message.gameId);
+        const state = await observer.peek(message.gameId);
 
-        if (game === undefined) {
+        if (state === undefined) {
           ws.send(socketFailure(`Game ${message.gameId} not found`));
           return;
         }
 
 
         if (message.action === "subscribe" && !isSubscribed) {
-          const listener: GameListener = (state) => {
-            const view = viewStateAs(state, message.playerId);
-            const knowledgeMap = generateKnowledgeMap(state);
+          const listener: GameListener = (e) => {
 
-            const knowledge = knowledgeMap[message.playerId] ?? [];
+            switch (e.type) {
+              case "state":
+                const state = e.state;
+                const view = viewStateAs(state, message.playerId);
+                const knowledgeMap = generateKnowledgeMap(state);
 
-            console.log("Sending new state...");
-            ws.send(stateResponse(view, knowledge));
+                const knowledge = knowledgeMap[message.playerId] ?? [];
+
+                console.log("Sending new state...");
+                ws.send(stateResponse(view, knowledge));
+                break;
+              case "message":
+                ws.send(chatResponse(e.newMessage));
+            }
           }
 
-          game.subscribe(listener);
+          observer.subscribe(message.gameId, listener);
           listeners.set(ws.id, listener);
           ws.send(socketInfo(`Subscribed to ${message.gameId}`))
         } else if (message.action === "unsubscribe" && isSubscribed) {
           const listener = listeners.get(ws.id)!;
 
-          game.unsubscribe(listener);
+          observer.unsubscribe(message.gameId, listener);
           listeners.delete(ws.id);
 
           ws.send(socketInfo(`Unsubscribed from ${message.gameId}`))
@@ -379,15 +348,12 @@ export const app = new Elysia()
     },
     close(ws) {
       console.log("Closed connecition:", ws.id);
-      const games = ws.data.store.games;
       const listeners = ws.data.store.listeners;
+      const observer = ws.data.store.observer;
 
       if (listeners.has(ws.id)) {
         const listener = listeners.get(ws.id)!;
-
-        games.forEach((game) => {
-          game.unsubscribe(listener);
-        });
+        observer.unsubscribeFromAll(listener);
       }
     },
   })

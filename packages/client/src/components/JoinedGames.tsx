@@ -33,7 +33,7 @@ export function JoinedGames() {
                   <tr key={game.id}>
                     <td>
                       <span className="font-mono text-sm">
-                        {game.id.slice(0, 8)}...
+                        {game.id}
                       </span>
                     </td>
                     <td>
@@ -76,7 +76,7 @@ export function JoinedGames() {
                         params={{ gameId: game.id }}
                         className="btn btn-primary btn-sm"
                       >
-                        {game.status === 'waiting' ? 'Join' : 'Rejoin'}
+                        Rejoin
                       </Link>
                     </td>
                   </tr>

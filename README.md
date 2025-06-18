@@ -20,8 +20,7 @@ This project was created using `bun init` in bun v1.2.13. [Bun](https://bun.sh) 
 - [ ] sign out
 - [ ] editable profiles
 - [ ] game database search
-- [ ] delete a game
 - [ ] add ability to delete the game
 - [ ] better game ui
-- [ ] store games on the database
+- [x] store games on the database
 - [ ] in-game chat system
