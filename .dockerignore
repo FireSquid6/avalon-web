@@ -211,5 +211,5 @@ packages/server/**/.idea
 # Finder (MacOS) folder config
 packages/server/**/.DS_Store
 
-packages/server/**/drizzle
+packages/server/**/drizzle/local
 fly.toml
