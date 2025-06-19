@@ -91,6 +91,8 @@ function RouteComponent() {
       state: view,
       knowledge: knowledge,
       viewingUser,
+      chat: () => {},
+      messages: [],
       act,
     }}>
       <Modal
