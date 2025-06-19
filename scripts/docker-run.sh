@@ -5,6 +5,5 @@ cd .. || exit
 
 docker run \
      -p 4320:4320 \
-     -v "$(pwd)"/app_data:/data \
-     -e CONFIG_FILE_PATH=/data/avalon-config.yaml \
+     -e CONFIG_FILE_PATH=./app_data/avalon-config.yaml \
      firesquid/avalon:latest
