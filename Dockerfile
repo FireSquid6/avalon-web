@@ -2,9 +2,6 @@
 # see all versions at https://hub.docker.com/r/oven/bun/tags
 FROM oven/bun:1 AS base
 
-# setup essential packages
-RUN apt-get update && apt-get install -y python3 python-is-python3 build-essential
-
 # setup app
 RUN mkdir -p /codebase
 COPY . /codebase
