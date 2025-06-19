@@ -1,5 +1,6 @@
 import Cookies from "js-cookie";
 import { treaty } from "./treaty";
+import { getAuthState } from "./hooks";
 
 export async function createUser(username: string, email: string, password: string): Promise<Error | "OK"> {
   const { error } = await treaty.users.post({
@@ -28,6 +29,26 @@ export async function login(email: string, password: string): Promise<Error | "O
 
   return "OK"
 
+}
+
+export async function logout(): Promise<Error | "OK"> {
+  const state = getAuthState();
+
+  // we're already logged out (this is necessary to ensure idempotency)
+  if (state.type === "unauthenticated") {
+    return "OK";
+  }
+
+  const { error } = await treaty.signout.post();
+
+  if (error !== null) {
+    return new Error(`Error signing out: ${error.status} - ${error.value}`);
+  }
+
+  Cookies.remove("username");
+  Cookies.remove("auth");
+
+  return "OK";
 }
 
 export function getAuthToken(): string | undefined {

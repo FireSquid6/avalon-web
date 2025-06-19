@@ -36,19 +36,19 @@ export const app = new Elysia()
 
       if (!token) {
         set.status = 401;
-        throw new Error("No token in cookie");
+        throw new Error("Not signed in. (No token in cookie)");
       }
 
       const session = await getSessionWithToken(db, token);
 
       if (!session) {
         set.status = 401;
-        throw new Error("Token doesn't represent a valid session");
+        throw new Error("Not signed in. (Token doesn't represent a valid session)");
       }
 
       if (session.session.expiresAt <= new Date()) {
         set.status = 401;
-        throw new Error("Token is expired");
+        throw new Error("Not signed in. (Token is expired)");
       }
 
       return session;
@@ -147,10 +147,10 @@ export const app = new Elysia()
 
     return gameInfo
   })
-  .get("/joinedgames", async ({ forceAuthenticated, store: { db } }) => {
-    const { user } = await forceAuthenticated();
+  .get("/joinedgames", async ({ getAuthStatus, store: { db } }) => {
+    const username = (await getAuthStatus())?.user.username ?? "anonymous-spectator";
 
-    const joinedGames = await getJoinedGamesByUser(db, user.username);
+    const joinedGames = await getJoinedGamesByUser(db, username);
 
     const gameInfo = joinedGames.map((g): GameInfo => {
       return {

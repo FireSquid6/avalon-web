@@ -2,9 +2,9 @@ import { Link } from "@tanstack/react-router";
 import { useAuth } from "../lib/hooks";
 
 export function SignInButton() {
-  const authState = useAuth();
+  const { state } = useAuth();
 
-  if (authState.type === "unauthenticated") {
+  if (state.type === "unauthenticated") {
     return (
       <Link to="/auth" className="btn btn-primary">
         Sign In
@@ -15,7 +15,7 @@ export function SignInButton() {
   return (
     <div className="dropdown dropdown-end">
       <div tabIndex={0} role="button" className="btn btn-primary">
-        {authState.username}
+        {state.username}
       </div>
       <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
         <li>

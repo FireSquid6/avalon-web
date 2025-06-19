@@ -4,9 +4,10 @@ import type { GameInfo } from "engine";
 import useSWR from "swr";
 import { usePushError } from "./errors";
 import { treaty } from "./treaty";
-import { client, type GameClient, type GameData } from "./game";
+import { client, type GameData } from "./game";
 import type { GameAction } from "engine/actions";
 import type { Message } from "server/db/schema";
+import { useRouter } from "@tanstack/react-router";
 
 export interface AuthenticatedState {
   type: "authenticated";
@@ -31,15 +32,33 @@ export function getAuthState(): AuthState {
   }
 }
 
+// we have to manually use "mutate" after we mutate the auth
+// status to let it know that something changed. This is kinda
+// terrible but not that big of a deal.
 export function useAuth() {
   const [state, setState] = useState<AuthState>(getAuthState());
+  const router = useRouter();
+
+  const fn = () => {
+    const state = getAuthState();
+    setState(state);
+  }
+
 
   useEffect(() => {
-    setState(getAuthState());
+    fn();
+    const unsubscribe = router.subscribe("onBeforeLoad", () => {
+      fn();
+    });
 
-  }, [])
+    return unsubscribe;
+  }, [router])
 
-  return state;
+  const mutate = () => {
+    fn();
+  }
+
+  return { state, mutate };
 
 }
 

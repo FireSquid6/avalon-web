@@ -16,11 +16,17 @@ This project was created using `bun init` in bun v1.2.13. [Bun](https://bun.sh) 
 
 
 # TODO
+## Version One
 - [x] better id generation
 - [ ] sign out
-- [ ] editable profiles
-- [ ] game database search
+- [ ] rules page
 - [ ] add ability to delete the game
-- [ ] better game ui
 - [x] store games on the database
-- [ ] in-game chat system
+- [x] in-game chat system
+
+## Version Two
+- [ ] 2FA
+- [ ] password reset
+- [ ] game database search
+- [ ] better game ui
+- [ ] editable profiles

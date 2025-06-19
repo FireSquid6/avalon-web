@@ -8,11 +8,8 @@ export function Header() {
         <Link to="/" className="btn btn-ghost text-xl font-bold">
           Play 
         </Link>
-        <Link to="/" className="btn btn-ghost text-xl font-bold">
-          Game Database
-        </Link>
-        <Link to="/" className="btn btn-ghost text-xl font-bold">
-          Profiles
+        <Link to="/rules" className="btn btn-ghost text-xl font-bold">
+          Rules
         </Link>
       </div>
       <div className="navbar-end">

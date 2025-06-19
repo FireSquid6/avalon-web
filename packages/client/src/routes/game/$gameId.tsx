@@ -9,7 +9,7 @@ export const Route = createFileRoute("/game/$gameId")({
 
 function RouteComponent() {
   const { gameId } = Route.useParams();
-  const auth = useAuth();
+  const { state: auth } = useAuth();
 
   const username = auth.type === "authenticated" ? auth.username : "anonymous-user";
   const { data: { state, knowledge }, act, connected, messages, chat }  = useGameSubscription(gameId);

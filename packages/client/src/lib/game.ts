@@ -136,6 +136,8 @@ export class GameClient {
 
     //@ts-ignore
     this.chats[gameId] = data;
+    this.chats[gameId].sort((a, b) => a.sent > b.sent ? 1 : -1);
+    this.dispatch({ type: "chat", chats: this.chats[gameId] })
   }
 
   async waitForConnection(): Promise<void> {
@@ -168,6 +170,8 @@ export class GameClient {
       await this.waitForConnection();
       console.log("Subscribing to the game...");
       await this.pullChatMessages(gameId);
+
+
 
       this.socket.send(makeMessage({
         playerId: this.username,

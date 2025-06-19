@@ -3,3 +3,27 @@
   themes: dark --default;
 }
 
+article h1 {
+  @apply text-4xl mb-12 mt-12
+}
+
+article h2 {
+  @apply text-3xl mb-8 mt-8
+}
+
+article h3 {
+  @apply text-2xl mb-4 mt-4
+}
+
+
+article p {
+  @apply text-lg my-4
+}
+
+article ul {
+  @apply list-disc ml-5 text-lg
+}
+
+article ol {
+  @apply list-decimal ml-5 text-lg
+}
