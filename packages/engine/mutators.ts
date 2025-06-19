@@ -258,7 +258,6 @@ export function performRulesetModification(inputs: ProcessInputs<RulesetModifiac
 
 // this is about stopping an avalon game not killing fetuses btw
 export function performAbortion(inputs: ProcessInputs<AbortGameAction>) {
-  console.log("Doing an abortion");
   const { state, actorId } = inputs;
 
   if (actorId !== state.gameMaster) {

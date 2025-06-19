@@ -6,5 +6,6 @@ const configFilepath = process.env.CONFIG_FILE_PATH ?? path.join(import.meta.dir
 
 console.log("Loading config from", configFilepath);
 const config = getConfigFromFile(configFilepath);
+console.log("Connecting to database:", config.databasePath);
 
 startServer(config);

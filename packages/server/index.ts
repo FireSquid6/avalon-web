@@ -13,8 +13,8 @@ export function startServer(config: Config) {
   app.store.listeners = new Map();
   app.store.db = db;
 
-  app.listen(4320, () => {
-    console.log("Server started on port 4320");
+  app.listen(config.port, () => {
+    console.log(`Server started on port ${config.port}`);
   });
 }
 

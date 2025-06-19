@@ -143,8 +143,6 @@ export async function getJoinedGamesByUser(db: Db, username: string): Promise<Ga
   
   const gameIds = participations.map(p => p.gameId);
 
-  console.log(gameIds)
-
   if (gameIds.length === 0) return [];
   const games = await db
     .select()
