@@ -22,8 +22,5 @@ primary_region = 'dfw'
   cpus = 1
 
 [env]
-  CONFIG_FILE_PATH = "/data/avalon-config.yaml"
+  CONFIG_FILE_PATH = "app_data/avalon-config.yaml"
 
-[mounts]
-  source = "app_data"
-  destination = "/data"
