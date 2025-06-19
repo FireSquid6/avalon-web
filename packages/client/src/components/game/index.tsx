@@ -234,7 +234,7 @@ function getAvailableActions(state: GameState, knowledge: Knowledge[], id: strin
     actions.push("assassinate");
   }
 
-  if (state.gameMaster === id && status === "waiting") {
+  if (state.gameMaster === id && state.status === "waiting") {
     actions.push("abort");
   }
 

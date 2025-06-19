@@ -12,11 +12,11 @@ export function AbortGame({ onAction, disabled = false }: AbortGameProps) {
 
   return (
     <button
-      className="btn btn-success"
+      className="btn btn-error"
       onClick={handleStart}
       disabled={disabled}
     >
-      Start Game
+      Abort Game
     </button>
   );
 }
