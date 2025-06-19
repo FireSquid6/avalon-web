@@ -2,6 +2,8 @@ import { z } from "zod";
 import YAML from "yaml";
 import fs from "fs";
 
+// TODO - add ability to load fromm environment variables and use that
+
 export const configSchema = z.object({
   port: z.optional(z.number()),
   dbType: z.optional(z.enum(["local", "remote"])),
@@ -24,6 +26,18 @@ export function getConfigFromFile(filepath?: string): Config {
   }
 
   return getConfigFromPartial(partialConfig);
+}
+
+export function getPartialFromEnv(): PartialConfig {
+  const port = process.env.AVALON_PORT ? parseInt(process.env.AVALON_PORT) : undefined;
+
+  return {
+    port,
+    dbType: process.env.AVALON_DB_TYPE === "remote" ? "remote" : "local" ,
+    databasePath: process.env.AVALON_DB_PATH,
+    databaseToken: process.env.DATABASE_TOKEN,
+  }
+
 }
 
 export function getConfigFromPartial(p: PartialConfig): Config {

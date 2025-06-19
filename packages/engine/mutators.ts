@@ -54,7 +54,6 @@ export function performStart(inputs: ProcessInputs<StartAction>) {
     state.ladyHolder = state.tableOrder[state.tableOrder.length - 1];
   }
 
-  // TODO: add the first round
   newRound(state);
 }
 
