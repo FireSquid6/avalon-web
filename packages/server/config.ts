@@ -4,7 +4,9 @@ import fs from "fs";
 
 export const configSchema = z.object({
   port: z.optional(z.number()),
+  dbType: z.optional(z.enum(["local", "remote"])),
   databasePath: z.optional(z.string()),
+  databaseToken: z.optional(z.string()),
 });
 
 export type PartialConfig = z.infer<typeof configSchema>;
@@ -28,5 +30,7 @@ export function getConfigFromPartial(p: PartialConfig): Config {
   return {
     port: p.port ?? 7890,
     databasePath: p.databasePath ?? ":memory:",
+    databaseToken: p.databaseToken ?? "",
+    dbType: p.dbType ?? "local",
   }
 }

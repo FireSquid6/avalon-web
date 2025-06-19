@@ -1,0 +1,215 @@
+# flyctl launch added from .gitignore
+**/.envrc
+**/.direnv
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+node_modules
+.pnp
+**/.pnp.*
+**/.yarn/*
+!**/.yarn/patches
+!**/.yarn/plugins
+!**/.yarn/releases
+!**/.yarn/versions
+
+# testing
+coverage
+
+# next.js
+.next
+out
+
+# production
+build
+
+# misc
+**/.DS_Store
+**/*.pem
+
+# debug
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+**/.env*
+
+# vercel
+**/.vercel
+
+# typescript
+**/*.tsbuildinfo
+**/next-env.d.ts
+
+**/frontend-build
+**/server-build
+
+**/*.gen.ts
+
+**/development-server-store
+
+# flyctl launch added from node_modules/secp256k1/src/secp256k1/.gitignore
+node_modules/secp256k1/src/secp256k1/**/bench_inv
+node_modules/secp256k1/src/secp256k1/**/bench_ecdh
+node_modules/secp256k1/src/secp256k1/**/bench_ecmult
+node_modules/secp256k1/src/secp256k1/**/bench_sign
+node_modules/secp256k1/src/secp256k1/**/bench_verify
+node_modules/secp256k1/src/secp256k1/**/bench_schnorr_verify
+node_modules/secp256k1/src/secp256k1/**/bench_recover
+node_modules/secp256k1/src/secp256k1/**/bench_internal
+node_modules/secp256k1/src/secp256k1/**/tests
+node_modules/secp256k1/src/secp256k1/**/exhaustive_tests
+node_modules/secp256k1/src/secp256k1/**/gen_context
+node_modules/secp256k1/src/secp256k1/**/*.exe
+node_modules/secp256k1/src/secp256k1/**/*.so
+node_modules/secp256k1/src/secp256k1/**/*.a
+!node_modules/secp256k1/src/secp256k1/**/.gitignore
+
+node_modules/secp256k1/src/secp256k1/**/Makefile
+node_modules/secp256k1/src/secp256k1/**/configure
+node_modules/secp256k1/src/secp256k1/**/.libs
+node_modules/secp256k1/src/secp256k1/**/Makefile.in
+node_modules/secp256k1/src/secp256k1/**/aclocal.m4
+node_modules/secp256k1/src/secp256k1/**/autom4te.cache
+node_modules/secp256k1/src/secp256k1/**/config.log
+node_modules/secp256k1/src/secp256k1/**/config.status
+node_modules/secp256k1/src/secp256k1/**/*.tar.gz
+node_modules/secp256k1/src/secp256k1/**/*.la
+node_modules/secp256k1/src/secp256k1/**/libtool
+node_modules/secp256k1/src/secp256k1/**/.deps
+node_modules/secp256k1/src/secp256k1/**/.dirstamp
+node_modules/secp256k1/src/secp256k1/**/*.lo
+node_modules/secp256k1/src/secp256k1/**/*.o
+node_modules/secp256k1/src/secp256k1/**/*~
+node_modules/secp256k1/src/secp256k1/**/src/libsecp256k1-config.h
+node_modules/secp256k1/src/secp256k1/**/src/libsecp256k1-config.h.in
+node_modules/secp256k1/src/secp256k1/**/src/ecmult_static_context.h
+node_modules/secp256k1/src/secp256k1/**/build-aux/config.guess
+node_modules/secp256k1/src/secp256k1/**/build-aux/config.sub
+node_modules/secp256k1/src/secp256k1/**/build-aux/depcomp
+node_modules/secp256k1/src/secp256k1/**/build-aux/install-sh
+node_modules/secp256k1/src/secp256k1/**/build-aux/ltmain.sh
+node_modules/secp256k1/src/secp256k1/**/build-aux/m4/libtool.m4
+node_modules/secp256k1/src/secp256k1/**/build-aux/m4/lt~obsolete.m4
+node_modules/secp256k1/src/secp256k1/**/build-aux/m4/ltoptions.m4
+node_modules/secp256k1/src/secp256k1/**/build-aux/m4/ltsugar.m4
+node_modules/secp256k1/src/secp256k1/**/build-aux/m4/ltversion.m4
+node_modules/secp256k1/src/secp256k1/**/build-aux/missing
+node_modules/secp256k1/src/secp256k1/**/build-aux/compile
+node_modules/secp256k1/src/secp256k1/**/build-aux/test-driver
+node_modules/secp256k1/src/secp256k1/**/src/stamp-h1
+node_modules/secp256k1/src/secp256k1/**/libsecp256k1.pc
+
+# flyctl launch added from node_modules/websocket/.gitignore
+node_modules/websocket/**/node_modules
+node_modules/websocket/**/.DS_Store
+node_modules/websocket/**/.lock-*
+node_modules/websocket/**/build
+node_modules/websocket/**/build/*
+node_modules/websocket/**/builderror.log
+node_modules/websocket/**/npm-debug.log
+node_modules/websocket/**/test/autobahn/reports*/*
+node_modules/websocket/**/test/scripts/heapdump/*
+
+# flyctl launch added from packages/client/.gitignore
+# Logs
+packages/client/**/logs
+packages/client/**/*.log
+packages/client/**/npm-debug.log*
+packages/client/**/yarn-debug.log*
+packages/client/**/yarn-error.log*
+packages/client/**/pnpm-debug.log*
+packages/client/**/lerna-debug.log*
+
+packages/client/**/node_modules
+packages/client/**/dist
+packages/client/**/dist-ssr
+packages/client/**/*.local
+
+# Editor directories and files
+packages/client/**/.vscode/*
+!packages/client/**/.vscode/extensions.json
+packages/client/**/.idea
+packages/client/**/.DS_Store
+packages/client/**/*.suo
+packages/client/**/*.ntvs*
+packages/client/**/*.njsproj
+packages/client/**/*.sln
+packages/client/**/*.sw?
+
+# flyctl launch added from packages/engine/.gitignore
+# dependencies (bun install)
+packages/engine/**/node_modules
+
+# output
+packages/engine/**/out
+packages/engine/**/dist
+packages/engine/**/*.tgz
+
+# code coverage
+packages/engine/**/coverage
+packages/engine/**/*.lcov
+
+# logs
+packages/engine/**/logs
+packages/engine/**/_.log
+packages/engine/**/report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
+
+# dotenv environment variable files
+packages/engine/**/.env
+packages/engine/**/.env.development.local
+packages/engine/**/.env.test.local
+packages/engine/**/.env.production.local
+packages/engine/**/.env.local
+
+# caches
+packages/engine/**/.eslintcache
+packages/engine/**/.cache
+packages/engine/**/*.tsbuildinfo
+
+# IntelliJ based IDEs
+packages/engine/**/.idea
+
+# Finder (MacOS) folder config
+packages/engine/**/.DS_Store
+
+# flyctl launch added from packages/server/.gitignore
+# dependencies (bun install)
+packages/server/**/node_modules
+
+# output
+packages/server/**/out
+packages/server/**/dist
+packages/server/**/*.tgz
+
+# code coverage
+packages/server/**/coverage
+packages/server/**/*.lcov
+
+# logs
+packages/server/**/logs
+packages/server/**/_.log
+packages/server/**/report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
+
+# dotenv environment variable files
+packages/server/**/.env
+packages/server/**/.env.development.local
+packages/server/**/.env.test.local
+packages/server/**/.env.production.local
+packages/server/**/.env.local
+
+# caches
+packages/server/**/.eslintcache
+packages/server/**/.cache
+packages/server/**/*.tsbuildinfo
+
+# IntelliJ based IDEs
+packages/server/**/.idea
+
+# Finder (MacOS) folder config
+packages/server/**/.DS_Store
+
+packages/server/**/drizzle
+fly.toml
