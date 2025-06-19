@@ -96,8 +96,6 @@ export function processAction<T extends GameAction>(inputs: ProcessInputs<T>): P
         throw new Error("Bad action: ", action);
     }
 
-    console.log("New state:");
-    console.log(state);
     return state;
   } catch (e) {
     if (e instanceof ProcessError) {

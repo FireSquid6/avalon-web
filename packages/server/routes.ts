@@ -259,7 +259,7 @@ export const app = new Elysia()
       }
     }
 
-    observer.update(state);
+    observer.update(result);
   }, {
     body: t.Object({
       action: t.Any(),
