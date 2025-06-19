@@ -18,7 +18,7 @@ This project was created using `bun init` in bun v1.2.13. [Bun](https://bun.sh) 
 # TODO
 ## Version One
 - [x] better id generation
-- [ ] sign out
+- [x] sign out
 - [ ] rules page
 - [ ] add ability to delete the game
 - [x] store games on the database
