@@ -25,8 +25,12 @@ This project was created using `bun init` in bun v1.2.13. [Bun](https://bun.sh) 
 - [x] in-game chat system
 
 ## Version Two
-- [ ] 2FA
-- [ ] password reset
-- [ ] game database search
-- [ ] better game ui
-- [ ] editable profiles
+- Game
+    - [ ] timer
+    - [ ] better game ui
+- Authentication
+    - [ ] 2FA
+    - [ ] password reset
+- Community
+    - [ ] game database search
+    - [ ] editable profiles

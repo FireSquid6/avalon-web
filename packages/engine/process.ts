@@ -1,6 +1,6 @@
 import type { GameState } from ".";
 import type { GameAction } from "./actions";
-import { performAssassination, performLady, performNominate, performQuest, performRulesetModification, performStart, performVote } from "./mutators";
+import { performAbortion, performAssassination, performLady, performNominate, performQuest, performRulesetModification, performStart, performVote } from "./mutators";
 
 export class ProcessError {
   reason: string | Error;
@@ -41,49 +41,56 @@ export function processAction<T extends GameAction>(inputs: ProcessInputs<T>): P
           state,
           action,
           actorId,
-        })
+        });
         break;
       case "lady":
         performLady({
           state,
           action,
           actorId,
-        })
+        });
         break;
       case "quest":
         performQuest({
           state,
           action,
           actorId,
-        })
+        });
         break;
       case "start":
         performStart({
           state,
           action,
           actorId,
-        })
+        });
         break;
       case "nominate":
         performNominate({
           state,
           action,
           actorId,
-        })
+        });
         break;
       case "assassinate":
         performAssassination({
           state,
           action,
           actorId,
-        })
+        });
         break;
       case "ruleset":
         performRulesetModification({
           state,
           action,
           actorId,
-        })
+        });
+        break;
+      case "abort":
+        performAbortion({
+          state,
+          action,
+          actorId,
+        });
         break;
       default:
         throw new Error("Bad action: ", action);

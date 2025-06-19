@@ -74,7 +74,7 @@ export const gameStateSchema = z.object({
   // Mordredic Victory - three quest fails
   // Asassination - Successful mid-round assassination
   // Deadlock - too many failed votes
-  result: z.optional(z.enum(["Arthurian Victory", "Mordredic Victory", "Assassination", "Deadlock"])),
+  result: z.optional(z.enum(["Arthurian Victory", "Mordredic Victory", "Assassination", "Deadlock", "Aborted"])),
 
   // hidden roles are not provided to the client unless the game is over
   hiddenRoles: z.record(z.string(), roleEnum),

@@ -49,8 +49,13 @@ export const rulesetModification = z.object({
   kind: z.literal("ruleset"),
   ruleset: z.array(ruleEnum),
   maxPlayers: z.number(),
-})
+});
 export type RulesetModifiaction = z.infer<typeof rulesetModification>;
+
+export const abortGameAction = z.object({
+  kind: z.literal("abort"),
+});
+export type AbortGameAction = z.infer<typeof abortGameAction>;
 
 export const gameActionSchema = z.discriminatedUnion("kind", [
   voteActionSchema,
@@ -60,6 +65,7 @@ export const gameActionSchema = z.discriminatedUnion("kind", [
   assassinateActionSchema,
   startActionSchema,
   rulesetModification,
+  abortGameAction,
 ]);
 
 export type GameAction = z.infer<typeof gameActionSchema>;

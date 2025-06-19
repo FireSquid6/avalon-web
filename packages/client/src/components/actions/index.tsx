@@ -7,6 +7,7 @@ import { LadyActionComponent } from "./LadyAction";
 import { AssassinateActionComponent } from "./AssassinateAction";
 import { StartActionComponent } from "./StartAction";
 import { RulesetModificationActionComponent } from "./RulesetModificationAction";
+import { AbortGame }  from "./AbortAction";
 
 interface ActionRendererProps {
   availableActions: string[];
@@ -96,6 +97,14 @@ export function ActionRenderer({
                 disabled={disabled}
               />
             );
+          case "abort":
+            return (
+              <AbortGame
+                key={action}
+                onAction={onAction}
+                disabled={disabled}
+              />
+            )
           default:
             return null;
         }

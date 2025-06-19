@@ -1,6 +1,6 @@
 // all mutators take in a ProcessInputs object and can mutate it
 // they can also at any time throw an error
-import type { AssassinationAction, LadyAction, NominateAction, QuestAction, RulesetModifiaction, StartAction, VoteAction } from "./actions";
+import type { AbortGameAction, AssassinationAction, LadyAction, NominateAction, QuestAction, RulesetModifiaction, StartAction, VoteAction } from "./actions";
 import { getRolesForRuleset, validateRuleset, rulesetHas, getNextIntendedAction, newRound, getQuestInformation, getFailedVotes, getScore, shuffleArray } from "./logic";
 import { ProcessError, type ProcessInputs } from "./process";
 
@@ -15,7 +15,7 @@ import { ProcessError, type ProcessInputs } from "./process";
 // -      types so that validation can be done without performing actions
 
 
-export function performStart<T extends StartAction>(inputs: ProcessInputs<T>) {
+export function performStart(inputs: ProcessInputs<StartAction>) {
   const { state, actorId } = inputs;
 
   if (state.gameMaster !== actorId) {
@@ -58,7 +58,7 @@ export function performStart<T extends StartAction>(inputs: ProcessInputs<T>) {
   newRound(state);
 }
 
-export function performNominate<T extends NominateAction>(inputs: ProcessInputs<T>) {
+export function performNominate(inputs: ProcessInputs<NominateAction>) {
   const { state, action, actorId } = inputs;
   const intendedAction = getNextIntendedAction(state);
 
@@ -82,7 +82,7 @@ export function performNominate<T extends NominateAction>(inputs: ProcessInputs<
   round.nominatedPlayers = action.playerIds;
 }
 
-export function performVote<T extends VoteAction>(inputs: ProcessInputs<T>) {
+export function performVote(inputs: ProcessInputs<VoteAction>) {
   const { state, action, actorId } = inputs;
   const intendedAction = getNextIntendedAction(state)
 
@@ -131,7 +131,7 @@ export function performVote<T extends VoteAction>(inputs: ProcessInputs<T>) {
   }
 }
 
-export function performQuest<T extends QuestAction>(inputs: ProcessInputs<T>) {
+export function performQuest(inputs: ProcessInputs<QuestAction>) {
   const { state, action, actorId } = inputs;
   const intendedAction = getNextIntendedAction(state)
 
@@ -191,7 +191,7 @@ export function performQuest<T extends QuestAction>(inputs: ProcessInputs<T>) {
   }
 }
 
-export function performLady<T extends LadyAction>(inputs: ProcessInputs<T>) {
+export function performLady(inputs: ProcessInputs<LadyAction>) {
   const { state, action, actorId } = inputs;
   const intendedAction = getNextIntendedAction(state)
 
@@ -211,7 +211,7 @@ export function performLady<T extends LadyAction>(inputs: ProcessInputs<T>) {
   newRound(state);
 }
 
-export function performAssassination<T extends AssassinationAction>(inputs: ProcessInputs<T>) {
+export function performAssassination(inputs: ProcessInputs<AssassinationAction>) {
   const { state, action, actorId } = inputs;
 
   if (state.hiddenRoles[actorId] !== "Assassin") {
@@ -222,10 +222,10 @@ export function performAssassination<T extends AssassinationAction>(inputs: Proc
     ? state.status === "in-progress"
     : getNextIntendedAction(state) === "assassinate";
 
-  if (!canAssassinate)  {
+  if (!canAssassinate) {
     throw new ProcessError("client", "Cannot assassinate at this time");
   }
-  
+
   state.status = "finished";
   state.assassinationTarget = action.playerId;
 
@@ -234,7 +234,7 @@ export function performAssassination<T extends AssassinationAction>(inputs: Proc
     : "Arthurian Victory"
 }
 
-export function performRulesetModification<T extends RulesetModifiaction>(inputs: ProcessInputs<T>) {
+export function performRulesetModification(inputs: ProcessInputs<RulesetModifiaction>) {
   const { state, action, actorId } = inputs;
 
   if (actorId !== state.gameMaster) {
@@ -255,3 +255,22 @@ export function performRulesetModification<T extends RulesetModifiaction>(inputs
   state.expectedPlayers = action.maxPlayers;
 
 }
+
+// this is about stopping an avalon game not killing fetuses btw
+export function performAbortion(inputs: ProcessInputs<AbortGameAction>) {
+  const { state, actorId } = inputs;
+
+  if (actorId !== state.gameMaster) {
+    throw new ProcessError("client", "Only the game master can abort the game");
+  }
+
+  if (state.status !== "waiting") {
+    throw new ProcessError("client", "In-progress or finished games");
+  }
+
+
+  state.status = "finished";
+  state.result = "Aborted";
+}
+
+

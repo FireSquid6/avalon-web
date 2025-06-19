@@ -85,6 +85,9 @@ export function GameRender() {
         case "Assassination":
           centerText = "Merlin was assassinated. The forces of Mordred are victorious.";
           break;
+        case "Aborted":
+          centerText = "Game aborted.";
+          break;
       }
       break;
     case "start":
@@ -229,6 +232,10 @@ function getAvailableActions(state: GameState, knowledge: Knowledge[], id: strin
 
   if (rulesetHas(state.ruleset, "Quickshot Assassin") && state.status === "in-progress" && isAssassin) {
     actions.push("assassinate");
+  }
+
+  if (state.gameMaster === id && status === "waiting") {
+    actions.push("abort");
   }
 
   return actions;
