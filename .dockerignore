@@ -212,4 +212,8 @@ packages/server/**/.idea
 packages/server/**/.DS_Store
 
 packages/server/**/drizzle/local
+
+app_data
 fly.toml
+
+

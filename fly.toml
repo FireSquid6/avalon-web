@@ -22,5 +22,8 @@ primary_region = 'dfw'
   cpus = 1
 
 [env]
-  CONFIG_FILE_PATH = "app_data/avalon-config.yaml"
+  AVALON_PORT = "4320"
+  AVALON_DB_TYPE = "remote"
+
+  # secrets needed for db url and token
 

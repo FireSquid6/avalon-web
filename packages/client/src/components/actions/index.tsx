@@ -31,7 +31,7 @@ export function ActionRenderer({
   extras = null,
 }: ActionRendererProps) {
   return (
-    <div className="flex flex-row items-center justify-center gap-4">
+    <div className="flex flex-row items-center justify-center gap-4 sticky bottom-10 left-1/2">
       {extras}
       {availableActions.map(action => {
         switch (action) {

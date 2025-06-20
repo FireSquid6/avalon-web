@@ -2,7 +2,6 @@ import { useGameContext } from '../GameContext';
 
 import { PlayerCircle } from './PlayerCircle';
 import type { Player } from './PlayerCircle';
-import { useScreenSize } from '../../lib/hooks';
 import { ActionRenderer } from '../actions';
 import type { GameState, Knowledge } from 'engine';
 import { Quest, type QuestWithResult } from "./Quest";
@@ -14,7 +13,8 @@ import { ChatWindow } from '../ChatWindow';
 
 export function GameRender() {
   const { state, act, chat, messages, knowledge, viewingUser } = useGameContext();
-  const screenSize = useScreenSize();
+
+  console.log("Rendering:");
   console.log(state);
 
   const lastRound = state.rounds[state.rounds.length - 1];
@@ -48,7 +48,7 @@ export function GameRender() {
       isMonarch: isMonarch,
       hasLady: state.ladyHolder === id,
       isCurrentPlayer: id === viewingUser,
-      role: state.hiddenRoles[id] 
+      role: state.hiddenRoles[id]
     }
   })
 
@@ -100,7 +100,6 @@ export function GameRender() {
   }
 
 
-  const radius = Math.min(((screenSize.width - 100) / 2), 350);
   let nominationCount = 0;
   const questInfo = getQuestInformation(state.players.length < 5 ? 5 : state.players.length);
 
@@ -126,6 +125,7 @@ export function GameRender() {
       players: q.players,
       result: result,
       failsGiven: roundWithQuest?.quest?.failCards ?? 0,
+      playersOnQuest: roundWithQuest?.nominatedPlayers ?? [],
     }
   });
 
@@ -149,17 +149,20 @@ export function GameRender() {
   }
 
 
+
+
+
   return (
     <>
       {/* Central table */}
       <div className="my-8">
-        <PlayerCircle players={players} radius={radius} centerText={centerText}/>
+        <PlayerCircle players={players} centerText={centerText} />
       </div>
       {/* Game Info */}
 
       <div className="flex flex-col mx-8">
-        <Quest quests={quests} />
         <VoteTracker failedVotes={failedVotes} />
+        <Quest quests={quests} />
       </div>
 
       {/* Actions bar */}
@@ -170,7 +173,7 @@ export function GameRender() {
         onAction={act}
         players={players.map((p) => { return { id: p.id, displayName: p.id } })}
         availableActions={getAvailableActions(state, knowledge, viewingUser)}
-        extras={<KnowledgeModal knowledge={knowledge} viewingUserId={viewingUser} /> }
+        extras={<KnowledgeModal knowledge={knowledge} viewingUserId={viewingUser} />}
       />
       <ChatWindow messages={messages} viewingUser={viewingUser} onSendMessage={chat} />
     </>
