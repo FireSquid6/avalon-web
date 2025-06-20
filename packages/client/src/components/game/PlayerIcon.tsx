@@ -106,20 +106,20 @@ export const PlayerIcon: React.FC<PlayerIconProps> = ({
   return (
     <div className="flex flex-col items-center space-y-2 relative">
       {/* Main circular icon */}
-      <span className={`text-xl font-medium text-gray-100`} title={title}>
+      <span className={`text-sm md:text-md mb-0 lg:text-lg font-medium text-gray-100`} title={title}>
         {headerString}
       </span>
       <div className="relative">
         <div
           className={`
-            w-12 h-12 rounded-full border-2 flex items-center justify-center
+            w-10 h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 rounded-full border-2 flex items-center justify-center
             ${isCurrentPlayer ? "border-amber-500" : ""}
             ${getIconColorClass()}
             ${assassinated ? 'opacity-50' : ''}
           `}
         >
           {/* User initial or icon */}
-          <span className={`text-xl font-bold ${getTextColorClass()}`}>
+          <span className={`text-md md:text-lg lg:text-xl font-bold ${getTextColorClass()}`}>
             {username.charAt(0).toUpperCase()}
           </span>
 

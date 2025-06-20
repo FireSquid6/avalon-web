@@ -2,7 +2,6 @@ import { useGameContext } from '../GameContext';
 
 import { PlayerCircle } from './PlayerCircle';
 import type { Player } from './PlayerCircle';
-import { useScreenSize } from '../../lib/hooks';
 import { ActionRenderer } from '../actions';
 import type { GameState, Knowledge } from 'engine';
 import { Quest, type QuestWithResult } from "./Quest";
@@ -150,11 +149,14 @@ export function GameRender() {
   }
 
 
+
+
+
   return (
     <>
       {/* Central table */}
       <div className="my-8">
-        <PlayerCircle players={players} radius={175} centerText={centerText} />
+        <PlayerCircle players={players} centerText={centerText} />
       </div>
       {/* Game Info */}
 

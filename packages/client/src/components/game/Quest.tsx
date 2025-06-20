@@ -34,7 +34,7 @@ export function Quest({ quests }: QuestListProps) {
       <div className="space-y-1">
         {quests.map((quest) => (
           <div>
-            <div key={quest.index} className="flex items-center gap-3 text-md">
+            <div key={quest.index} className="flex items-center gap-3 text-xs sm:text-sm md:text-md">
               <span className={`font-mono ${getQuestStatusColor(quest.result)}`}>
                 {getQuestStatusIcon(quest.result)}
               </span>
@@ -52,7 +52,7 @@ export function Quest({ quests }: QuestListProps) {
             </div>
             <ul className={`ml-8 list-disc ${getQuestStatusColor(quest.result)}`}>
               {quest.playersOnQuest.map((p, i) => (
-                <li key={i}>{p}</li>
+                <li className="text-xs sm:text-sm md:text-md" key={i}>{p}</li>
               ))}
             </ul>
           </div>

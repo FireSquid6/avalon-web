@@ -1,6 +1,7 @@
 import React from 'react';
 import { PlayerIcon } from './PlayerIcon';
 import type { Role } from 'engine';
+import { useScreenSize } from '../../lib/hooks';
 
 export interface Player {
   id: string;
@@ -16,15 +17,18 @@ export interface Player {
 
 interface PlayerCircleProps {
   players: Player[];
-  radius?: number;
   centerText?: string;
 }
 
 export const PlayerCircle: React.FC<PlayerCircleProps> = ({
   players,
-  radius = 150,
   centerText,
 }) => {
+  const size = useScreenSize().width;
+
+  let radius = Math.min((size - 100) / 2, 200);
+
+
   const calculatePosition = (index: number, total: number) => {
     // Start from top (12 o'clock) and go clockwise
     const angle = (index * 2 * Math.PI) / total - Math.PI / 2;
@@ -70,7 +74,7 @@ export const PlayerCircle: React.FC<PlayerCircleProps> = ({
       {/* Center text */}
       {centerText && (
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <div className="text-center text-white font-semibold text-lg">
+          <div className="text-center text-white font-semibold text-md md:text-lg lg:text-lg">
             {centerText}
           </div>
         </div>
