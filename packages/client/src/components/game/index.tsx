@@ -148,12 +148,8 @@ export function GameRender() {
     }
   }
 
-
-
-
-
   return (
-    <>
+    <div className="flex-1">
       {/* Central table */}
       <div className="my-8">
         <PlayerCircle players={players} centerText={centerText} />
@@ -176,7 +172,7 @@ export function GameRender() {
         extras={<KnowledgeModal knowledge={knowledge} viewingUserId={viewingUser} />}
       />
       <ChatWindow messages={messages} viewingUser={viewingUser} onSendMessage={chat} />
-    </>
+    </div>
   )
 }
 

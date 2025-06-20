@@ -70,8 +70,29 @@ export class GameClient {
   private socket: WebSocket;
   private listeners: Listener[] = [];
   private subscribedGames: Set<string> = new Set();
+  private reconnecting: boolean = false;
 
-  reconnect() {
+  async reconnect() {
+    // we don't want to reconnect if we are already trying to
+    if (this.reconnecting || this.connected) {
+      return;
+    }
+
+    this.reconnecting = true;
+
+    // we want to automatically resubscribe to all stuff we had previously
+    const previousSubscribed = Array.from(this.subscribedGames);
+    const previousData = new Map<string, GameData>();
+    for (const k of this.gameData.keys()) {
+      previousData.set(k, this.gameData.get(k)!);
+    }
+
+    // reset all state
+    this.listeners = [];
+    this.chats = {}
+    this.gameData = new Map();
+    this.subscribedGames = new Set();
+
     this.socket = getSocket();
     this.socket.onmessage = async (e) => {
       const response = responseSchema.parse(JSON.parse(e.data));
@@ -115,6 +136,14 @@ export class GameClient {
       this.dispatch({ type: "active", active: false });
       this.dispatch({ type: "error", error: new Error(`Socket disconnected: ${e.reason}`) });
     }
+
+    // re-subscribe to all stuff we have disconnected from
+    await this.waitForConnection();
+    for (const s of previousSubscribed) {
+      this.subscribeToGame(s, previousData.get(s), true);
+    }
+
+    this.reconnecting = false;
   }
 
   constructor() {
@@ -156,7 +185,7 @@ export class GameClient {
     return this.chats[gameId] ?? [];
   }
 
-  async subscribeToGame(gameId: string, initialData?: GameData) {
+  async subscribeToGame(gameId: string, initialData?: GameData, alwaysRefetch?: boolean) {
     // we want to subscribe to the game if we aren't yet
     if (!this.subscribedGames.has(gameId)) {
       if (initialData) {
@@ -178,7 +207,11 @@ export class GameClient {
 
     // if we don't have information on the game, we go ahead and 
     // just do a fetch
-    if (!this.gameData.has(gameId)) {
+    //
+    // there's also a flag for refetching anyways. This is useful
+    // for reconnection, when we want to use the stale state we have,
+    // but also fetch all updates we may have missed
+    if (!this.gameData.has(gameId) || alwaysRefetch === true) {
       console.log("Fetching game data...");
       const { data, error } = await treaty.games({ id: gameId }).state.get();
 

@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useAuth, useGameSubscription } from "../../lib/hooks";
-import { client } from "../../lib/game";
 import { GameContextProvider } from "../../components/GameContext";
 import { GameRender } from "../../components/game";
 import { ConnectionStatus } from "../../components/ConnectionStatus";
@@ -21,7 +20,7 @@ function RouteComponent() {
       <ConnectionStatus 
         connected={connected}
         onReconnect={() => {
-          client.reconnect();
+          location.reload();
         }}
         gameId={gameId}
       />
