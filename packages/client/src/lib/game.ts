@@ -1,5 +1,5 @@
 import type { GameAction } from "engine/actions";
-import { treaty } from "./treaty";
+import { getSocket, treaty } from "./treaty";
 import { type GameState, type Knowledge, type Rule } from "engine";
 import { makeMessage, responseSchema } from "server/protocol";
 import { getAuthState } from "./hooks";
@@ -79,7 +79,7 @@ export class GameClient {
     const auth = getAuthState();
     this.username = auth.type === "authenticated" ? auth.username : "anonymous-spectator";
 
-    this.socket = treaty.socket.subscribe().ws;
+    this.socket = getSocket();
     this.socket.onmessage = async (e) => {
       const response = responseSchema.parse(JSON.parse(e.data));
 

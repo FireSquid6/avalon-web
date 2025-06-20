@@ -33,8 +33,8 @@ export function Quest({ quests }: QuestListProps) {
       <h3 className="text-xl font-semibold">Quests</h3>
       <div className="space-y-1">
         {quests.map((quest) => (
-          <div>
-            <div key={quest.index} className="flex items-center gap-3 text-xs sm:text-sm md:text-md">
+          <div key={quest.index}>
+            <div className="flex items-center gap-3 text-xs sm:text-sm md:text-md">
               <span className={`font-mono ${getQuestStatusColor(quest.result)}`}>
                 {getQuestStatusIcon(quest.result)}
               </span>
