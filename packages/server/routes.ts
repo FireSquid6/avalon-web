@@ -5,14 +5,14 @@ import { generateKnowledgeMap, getBlankState } from "engine/logic";
 import { gameActionSchema } from "engine/actions";
 import { processAction, ProcessError } from "engine/process";
 import { viewStateAs } from "engine/view";
-import { chatResponse, messageSchema, socketFailure, socketInfo, stateResponse } from "./protocol";
+import {  messageSchema, socketFailure, socketInfo } from "./protocol";
 import { loggerPlugin } from "./logger";
 import type { Config } from "./config";
 import type { Db } from "./db";
 import { createSession, createUser, deleteSesssion, getSessionWithToken, userExists, validateEmail, validatePassword, validateUsername } from "./db/auth";
 import { cors } from "@elysiajs/cors";
 import { getProfile } from "./db/profile";
-import { GameObserver } from "./game";
+import { GameObserver, makeListener } from "./game";
 import { createGame, getJoinedGamesByUser, getWaitingGames } from "./db/game";
 import type { GameListener } from "./game";
 import { createMessage, lastNMessages } from "./db/chat";
@@ -280,23 +280,21 @@ export const app = new Elysia()
       ws.data.store.socketAuth.set(ws.id, auth);
     },
     async message(ws, rawMessage) {
-      const auth = ws.data.store.socketAuth.get(ws.id);
-
-      if (!auth) {
-        ws.send(socketFailure("No session found"));
-        ws.close();
-        return;
-      }
-      const { user } = auth;
-
       try {
-        const listeners = ws.data.store.listeners;
+        const auth = ws.data.store.socketAuth.get(ws.id);
+
+        if (!auth) {
+          ws.send(socketFailure("No session found"));
+          ws.close();
+          return;
+        }
+        const { user } = auth;
+
         const observer = ws.data.store.observer;
 
         const message = messageSchema.parse(rawMessage);
         console.log("Recieved", message);
 
-        const isSubscribed = listeners.has(ws.id);
         const state = await observer.peek(message.gameId);
 
         if (state === undefined) {
@@ -305,37 +303,15 @@ export const app = new Elysia()
         }
 
 
-        if (message.action === "subscribe" && !isSubscribed) {
-          const listener: GameListener = (e) => {
+        if (message.action === "subscribe") {
+          const listener: GameListener = makeListener(user, ws);
+          observer.subscribe(message.gameId, ws.id, listener);
 
-            switch (e.type) {
-              case "state":
-                const state = e.state;
-                const view = viewStateAs(state, user.username);
-                const knowledgeMap = generateKnowledgeMap(state);
-
-                const knowledge = knowledgeMap[user.username] ?? [];
-
-                console.log("Sending new state...");
-                ws.send(stateResponse(view, knowledge));
-                break;
-              case "message":
-                ws.send(chatResponse(e.newMessage));
-            }
-          }
-
-          observer.subscribe(message.gameId, listener);
-          listeners.set(ws.id, listener);
           ws.send(socketInfo(`Subscribed to ${message.gameId}`))
-        } else if (message.action === "unsubscribe" && isSubscribed) {
-          const listener = listeners.get(ws.id)!;
-
-          observer.unsubscribe(message.gameId, listener);
-          listeners.delete(ws.id);
+        } else if (message.action === "unsubscribe") {
+          observer.unsubscribe(ws.id, message.gameId);
 
           ws.send(socketInfo(`Unsubscribed from ${message.gameId}`))
-        } else {
-          ws.send(socketFailure(`Tried to subscribe to an already subscribed game or unsubscribe from unsubscribed game`));
         }
       } catch (e) {
         console.log("Unexpected error:", e);
@@ -343,13 +319,9 @@ export const app = new Elysia()
     },
     close(ws) {
       console.log("Closed connecition:", ws.id);
-      const listeners = ws.data.store.listeners;
       const observer = ws.data.store.observer;
+      observer.unsubscribeListener(ws.id);
 
-      if (listeners.has(ws.id)) {
-        const listener = listeners.get(ws.id)!;
-        observer.unsubscribeFromAll(listener);
-      }
     },
   })
   .get("/users/:username", async ({ params, status, store: { db } }) => {
@@ -411,7 +383,7 @@ export const app = new Elysia()
   })
   .get("/whoami", async ({ getAuthStatus }) => {
     const auth = await getAuthStatus();
-    
+
     if (auth === null) {
       return null;
     }
