@@ -5,7 +5,7 @@ import { generateKnowledgeMap, getBlankState } from "engine/logic";
 import { gameActionSchema } from "engine/actions";
 import { processAction, ProcessError } from "engine/process";
 import { viewStateAs } from "engine/view";
-import { chatResponse, messageSchema, socketFailure, socketInfo, stateResponse, type SocketMessage } from "./protocol";
+import { chatResponse, messageSchema, socketFailure, socketInfo, stateResponse } from "./protocol";
 import { loggerPlugin } from "./logger";
 import type { Config } from "./config";
 import type { Db } from "./db";
@@ -16,23 +16,22 @@ import { GameObserver } from "./game";
 import { createGame, getJoinedGamesByUser, getWaitingGames } from "./db/game";
 import type { GameListener } from "./game";
 import { createMessage, lastNMessages } from "./db/chat";
-import type { Message } from "./db/schema";
+import type { Message, Session, User } from "./db/schema";
+import { cookiePlugin } from "./plugins/cookie";
 
 // TODO - rate limit
 export const app = new Elysia()
   .use(loggerPlugin)
   .use(cors())
+  .use(cookiePlugin())
   .state("observer", {} as GameObserver)
   .state("listeners", new Map<string, GameListener>())
   .state("config", {} as Config)
   .state("db", {} as Db)
-  .derive(({ cookie: { auth }, set, store: { db, observer } }) => {
+  .state("socketAuth", new Map<string, { session: Session, user: User }>())
+  .derive(({ getSession, set, store: { db, observer } }) => {
     const forceAuthenticated = async () => {
-      if (!auth) {
-        set.status = 401;
-        throw new Error("No cookie");
-      }
-      const token = auth.value;
+      const token = getSession();
 
       if (!token) {
         set.status = 401;
@@ -54,7 +53,7 @@ export const app = new Elysia()
       return session;
     }
     const getAuthStatus = async () => {
-      const token = auth?.value;
+      const token = getSession();
 
       if (!token) {
         return null;
@@ -82,29 +81,11 @@ export const app = new Elysia()
         state,
       }
     }
-    const validateMessage = async (message: SocketMessage): Promise<string | true> => {
-      const session = await getSessionWithToken(db, message.sessionToken);
-
-      if (session === null) {
-        return "No session exists";
-      }
-
-      if (session.user.username !== message.playerId) {
-        return "Session does not match user";
-      }
-
-      if (session.session.expiresAt <= new Date()) {
-        return "Session is expired";
-      }
-
-      return true;
-    }
 
     return {
       getAuthStatus,
       forceAuthenticated,
       forceInGame,
-      validateMessage,
     }
 
   })
@@ -287,22 +268,33 @@ export const app = new Elysia()
   })
   .ws("/socket", {
     // TODO - new rule: each client can only be connected to ONE game
-    open(ws) {
+    async open(ws) {
+      const auth = await ws.data.getAuthStatus();
       console.log("New connecition:", ws.id);
+      if (!auth) {
+        console.log("Disconnecting, connection doesn't work");
+        ws.send(socketFailure("No token found"));
+        ws.close();
+        return;
+      }
+      ws.data.store.socketAuth.set(ws.id, auth);
     },
     async message(ws, rawMessage) {
+      const auth = ws.data.store.socketAuth.get(ws.id);
+
+      if (!auth) {
+        ws.send(socketFailure("No session found"));
+        ws.close();
+        return;
+      }
+      const { user } = auth;
+
       try {
         const listeners = ws.data.store.listeners;
         const observer = ws.data.store.observer;
 
         const message = messageSchema.parse(rawMessage);
         console.log("Recieved", message);
-
-        const validationError = ws.data.validateMessage(message);
-        if (typeof validationError === "string") {
-          ws.send(socketFailure(validationError));
-          return;
-        }
 
         const isSubscribed = listeners.has(ws.id);
         const state = await observer.peek(message.gameId);
@@ -319,10 +311,10 @@ export const app = new Elysia()
             switch (e.type) {
               case "state":
                 const state = e.state;
-                const view = viewStateAs(state, message.playerId);
+                const view = viewStateAs(state, user.username);
                 const knowledgeMap = generateKnowledgeMap(state);
 
-                const knowledge = knowledgeMap[message.playerId] ?? [];
+                const knowledge = knowledgeMap[user.username] ?? [];
 
                 console.log("Sending new state...");
                 ws.send(stateResponse(view, knowledge));
@@ -393,7 +385,7 @@ export const app = new Elysia()
       password: t.String(),
     })
   })
-  .post("/sessions", async ({ body, status, store: { db }, cookie: { auth, username } }) => {
+  .post("/sessions", async ({ body, status, store: { db }, setSession }) => {
     const session = await createSession(db, body.email, body.password);
 
     if (session === null) {
@@ -401,14 +393,7 @@ export const app = new Elysia()
       return status("Bad Request", "Invalid email or password");
     }
 
-    auth?.set({
-      expires: session.session.expiresAt,
-      value: session.session.token,
-    });
-    username?.set({
-      expires: session.session.expiresAt,
-      value: session.user.username,
-    });
+    setSession(session.session.token, session.session.expiresAt);
 
     return session.session;
   }, {
@@ -417,16 +402,25 @@ export const app = new Elysia()
       password: t.String(),
     })
   })
-  .post("/signout", async ({ forceAuthenticated, store: { db }, cookie: { auth, username } }) => {
+  .post("/signout", async ({ forceAuthenticated, store: { db }, removeSessionCookie }) => {
     const { session } = await forceAuthenticated();
 
     await deleteSesssion(db, session.token);
+    removeSessionCookie();
 
-    auth?.remove();
-    username?.remove();
   })
-  .get("/whoami", async () => {
-
+  .get("/whoami", async ({ getAuthStatus }) => {
+    const auth = await getAuthStatus();
+    
+    if (auth === null) {
+      return null;
+    }
+    const { user } = auth;
+    return {
+      username: user.username,
+      verified: user.verified,
+      email: user.email,
+    }
   })
 // TODO - reset password with email
 

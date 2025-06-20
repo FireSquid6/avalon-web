@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
-import Cookies from "js-cookie";
 import type { GameInfo } from "engine";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import { usePushError } from "./errors";
 import { treaty } from "./treaty";
 import { client, type GameData } from "./game";
 import type { GameAction } from "engine/actions";
 import type { Message } from "server/db/schema";
-import { useRouter } from "@tanstack/react-router";
 
 export interface AuthenticatedState {
   type: "authenticated";
@@ -20,45 +18,36 @@ export interface UnauthenticatedState {
 
 export type AuthState = AuthenticatedState | UnauthenticatedState;
 
-export function getAuthState(): AuthState {
-  const authenticated = Cookies.get("auth") !== undefined;
-  const username = Cookies.get("username")
-
-  return (authenticated && username !== undefined) ? {
-    type: "authenticated",
-    username: username,
-  } : {
-    type: "unauthenticated",
-  }
-}
 
 // we have to manually use "mutate" after we mutate the auth
 // status to let it know that something changed. This is kinda
 // terrible but not that big of a deal.
 export function useAuth() {
-  const [state, setState] = useState<AuthState>(getAuthState());
-  const router = useRouter();
+  const pushError = usePushError();
+  const { mutate } = useSWRConfig();
+  const fetcher = async () => {
+    const { data, error } = await treaty.whoami.get();
 
-  const fn = () => {
-    const state = getAuthState();
-    setState(state);
+    if (error !== null) {
+      throw new Error(`Error fetching whoami: ${error.status} - ${error.value}`)
+    }
+
+    return data;
   }
 
+  const { data: user, error } = useSWR("/whoami", fetcher);
 
-  useEffect(() => {
-    fn();
-    const unsubscribe = router.subscribe("onBeforeLoad", () => {
-      fn();
-    });
-
-    return unsubscribe;
-  }, [router])
-
-  const mutate = () => {
-    fn();
+  if (error) {
+    pushError(error);
   }
 
-  return { state, mutate };
+  const state: AuthState = !user ? { type: "unauthenticated" } : { type: "authenticated", username: user.username }
+  const mutateAuth = () => {
+    mutate("/whoami");
+
+  }
+
+  return { state, mutate: mutateAuth };
 
 }
 
