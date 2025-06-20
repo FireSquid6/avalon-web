@@ -2,8 +2,6 @@ import type { GameAction } from "engine/actions";
 import { getSocket, treaty } from "./treaty";
 import { type GameState, type Knowledge, type Rule } from "engine";
 import { makeMessage, responseSchema } from "server/protocol";
-import { getAuthState } from "./hooks";
-import { getAuthToken } from "./auth";
 import { getBlankState } from "engine/logic";
 import type { Message } from "server/db/schema";
 
@@ -68,17 +66,11 @@ export class GameClient {
   private gameData: Map<string, GameData> = new Map();
   private chats: Record<string, Message[]> = {};
   private connected: boolean = false;
-  private token: string;
-  private username: string;
   private socket: WebSocket;
   private listeners: Listener[] = [];
   private subscribedGames: Set<string> = new Set();
 
   constructor() {
-    this.token = getAuthToken() ?? "";
-    const auth = getAuthState();
-    this.username = auth.type === "authenticated" ? auth.username : "anonymous-spectator";
-
     this.socket = getSocket();
     this.socket.onmessage = async (e) => {
       const response = responseSchema.parse(JSON.parse(e.data));
@@ -174,8 +166,6 @@ export class GameClient {
 
 
       this.socket.send(makeMessage({
-        playerId: this.username,
-        sessionToken: this.token,
         gameId: gameId,
         action: "subscribe",
       }));
@@ -213,8 +203,6 @@ export class GameClient {
     await this.waitForConnection();
 
     this.socket.send(makeMessage({
-      playerId: this.username,
-      sessionToken: this.token,
       gameId: gameId,
       action: "unsubscribe",
     }));

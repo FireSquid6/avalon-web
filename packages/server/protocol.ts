@@ -3,9 +3,7 @@ import { type GameState, gameStateSchema, type Knowledge, knowledgeSchema } from
 import type { Message } from "./db/schema";
 
 export const messageSchema = z.object({
-  playerId: z.string(),
   gameId: z.string(),
-  sessionToken: z.string(),
   action: z.enum(["subscribe", "unsubscribe"]),
 });
 export type SocketMessage = z.infer<typeof messageSchema>;
