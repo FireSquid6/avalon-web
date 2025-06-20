@@ -409,8 +409,13 @@ export const app = new Elysia()
     removeSessionCookie();
 
   })
-  .get("/whoami", async ({ forceAuthenticated }) => {
-    const { user } = await forceAuthenticated();
+  .get("/whoami", async ({ getAuthStatus }) => {
+    const auth = await getAuthStatus();
+    
+    if (auth === null) {
+      return null;
+    }
+    const { user } = auth;
     return {
       username: user.username,
       verified: user.verified,

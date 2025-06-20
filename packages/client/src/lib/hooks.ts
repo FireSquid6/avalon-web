@@ -41,7 +41,7 @@ export function useAuth() {
     pushError(error);
   }
 
-  const state: AuthState = user === undefined ? { type: "unauthenticated" } : { type: "authenticated", username: user.username }
+  const state: AuthState = !user ? { type: "unauthenticated" } : { type: "authenticated", username: user.username }
   const mutateAuth = () => {
     mutate("/whoami");
 
