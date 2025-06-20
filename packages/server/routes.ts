@@ -5,7 +5,7 @@ import { generateKnowledgeMap, getBlankState } from "engine/logic";
 import { gameActionSchema } from "engine/actions";
 import { processAction, ProcessError } from "engine/process";
 import { viewStateAs } from "engine/view";
-import { chatResponse, messageSchema, socketFailure, socketInfo, stateResponse, type SocketMessage } from "./protocol";
+import { chatResponse, messageSchema, socketFailure, socketInfo, stateResponse } from "./protocol";
 import { loggerPlugin } from "./logger";
 import type { Config } from "./config";
 import type { Db } from "./db";

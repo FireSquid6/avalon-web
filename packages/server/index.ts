@@ -12,6 +12,7 @@ export function startServer(config: Config) {
   app.store.observer = new GameObserver(db);
   app.store.listeners = new Map();
   app.store.db = db;
+  app.store.socketAuth = new Map();
 
   app.listen(config.port, () => {
     console.log(`Server started on port ${config.port}`);

@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useAuth, useGameSubscription } from "../../lib/hooks";
+import { client } from "../../lib/game";
 import { GameContextProvider } from "../../components/GameContext";
 import { GameRender } from "../../components/game";
+import { ConnectionStatus } from "../../components/ConnectionStatus";
 
 export const Route = createFileRoute("/game/$gameId")({
   component: RouteComponent,
@@ -16,7 +18,13 @@ function RouteComponent() {
 
   return (
     <GameContextProvider data={{ state, knowledge, act, viewingUser: username, chat, messages }}>
-      <p>{connected ? "Connected to" : "Disconnected from"} game {state.id}</p>
+      <ConnectionStatus 
+        connected={connected}
+        onReconnect={() => {
+          client.reconnect();
+        }}
+        gameId={gameId}
+      />
       <GameRender />
     </GameContextProvider>
   )

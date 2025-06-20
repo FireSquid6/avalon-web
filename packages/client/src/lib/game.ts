@@ -66,11 +66,12 @@ export class GameClient {
   private gameData: Map<string, GameData> = new Map();
   private chats: Record<string, Message[]> = {};
   private connected: boolean = false;
+  //@ts-expect-error we do actually define it in the constructor. It's fine.
   private socket: WebSocket;
   private listeners: Listener[] = [];
   private subscribedGames: Set<string> = new Set();
 
-  constructor() {
+  reconnect() {
     this.socket = getSocket();
     this.socket.onmessage = async (e) => {
       const response = responseSchema.parse(JSON.parse(e.data));
@@ -114,6 +115,10 @@ export class GameClient {
       this.dispatch({ type: "active", active: false });
       this.dispatch({ type: "error", error: new Error(`Socket disconnected: ${e.reason}`) });
     }
+  }
+
+  constructor() {
+    this.reconnect();
   }
 
   async pullChatMessages(gameId: string) {

@@ -5,7 +5,7 @@ export const cookiePlugin = () => new Elysia()
   .derive({ as: "global" },(ctx) => {
     const makeCookie = (name: string, data: string, expires: Date) => {
       const url = new URL(ctx.request.url);
-      let cookie = `${name}=${data}; Date=${expires.toUTCString()}; SameSite=None`
+      let cookie = `${name}=${data}; Path=/; Date=${expires.toUTCString()}; SameSite=None`
 
       if (url.protocol === "https") {
         cookie += '; Secure';
