@@ -17,7 +17,7 @@ function roleToEmoji(role: Role): string {
     case "Assassin":
       return "🥷 ";
     case "Merlin":
-      return "🧙‍♂️"  ;
+      return "🧙‍♂️";
     case "Percival":
       return "👦";
     case "Mordredic Servant":
@@ -47,9 +47,9 @@ export const PlayerIcon: React.FC<PlayerIconProps> = ({
 }) => {
   const getIconColorClass = () => {
     if (assassinated) return 'bg-gray-400';
-    
+
     switch (iconColor) {
-      case 'white': return 'bg-white border-gray-300';
+      case 'white': return 'bg-white';
       case 'black': return 'bg-black';
       case 'gray': return 'bg-gray-500';
       default: return 'bg-gray-500';
@@ -60,13 +60,59 @@ export const PlayerIcon: React.FC<PlayerIconProps> = ({
     return iconColor === 'white' ? 'text-black' : 'text-white';
   };
 
+  let titles: string[] = [];
+  let headerString = "";
+
+  if (hasLady) {
+    headerString += "🧚‍♀️"
+    titles.push("holding the lady of the lake");
+  }
+  if (isMonarch) {
+    headerString += "👑";
+    titles.push("the current monarch");
+  }
+  if (nominated) {
+    headerString += "🛡️";
+    titles.push("nominated for the quest");
+  }
+  if (role) {
+    headerString += roleToEmoji(role);
+    titles.push(`revealed to have the role "${role}"`);
+  }
+
+  if (headerString === "") {
+    headerString = "-";
+  }
+
+  let title = "";
+  switch (titles.length) {
+    case 0:
+      break;
+    case 1:
+      title = `${username} is ${titles[0]}`;
+      break;
+    case 2:
+      title = `${username} is ${titles[0]} and ${titles[1]}`;
+      break;
+    default:
+      const lastTitle = titles.pop();
+      title = `${username} is `;
+      for (const t of titles) {
+        title += `${t}, `;
+      }
+      title += `and ${lastTitle}`;
+  }
+
   return (
     <div className="flex flex-col items-center space-y-2 relative">
       {/* Main circular icon */}
+      <span className={`text-xl font-medium text-gray-100`} title={title}>
+        {headerString}
+      </span>
       <div className="relative">
-        <div 
+        <div
           className={`
-            w-16 h-16 rounded-full border-2 flex items-center justify-center
+            w-12 h-12 rounded-full border-2 flex items-center justify-center
             ${isCurrentPlayer ? "border-amber-500" : ""}
             ${getIconColorClass()}
             ${assassinated ? 'opacity-50' : ''}
@@ -76,7 +122,7 @@ export const PlayerIcon: React.FC<PlayerIconProps> = ({
           <span className={`text-xl font-bold ${getTextColorClass()}`}>
             {username.charAt(0).toUpperCase()}
           </span>
-          
+
           {/* Assassination X */}
           {assassinated && (
             <div className="absolute inset-0 flex items-center justify-center" title="This player has been assassinated">
@@ -84,34 +130,8 @@ export const PlayerIcon: React.FC<PlayerIconProps> = ({
             </div>
           )}
         </div>
-        
-        {/* Crown for monarch */}
-        {isMonarch && !assassinated && (
-          <div className="absolute -top-5 left-1/2 transform -translate-x-1/2" title="This player is the monarch">
-            <span className="text-2xl">👑</span>
-          </div>
-        )}
-        
-        {/* Sword for nomination */}
-        {nominated && !assassinated && (
-          <div className="absolute -right-8 top-1/2 transform -translate-y-1/2" title="This player is nominated for a quest">
-            <span className="text-xl">⚔️</span>
-          </div>
-        )}
 
-        {/* Lady of the lake */}
-        {hasLady && (
-          <div className="absolute -left-8 top-1/2 transform -translate-y-1/2" title="This player has the Lady of the Lake token">
-            <span className="text-xl">🧚‍♀️</span>
-          </div>
-        )}
-        {role && (
-          <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2" title={`This player was ${role}`}>
-            <span className="text-2xl">{roleToEmoji(role)}</span>
-          </div>
-        )}
       </div>
-      
       {/* Username */}
       <span className={`text-sm font-medium text-gray-100`}>
         {username}

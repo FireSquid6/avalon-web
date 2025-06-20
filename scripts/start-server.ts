@@ -15,5 +15,6 @@ if (!fs.existsSync(storeDir)) {
 const config = getConfigFromPartial({
   databasePath: path.join(storeDir, "db.sqlite"),
   dbType: "local",
+  port: 4320,
 });
 startServer(config);
