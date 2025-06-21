@@ -20,7 +20,7 @@ export function getDb(config: Config) {
 
   const db = drizzle({ client: sqlite });
   migrate(db, {
-    migrationsFolder: path.resolve(import.meta.dir, "..", "drizzle", config.dbType),
+    migrationsFolder: path.resolve(import.meta.dir, "../../..", "drizzle", config.dbType),
   });
 
   return db;
