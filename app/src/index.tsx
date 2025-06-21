@@ -1,4 +1,4 @@
-import { serve, type ServerWebSocket } from "bun";
+import { randomUUIDv7, serve, type ServerWebSocket } from "bun";
 import index from "./frontend/index.html";
 import type { Config } from "./backend/config";
 import { app } from "./backend/routes"
@@ -52,7 +52,7 @@ function startApp(config: Config) {
           if (!auth) {
             return new Response("Must be authenticated for socket", { status: 401 });
           }
-          const data: WsData = auth;
+          const data: WsData = { ...auth, id: randomUUIDv7() };
 
           if (server.upgrade(req, { data })) {
             return;
@@ -64,6 +64,8 @@ function startApp(config: Config) {
 
     websocket: {
       async close(ws) {
+        const data = ws.data as WsData
+        console.log("Disconnected:", data.id);
         await handleClose(socketContext, ws as ServerWebSocket<WsData>);
       },
       async message(ws, buffer) {
@@ -71,8 +73,12 @@ function startApp(config: Config) {
         // we can typecast trust me
         await handleMessage(socketContext, ws as ServerWebSocket<WsData>, message);
       },
+      async open(ws) {
+        const data = ws.data as WsData
+        console.log("Connected:", data.id);
+      },
       // idk what to do with this one
-      drain() {},
+      drain() { },
     },
 
     development: process.env.NODE_ENV !== "production" && {

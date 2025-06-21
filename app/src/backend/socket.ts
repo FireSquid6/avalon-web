@@ -14,6 +14,7 @@ export interface SocketContext {
 export interface WsData {
   user: User;
   session: Session;
+  id: string;
 }
 
 
@@ -35,7 +36,7 @@ export async function handleMessage(ctx: SocketContext, ws: ServerWebSocket<WsDa
 
     if (message.action === "subscribe") {
       const listener: GameListener = makeListener(user, ws);
-      observer.subscribe(message.gameId, user.username, listener);
+      observer.subscribe(message.gameId, ws.data.id, listener);
 
       ws.send(socketInfo(`Subscribed to ${message.gameId}`))
     } else if (message.action === "unsubscribe") {
@@ -51,7 +52,7 @@ export async function handleMessage(ctx: SocketContext, ws: ServerWebSocket<WsDa
 
 
 export async function handleClose(ctx: SocketContext, ws: ServerWebSocket<WsData>) {
-  console.log("Closed connection:", ws.data.user.username);
+  console.log("Closed connection:", ws.data.id);
   const observer = ctx.observer;
-  observer.unsubscribeListener(ws.data.user.username);
+  observer.unsubscribeListener(ws.data.id);
 }

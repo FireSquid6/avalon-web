@@ -79,6 +79,7 @@ export class GameClient {
     }
 
     this.reconnecting = true;
+    console.log("Reconnecting...");
 
     // we want to automatically resubscribe to all stuff we had previously
     const previousSubscribed = Array.from(this.subscribedGames);
@@ -128,13 +129,18 @@ export class GameClient {
 
     }
     this.socket.onopen = () => {
+      console.log("Connected to server");
       this.connected = true;
       this.dispatch({ type: "active", active: true });
     }
     this.socket.onclose = (e) => {
+      console.log("Disconnected from server");
       this.connected = false;
       this.dispatch({ type: "active", active: false });
       this.dispatch({ type: "error", error: new Error(`Socket disconnected: ${e.reason}`) });
+    }
+    this.socket.onerror = (e) => {
+      console.log("Got an error from the socket");
     }
 
     // re-subscribe to all stuff we have disconnected from
@@ -143,6 +149,7 @@ export class GameClient {
       this.subscribeToGame(s, previousData.get(s), true);
     }
 
+    console.log(this.subscribedTo());
     this.reconnecting = false;
   }
 
@@ -194,7 +201,7 @@ export class GameClient {
       this.subscribedGames.add(gameId);
 
       await this.waitForConnection();
-      console.log("Subscribing to the game...");
+      console.log("Subscribing to the game", gameId);
       await this.pullChatMessages(gameId);
 
 
