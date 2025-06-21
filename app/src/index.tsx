@@ -44,6 +44,7 @@ function startApp(config: Config) {
       // Echo console logs from the browser to the server
       console: true,
     },
+    port: config.port,
   });
 }
 
@@ -51,3 +52,4 @@ const partial = getPartialFromEnv();
 const config = getConfigFromPartial(partial);
 console.log("Connecting to database:", config.databasePath);
 startApp(config);
+console.log(`Started server on port ${config.port}`)
