@@ -1,9 +1,9 @@
-import type { GameState, GameInfo } from "engine";
+import type { GameState, GameInfo } from "@/engine";
 import type { Db } from "./db";
 import { updateGameState, getGameById } from "./db/game";
 import type { Message, User } from "./db/schema";
-import { viewStateAs } from "engine/view";
-import { generateKnowledgeMap } from "engine/logic";
+import { viewStateAs } from "@/engine/view";
+import { generateKnowledgeMap } from "@/engine/logic";
 import { stateResponse, chatResponse } from "./protocol";
 import type { ElysiaWS } from "elysia/ws";
 

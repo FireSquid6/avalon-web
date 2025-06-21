@@ -30,7 +30,7 @@ export async function login(email: string, password: string): Promise<Error | "O
 }
 
 export async function logout(): Promise<Error | "OK"> {
-  const { error } = await treaty.signout.post();
+  const { error } = await treaty.api.signout.post();
 
   if (error !== null) {
     return new Error(`Error signing out: ${error.status} - ${error.value}`);

@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import type { GameState } from 'engine'
-import type { GameAction } from 'engine/actions'
-import { generateKnowledgeMap, getBlankState } from 'engine/logic'
-import { processAction, ProcessError } from 'engine/process'
+import type { GameState } from '@/engine'
+import type { GameAction } from '@/engine/actions'
+import { generateKnowledgeMap, getBlankState } from '@/engine/logic'
+import { processAction, ProcessError } from '@/engine/process'
 import { useState } from 'react'
 import { GameContextProvider } from '../components/GameContext'
 import { DebugGameRender } from '../components/GameRender'
@@ -11,7 +11,7 @@ import { Modal } from '../components/Modal'
 import { DebugActions } from '../components/DebugActions'
 import { DropdownInput } from '../components/DropdownInput'
 import { GameRender } from '../components/game'
-import { viewStateAs } from 'engine/view'
+import { viewStateAs } from '@/engine/view'
 
 export const Route = createFileRoute('/test-game')({
   component: RouteComponent,

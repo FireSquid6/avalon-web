@@ -1,39 +1,53 @@
 import { serve } from "bun";
-import index from "./index.html";
+import index from "./frontend/index.html";
+import type { Config } from "./backend/config";
+import { app } from "./backend/routes"
+import { getPartialFromEnv, getConfigFromPartial } from "./backend/config";
+import { getDb } from "./backend/db";
+import { GameObserver } from "./backend/game";
 
-serve({
-  routes: {
-    // Serve index.html for all unmatched routes.
-    "/*": index,
 
-    "/api/hello": {
-      async GET(req) {
-        return Response.json({
-          message: "Hello, world!",
-          method: "GET",
-        });
+function startApp(config: Config) {
+  const db = getDb(config);
+
+  app.store.config = config;
+  app.store.observer = new GameObserver(db);
+  app.store.listeners = new Map();
+  app.store.db = db;
+  app.store.socketAuth = new Map();
+
+  serve({
+    routes: {
+      "/api/*": {
+        GET: r => app.handle(r),
+        POST: r => app.handle(r),
+        PATCH: r => app.handle(r),
+        PUT: r => app.handle(r),
+        DELETE: r => app.handle(r),
+        OPTIONS: r => app.handle(r),
       },
-      async PUT(req) {
-        return Response.json({
-          message: "Hello, world!",
-          method: "PUT",
-        });
+      "/api": {
+        GET: r => app.handle(r),
+        POST: r => app.handle(r),
+        PATCH: r => app.handle(r),
+        PUT: r => app.handle(r),
+        DELETE: r => app.handle(r),
+        OPTIONS: r => app.handle(r),
       },
+      "/*": index,
     },
 
-    "/api/hello/:name": async req => {
-      const name = req.params.name;
-      return Response.json({
-        message: `Hello, ${name}!`,
-      });
+    development: process.env.NODE_ENV !== "production" && {
+      // Enable browser hot reloading in development
+      hmr: true,
+
+      // Echo console logs from the browser to the server
+      console: true,
     },
-  },
+  });
+}
 
-  development: process.env.NODE_ENV !== "production" && {
-    // Enable browser hot reloading in development
-    hmr: true,
-
-    // Echo console logs from the browser to the server
-    console: true,
-  },
-});
+const partial = getPartialFromEnv();
+const config = getConfigFromPartial(partial);
+console.log("Connecting to database:", config.databasePath);
+startApp(config);

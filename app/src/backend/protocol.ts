@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { type GameState, gameStateSchema, type Knowledge, knowledgeSchema } from "engine";
+import { type GameState, gameStateSchema, type Knowledge, knowledgeSchema } from "@/engine";
 import type { Message } from "./db/schema";
 
 export const messageSchema = z.object({

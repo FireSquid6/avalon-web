@@ -1,10 +1,10 @@
 import { z } from "zod";
 import { Elysia, t } from "elysia"
-import { ruleEnum, type GameInfo } from "engine";
-import { generateKnowledgeMap, getBlankState } from "engine/logic";
-import { gameActionSchema } from "engine/actions";
-import { processAction, ProcessError } from "engine/process";
-import { viewStateAs } from "engine/view";
+import { ruleEnum, type GameInfo } from "@/engine";
+import { generateKnowledgeMap, getBlankState } from "@/engine/logic";
+import { gameActionSchema } from "@/engine/actions";
+import { processAction, ProcessError } from "@/engine/process";
+import { viewStateAs } from "@/engine/view";
 import {  messageSchema, socketFailure, socketInfo } from "./protocol";
 import { loggerPlugin } from "./logger";
 import type { Config } from "./config";
@@ -89,7 +89,7 @@ export const app = new Elysia()
     }
 
   })
-  .post("/games/:id/chat", async ({ forceInGame, store: { db, observer }, status, params, body: { message } }) => {
+  .post("/api/games/:id/chat", async ({ forceInGame, store: { db, observer }, status, params, body: { message } }) => {
     const { user } = await forceInGame(params.id);
 
     if (message.length > 1000) {
@@ -105,10 +105,10 @@ export const app = new Elysia()
       message: t.String(),
     })
   })
-  .get("/games/:id/chat", ({ store: { db }, params }): Promise<Message[]> => {
+  .get("/api/games/:id/chat", ({ store: { db }, params }): Promise<Message[]> => {
     return lastNMessages(db, params.id);
   })
-  .get("/opengames", async ({ getAuthStatus, store: { db } }) => {
+  .get("/api/opengames", async ({ getAuthStatus, store: { db } }) => {
     const auth = await getAuthStatus();
     const username = auth?.user.username;
     const openGames = await getWaitingGames(db, username, 50);
@@ -128,7 +128,7 @@ export const app = new Elysia()
 
     return gameInfo
   })
-  .get("/joinedgames", async ({ getAuthStatus, store: { db } }) => {
+  .get("/api/joinedgames", async ({ getAuthStatus, store: { db } }) => {
     const username = (await getAuthStatus())?.user.username ?? "anonymous-spectator";
 
     const joinedGames = await getJoinedGamesByUser(db, username);
@@ -147,7 +147,7 @@ export const app = new Elysia()
 
     return gameInfo
   })
-  .post("/games", async ({ body, set, store, forceAuthenticated }) => {
+  .post("/api/games", async ({ body, set, store, forceAuthenticated }) => {
     const { user } = await forceAuthenticated();
 
     const ruleset = z.array(ruleEnum).parse(body.ruleset);
@@ -172,7 +172,7 @@ export const app = new Elysia()
       password: t.Optional(t.String()),
     }),
   })
-  .post("/games/:id/join", async ({ params, store: { observer }, body, status, forceAuthenticated }) => {
+  .post("/api/games/:id/join", async ({ params, store: { observer }, body, status, forceAuthenticated }) => {
     const { user } = await forceAuthenticated();
     const state = await observer.peek(params.id);
     const password = body?.password ?? "";
@@ -217,7 +217,7 @@ export const app = new Elysia()
       password: t.String(),
     }))
   })
-  .post("/games/:id/act", async ({ params, store: { observer }, body, status, forceInGame }) => {
+  .post("/api/games/:id/act", async ({ params, store: { observer }, body, status, forceInGame }) => {
     const { user, state } = await forceInGame(params.id);
 
     const { data: action, error, success } = gameActionSchema.safeParse(body.action);
@@ -246,7 +246,7 @@ export const app = new Elysia()
       action: t.Any(),
     }),
   })
-  .get("/games/:id/state", async ({ getAuthStatus, store: { observer }, status, params }) => {
+  .get("/api/games/:id/state", async ({ getAuthStatus, store: { observer }, status, params }) => {
     const auth = await getAuthStatus();
     const username = auth?.user.username ?? "anonymous-spectator";
     const state = await observer.peek(params.id);
@@ -266,7 +266,7 @@ export const app = new Elysia()
       knowledge: knowledgeMap[username] ?? [],
     }
   })
-  .ws("/socket", {
+  .ws("/api/socket", {
     // TODO - new rule: each client can only be connected to ONE game
     async open(ws) {
       const auth = await ws.data.getAuthStatus();
@@ -324,7 +324,7 @@ export const app = new Elysia()
 
     },
   })
-  .get("/users/:username", async ({ params, status, store: { db } }) => {
+  .get("/api/users/:username", async ({ params, status, store: { db } }) => {
     const profile = await getProfile(db, params.username);
 
     if (profile === null) {
@@ -333,7 +333,7 @@ export const app = new Elysia()
 
     return profile;
   })
-  .post("/users", async ({ body, status, store: { db } }) => {
+  .post("/api/users", async ({ body, status, store: { db } }) => {
     if (await userExists(db, body.username, body.email)) {
       return status("Bad Request", "Username or email already taken. Try a different one.");
     }
@@ -357,7 +357,7 @@ export const app = new Elysia()
       password: t.String(),
     })
   })
-  .post("/sessions", async ({ body, status, store: { db }, setSession }) => {
+  .post("/api/sessions", async ({ body, status, store: { db }, setSession }) => {
     const session = await createSession(db, body.email, body.password);
 
     if (session === null) {
@@ -374,14 +374,14 @@ export const app = new Elysia()
       password: t.String(),
     })
   })
-  .post("/signout", async ({ forceAuthenticated, store: { db }, removeSessionCookie }) => {
+  .post("/api/signout", async ({ forceAuthenticated, store: { db }, removeSessionCookie }) => {
     const { session } = await forceAuthenticated();
 
     await deleteSesssion(db, session.token);
     removeSessionCookie();
 
   })
-  .get("/whoami", async ({ getAuthStatus }) => {
+  .get("/api/whoami", async ({ getAuthStatus }) => {
     const auth = await getAuthStatus();
 
     if (auth === null) {

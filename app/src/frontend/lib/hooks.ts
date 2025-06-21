@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import type { GameInfo } from "engine";
+import type { GameInfo } from "@/engine";
 import useSWR, { useSWRConfig } from "swr";
 import { usePushError } from "./errors";
 import { treaty } from "./treaty";
 import { client, type GameData } from "./game";
-import type { GameAction } from "engine/actions";
-import type { Message } from "server/db/schema";
+import type { GameAction } from "@/engine/actions";
+import type { Message } from "@/backend/db/schema";
 
 export interface AuthenticatedState {
   type: "authenticated";

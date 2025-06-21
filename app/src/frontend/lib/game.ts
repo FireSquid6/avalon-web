@@ -1,9 +1,9 @@
-import type { GameAction } from "engine/actions";
+import type { GameAction } from "@/engine/actions";
 import { getSocket, treaty } from "./treaty";
-import { type GameState, type Knowledge, type Rule } from "engine";
-import { makeMessage, responseSchema } from "server/protocol";
-import { getBlankState } from "engine/logic";
-import type { Message } from "server/db/schema";
+import { type GameState, type Knowledge, type Rule } from "@/engine";
+import { makeMessage, responseSchema } from "@/backend/protocol";
+import { getBlankState } from "@/engine/logic";
+import type { Message } from "@/backend/db/schema";
 
 export interface GameData {
   state: GameState,
@@ -29,7 +29,7 @@ export async function createGame(ruleset: Rule[], maxPlayers: number, password?:
 }
 
 export async function joinGame(id: string, password?: string): Promise<Error | GameData> {
-  const { data, error } = await treaty.games({ id: id }).join.post({ password: password });
+  const { data, error } = await treaty.api.games({ id: id }).join.post({ password: password });
 
   if (error) {
     return new Error(`Error joining game: ${error.status} - ${error.value}`);
@@ -151,7 +151,7 @@ export class GameClient {
   }
 
   async pullChatMessages(gameId: string) {
-    const { data, error } = await treaty.games({ id: gameId }).chat.get();
+    const { data, error } = await treaty.api.games({ id: gameId }).chat.get();
 
     if (error !== null) {
       this.dispatch({
@@ -271,7 +271,7 @@ export class GameClient {
   }
 
   async act(id: string, action: GameAction): Promise<void> {
-    const { error } = await treaty.games({ id: id }).act.post({
+    const { error } = await treaty.api.games({ id: id }).act.post({
       action,
     });
 

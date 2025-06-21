@@ -1,5 +1,5 @@
 import { eq, and, or, isNull } from "drizzle-orm";
-import type { GameState, Round, Rule, Role } from "engine";
+import type { GameState, Round, Rule, Role } from "@/engine";
 import type { Db } from "./index";
 import { gamesTable, gamePlayersTable, gameRoundsTable } from "./schema";
 
