@@ -11,13 +11,13 @@ export interface GameData {
 }
 
 export async function createGame(ruleset: Rule[], maxPlayers: number, password?: string): Promise<Error | GameData> {
-  const { data: id, error } = await treaty.games.post({ ruleset, maxPlayers, password })
+  const { data: id, error } = await treaty.api.games.post({ ruleset, maxPlayers, password })
 
   if (error) {
     return new Error(`Error creating game: ${error.status} - ${error.value}`);
   }
 
-  const { data, error: stateError } = await treaty.games({ id: id }).state.get();
+  const { data, error: stateError } = await treaty.api.games({ id: id }).state.get();
 
   if (stateError) {
     return new Error(`Error fetching game: ${stateError.status} - ${stateError.value} `);
@@ -213,7 +213,7 @@ export class GameClient {
     // but also fetch all updates we may have missed
     if (!this.gameData.has(gameId) || alwaysRefetch === true) {
       console.log("Fetching game data...");
-      const { data, error } = await treaty.games({ id: gameId }).state.get();
+      const { data, error } = await treaty.api.games({ id: gameId }).state.get();
 
       if (error !== null) {
         this.dispatch({

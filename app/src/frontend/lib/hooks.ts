@@ -26,7 +26,7 @@ export function useAuth() {
   const pushError = usePushError();
   const { mutate } = useSWRConfig();
   const fetcher = async () => {
-    const { data, error } = await treaty.whoami.get();
+    const { data, error } = await treaty.api.whoami.get();
 
     if (error !== null) {
       throw new Error(`Error fetching whoami: ${error.status} - ${error.value}`)
@@ -54,7 +54,7 @@ export function useAuth() {
 export function useAvailableGames(): GameInfo[] {
   const pushError = usePushError();
   const fetcher = async () => {
-    const { data, error } = await treaty.opengames.get();
+    const { data, error } = await treaty.api.opengames.get();
 
     if (error !== null) {
       throw new Error(`Error fetching open games: ${error.status} - ${error.value}`)
@@ -76,7 +76,7 @@ export function useAvailableGames(): GameInfo[] {
 export function useJoinedGames(): GameInfo[] {
   const pushError = usePushError();
   const fetcher = async () => {
-    const { data, error } = await treaty.joinedgames.get();
+    const { data, error } = await treaty.api.joinedgames.get();
 
     if (error !== null) {
       throw new Error(`Error fetching joined games: ${error.status} - ${error.value}`)
@@ -138,7 +138,7 @@ export function useGameSubscription(gameId: string): GameSubscriptionResponse {
   }
 
   const chat = async (content: string) => {
-    await treaty.games({ id: gameId }).chat.post({
+    await treaty.api.games({ id: gameId }).chat.post({
       message: content,
     });
   }

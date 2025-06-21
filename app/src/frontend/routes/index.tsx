@@ -54,7 +54,7 @@ function Index() {
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold mb-2">Avalon</h1>
         <p className="text-lg text-base-content/70">
-          The resistance needs you. Create or join a game to begin.
+          Create or join an ongoing game.
         </p>
       </div>
       <JoinedGames />

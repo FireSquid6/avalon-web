@@ -16,7 +16,7 @@ import { GameObserver, makeListener } from "./game";
 import { createGame, getJoinedGamesByUser, getWaitingGames } from "./db/game";
 import type { GameListener } from "./game";
 import { createMessage, lastNMessages } from "./db/chat";
-import type { Message, Session, User } from "./db/schema";
+import type { Message } from "./db/schema";
 import { cookiePlugin } from "./plugins/cookie";
 
 // TODO - rate limit
@@ -25,10 +25,8 @@ export const app = new Elysia()
   .use(cors())
   .use(cookiePlugin())
   .state("observer", {} as GameObserver)
-  .state("listeners", new Map<string, GameListener>())
   .state("config", {} as Config)
   .state("db", {} as Db)
-  .state("socketAuth", new Map<string, { session: Session, user: User }>())
   .derive(({ getSession, set, store: { db, observer } }) => {
     const forceAuthenticated = async () => {
       const token = getSession();
@@ -265,64 +263,6 @@ export const app = new Elysia()
       state: view,
       knowledge: knowledgeMap[username] ?? [],
     }
-  })
-  .ws("/api/socket", {
-    // TODO - new rule: each client can only be connected to ONE game
-    async open(ws) {
-      const auth = await ws.data.getAuthStatus();
-      console.log("New connecition:", ws.id);
-      if (!auth) {
-        console.log("Disconnecting, connection doesn't work");
-        ws.send(socketFailure("No token found"));
-        ws.close();
-        return;
-      }
-      ws.data.store.socketAuth.set(ws.id, auth);
-    },
-    async message(ws, rawMessage) {
-      try {
-        const auth = ws.data.store.socketAuth.get(ws.id);
-
-        if (!auth) {
-          ws.send(socketFailure("No session found"));
-          ws.close();
-          return;
-        }
-        const { user } = auth;
-
-        const observer = ws.data.store.observer;
-
-        const message = messageSchema.parse(rawMessage);
-        console.log("Recieved", message);
-
-        const state = await observer.peek(message.gameId);
-
-        if (state === undefined) {
-          ws.send(socketFailure(`Game ${message.gameId} not found`));
-          return;
-        }
-
-
-        if (message.action === "subscribe") {
-          const listener: GameListener = makeListener(user, ws);
-          observer.subscribe(message.gameId, ws.id, listener);
-
-          ws.send(socketInfo(`Subscribed to ${message.gameId}`))
-        } else if (message.action === "unsubscribe") {
-          observer.unsubscribe(ws.id, message.gameId);
-
-          ws.send(socketInfo(`Unsubscribed from ${message.gameId}`))
-        }
-      } catch (e) {
-        console.log("Unexpected error:", e);
-      }
-    },
-    close(ws) {
-      console.log("Closed connecition:", ws.id);
-      const observer = ws.data.store.observer;
-      observer.unsubscribeListener(ws.id);
-
-    },
   })
   .get("/api/users/:username", async ({ params, status, store: { db } }) => {
     const profile = await getProfile(db, params.username);

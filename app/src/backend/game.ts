@@ -5,7 +5,7 @@ import type { Message, User } from "./db/schema";
 import { viewStateAs } from "@/engine/view";
 import { generateKnowledgeMap } from "@/engine/logic";
 import { stateResponse, chatResponse } from "./protocol";
-import type { ElysiaWS } from "elysia/ws";
+import type { ServerWebSocket } from "bun";
 
 export type GameEvent = {
   type: "message";
@@ -107,7 +107,7 @@ export class GameObserver {
   }
 }
 
-export function makeListener(user: User, ws: ElysiaWS): GameListener {
+export function makeListener(user: User, ws: ServerWebSocket<any>): GameListener {
   return (e) => {
     switch (e.type) {
       case "state":
