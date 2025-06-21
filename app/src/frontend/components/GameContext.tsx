@@ -1,7 +1,7 @@
 import { useContext, createContext } from "react";
-import type { GameState, Knowledge } from "engine";
-import type { GameAction } from "engine/actions";
-import type { Message } from "server/db/schema";
+import type { GameState, Knowledge } from "@/engine";
+import type { GameAction } from "@/engine/actions";
+import type { Message } from "@/backend/db/schema";
 
 const gameContext = createContext<GameContext | null>(null);
 

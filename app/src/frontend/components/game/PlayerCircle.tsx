@@ -1,6 +1,6 @@
 import React from 'react';
 import { PlayerIcon } from './PlayerIcon';
-import type { Role } from 'engine';
+import type { Role } from '@/engine';
 import { useScreenSize } from '../../lib/hooks';
 
 export interface Player {

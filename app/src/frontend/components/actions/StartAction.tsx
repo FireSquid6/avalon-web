@@ -1,4 +1,4 @@
-import type { StartAction } from "engine/actions";
+import type { StartAction } from "@/engine/actions";
 
 interface StartActionProps {
   onAction: (action: StartAction) => void;

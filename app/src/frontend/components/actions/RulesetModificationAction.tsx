@@ -1,6 +1,6 @@
 import { useState } from "react";
-import type { RulesetModifiaction } from "engine/actions";
-import type { Rule } from "engine";
+import type { RulesetModifiaction } from "@/engine/actions";
+import type { Rule } from "@/engine";
 import { Modal } from "../Modal";
 
 const availableRules: Rule[] = [

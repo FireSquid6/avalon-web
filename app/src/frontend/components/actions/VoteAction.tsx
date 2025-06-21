@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { VoteAction } from "engine/actions";
+import type { VoteAction } from "@/engine/actions";
 import { Modal } from "../Modal";
 
 interface VoteActionProps {

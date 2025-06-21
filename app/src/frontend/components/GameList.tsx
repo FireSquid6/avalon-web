@@ -1,4 +1,4 @@
-import type { GameInfo } from 'engine';
+import type { GameInfo } from '@/engine';
 
 
 interface GameListProps {

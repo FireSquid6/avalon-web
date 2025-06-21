@@ -1,4 +1,4 @@
-import type { Message } from "server/db/schema";
+import type { Message } from "@/backend/db/schema";
 import { useState } from "react";
 import { Chat } from "./Chat";
 

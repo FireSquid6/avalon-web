@@ -1,4 +1,4 @@
-import type { AbortGameAction } from "engine/actions";
+import type { AbortGameAction } from "@/engine/actions";
 
 interface AbortGameProps {
   onAction: (action: AbortGameAction) => void;

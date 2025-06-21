@@ -1,6 +1,6 @@
 import { useState } from "react";
-import type { AssassinationAction } from "engine/actions";
-import type { Player } from "engine";
+import type { AssassinationAction } from "@/engine/actions";
+import type { Player } from "@/engine";
 import { Modal } from "../Modal";
 
 interface AssassinateActionProps {

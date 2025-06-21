@@ -1,6 +1,6 @@
 import { useState } from "react";
-import type { NominateAction } from "engine/actions";
-import type { Player } from "engine";
+import type { NominateAction } from "@/engine/actions";
+import type { Player } from "@/engine";
 import { Modal } from "../Modal";
 
 interface NominateActionProps {

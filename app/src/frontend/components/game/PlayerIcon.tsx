@@ -1,4 +1,4 @@
-import type { Role } from 'engine';
+import type { Role } from '@/engine';
 import React from 'react';
 
 interface PlayerIconProps {

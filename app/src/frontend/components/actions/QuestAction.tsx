@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { QuestAction } from "engine/actions";
+import type { QuestAction } from "@/engine/actions";
 import { Modal } from "../Modal";
 
 interface QuestActionProps {

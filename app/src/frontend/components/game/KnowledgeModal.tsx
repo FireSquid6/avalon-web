@@ -1,6 +1,6 @@
 import { useState } from "react";
-import type { Knowledge } from "engine";
-import { getTeam } from "engine/logic";
+import type { Knowledge } from "@/engine";
+import { getTeam } from "@/engine/logic";
 import { Modal } from "../Modal";
 
 interface KnowledgeModalProps {

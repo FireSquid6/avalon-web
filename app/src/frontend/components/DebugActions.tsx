@@ -1,6 +1,6 @@
 import { useState } from "react";
-import type { GameAction } from "engine/actions";
-import { ruleEnum } from "engine";
+import type { GameAction } from "@/engine/actions";
+import { ruleEnum } from "@/engine";
 
 export function DebugActions({ act }: { act: (a: GameAction) => void }) {
   const [selectedAction, setSelectedAction] = useState<string>("vote");

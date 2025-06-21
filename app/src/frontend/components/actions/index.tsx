@@ -1,5 +1,5 @@
-import type { GameAction } from "engine/actions";
-import type { Player, Rule } from "engine";
+import type { GameAction } from "@/engine/actions";
+import type { Player, Rule } from "@/engine";
 import { VoteActionComponent } from "./VoteAction";
 import { NominateActionComponent } from "./NominateAction";
 import { QuestActionComponent } from "./QuestAction";

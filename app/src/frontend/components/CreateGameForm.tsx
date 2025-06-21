@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import type { Rule } from 'engine';
+import type { Rule } from '@/engine';
 import { RulesetCreator } from './RulesetCreator';
-import { validateRuleset } from 'engine/logic';
+import { validateRuleset } from '@/engine/logic';
 
 interface CreateGameFormProps {
   onCreateGame?: (ruleset: Rule[], maxPlayers: number, password?: string) => void;
