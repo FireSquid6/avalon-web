@@ -3,12 +3,12 @@
 FROM oven/bun:1 AS base
 
 # setup app
-RUN mkdir -p /codebase
-COPY . /codebase
-WORKDIR /codebase
+RUN mkdir -p /app
+COPY . /app
+WORKDIR /app
 RUN bun install --frozen-lockfile
 
 RUN ./scripts/generate.sh
 
 EXPOSE 3120/tcp
-ENTRYPOINT ["bun", "run", "packages/server/main.ts"]
+ENTRYPOINT ["bun", "run", "start"]
