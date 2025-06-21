@@ -1,4 +1,4 @@
-# avalon-web
+# bun-react-tailwind-template
 
 To install dependencies:
 
@@ -6,31 +6,16 @@ To install dependencies:
 bun install
 ```
 
-To run:
+To start a development server:
 
 ```bash
-bun run index.ts
+bun dev
+```
+
+To run for production:
+
+```bash
+bun start
 ```
 
 This project was created using `bun init` in bun v1.2.13. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
-
-
-# TODO
-## Version One
-- [x] better id generation
-- [x] sign out
-- [ ] rules page
-- [ ] add ability to delete the game
-- [x] store games on the database
-- [x] in-game chat system
-
-## Version Two
-- Game
-    - [ ] timer
-    - [ ] better game ui
-- Authentication
-    - [ ] 2FA
-    - [ ] password reset
-- Community
-    - [ ] game database search
-    - [ ] editable profiles
