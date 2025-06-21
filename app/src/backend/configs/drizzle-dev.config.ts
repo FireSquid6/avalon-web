@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { defineConfig } from 'drizzle-kit';
 
 export default defineConfig({
-  out: "./drizzle/local",
+  out: "../drizzle/local",
   schema: "./db/schema.ts",
   dialect: "turso",
   dbCredentials: {

@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "cdacb6f0-ea0b-4001-85b7-0518ff05edc4",
+  "id": "d6217496-d836-471c-abcf-0f6d5529c793",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "chat_messages": {
