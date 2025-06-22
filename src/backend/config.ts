@@ -35,7 +35,7 @@ export function getPartialFromEnv(): PartialConfig {
     port,
     dbType: process.env.AVALON_DB_TYPE === "remote" ? "remote" : "local" ,
     databasePath: process.env.AVALON_DB_PATH,
-    databaseToken: process.env.DATABASE_TOKEN,
+    databaseToken: process.env.AVALON_DB_TOKEN,
   }
 
 }
