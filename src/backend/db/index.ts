@@ -1,6 +1,5 @@
 import type { Config } from "../config";
 import { drizzle } from "drizzle-orm/libsql";
-import { migrate } from "drizzle-orm/libsql/migrator";
 import path from "path";
 import fs from "fs";
 import { createClient } from "@libsql/client";
@@ -18,12 +17,7 @@ export function getDb(config: Config) {
     authToken: config.databaseToken,
   })
 
-  const drizzlePath = path.resolve(import.meta.dir, "../../..", "drizzle", config.dbType);
   const db = drizzle({ client: sqlite });
-  migrate(db, {
-    migrationsFolder: drizzlePath,
-  });
-
   return db;
 }
 
