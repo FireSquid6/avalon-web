@@ -12,12 +12,6 @@ export function makeMessage(msg: SocketMessage): string {
   return JSON.stringify(msg);
 }
 
-export const infoResponseSchema = z.object({
-  type: z.literal("info"),
-  result: z.enum(["success", "failure"]),
-  message: z.string(),
-});
-
 export const stateResponseSchema = z.object({
   type: z.literal("state"),
   state: gameStateSchema,
@@ -38,31 +32,10 @@ export const chatResponseSchema = z.object({
 
 export const responseSchema = z.discriminatedUnion("type", [
   stateResponseSchema,
-  infoResponseSchema,
   chatResponseSchema,
 ]);
 
 export type SocketResponse = z.infer<typeof responseSchema>;
-
-export function socketFailure(message: string): string {
-  const res: SocketResponse = {
-    type: "info",
-    result: "failure",
-    message,
-  }
-
-  return JSON.stringify(res);
-}
-
-export function socketInfo(message: string): string {
-  const res: SocketResponse = {
-    type: "info",
-    result: "success",
-    message,
-  }
-
-  return JSON.stringify(res);
-}
 
 export function stateResponse(state: GameState, knowledge: Knowledge[]) {
   const res: SocketResponse = {

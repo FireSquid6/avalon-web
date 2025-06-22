@@ -1,7 +1,7 @@
 import type { GameAction } from "@/engine/actions";
 import { getSocket, treaty } from "./treaty";
 import { type GameState, type Knowledge, type Rule } from "@/engine";
-import { makeMessage, responseSchema } from "@/backend/protocol";
+import { responseSchema } from "@/backend/protocol";
 import { getBlankState } from "@/engine/logic";
 import type { Message } from "@/backend/db/schema";
 
@@ -23,8 +23,6 @@ export async function createGame(ruleset: Rule[], maxPlayers: number, password?:
     return new Error(`Error fetching game: ${stateError.status} - ${stateError.value} `);
   }
 
-  client.subscribeToGame(data.state.id, data);
-
   return data;
 }
 
@@ -35,7 +33,6 @@ export async function joinGame(id: string, password?: string): Promise<Error | G
     return new Error(`Error joining game: ${error.status} - ${error.value}`);
   }
 
-  client.subscribeToGame(data.state.id, data);
   return {
     state: data.state,
     knowledge: data.knowledge,
@@ -69,7 +66,6 @@ export class GameClient {
   //@ts-expect-error we do actually define it in the constructor. It's fine.
   private socket: WebSocket;
   private listeners: Listener[] = [];
-  private subscribedGames: Set<string> = new Set();
   private reconnecting: boolean = false;
 
   async reconnect() {
@@ -79,10 +75,10 @@ export class GameClient {
     }
 
     this.reconnecting = true;
+    this.connected = false;
     console.log("Reconnecting...");
 
     // we want to automatically resubscribe to all stuff we had previously
-    const previousSubscribed = Array.from(this.subscribedGames);
     const previousData = new Map<string, GameData>();
     for (const k of this.gameData.keys()) {
       previousData.set(k, this.gameData.get(k)!);
@@ -92,20 +88,12 @@ export class GameClient {
     this.listeners = [];
     this.chats = {}
     this.gameData = new Map();
-    this.subscribedGames = new Set();
 
     this.socket = getSocket();
     this.socket.onmessage = async (e) => {
       const response = responseSchema.parse(JSON.parse(e.data));
 
       switch (response.type) {
-        case "info":
-          if (response.result === "failure") {
-            this.dispatch({ type: "error", error: new Error(`Error recieved from socket: ${response.message}`) });
-          } else {
-            console.log(response.message);
-          }
-          break;
         case "state":
           const id = response.state.id;
           const data = { state: response.state, knowledge: response.knowledge };
@@ -143,13 +131,7 @@ export class GameClient {
       console.log("Got an error from the socket");
     }
 
-    // re-subscribe to all stuff we have disconnected from
     await this.waitForConnection();
-    for (const s of previousSubscribed) {
-      this.subscribeToGame(s, previousData.get(s), true);
-    }
-
-    console.log(this.subscribedTo());
     this.reconnecting = false;
   }
 
@@ -192,68 +174,6 @@ export class GameClient {
     return this.chats[gameId] ?? [];
   }
 
-  async subscribeToGame(gameId: string, initialData?: GameData, alwaysRefetch?: boolean) {
-    // we want to subscribe to the game if we aren't yet
-    if (!this.subscribedGames.has(gameId)) {
-      if (initialData) {
-        this.gameData.set(gameId, initialData);
-      }
-      this.subscribedGames.add(gameId);
-
-      await this.waitForConnection();
-      console.log("Subscribing to the game", gameId);
-      await this.pullChatMessages(gameId);
-
-
-
-      this.socket.send(makeMessage({
-        gameId: gameId,
-        action: "subscribe",
-      }));
-    }
-
-    // if we don't have information on the game, we go ahead and 
-    // just do a fetch
-    //
-    // there's also a flag for refetching anyways. This is useful
-    // for reconnection, when we want to use the stale state we have,
-    // but also fetch all updates we may have missed
-    if (!this.gameData.has(gameId) || alwaysRefetch === true) {
-      console.log("Fetching game data...");
-      const { data, error } = await treaty.api.games({ id: gameId }).state.get();
-
-      if (error !== null) {
-        this.dispatch({
-          type: "error",
-          error: new Error(`Error fetching game state: ${error.status} - ${error.value}`),
-        });
-
-        return;
-      }
-
-      this.gameData.set(gameId, data);
-      this.dispatch({
-        type: "state",
-        id: gameId,
-        data: data,
-      })
-    }
-  }
-
-  async unsubscribeFromGame(gameId: string) {
-    if (!this.subscribedGames.has(gameId)) {
-      return;
-    }
-
-    await this.waitForConnection();
-
-    this.socket.send(makeMessage({
-      gameId: gameId,
-      action: "unsubscribe",
-    }));
-    this.subscribedGames.delete(gameId);
-  }
-
   peekState(id: string): GameData | null {
     return this.gameData.get(id) ?? null;
   }
@@ -265,9 +185,6 @@ export class GameClient {
   }
   peekConnected(): boolean {
     return this.connected
-  }
-  subscribedTo(): string[] {
-    return Array.from(this.subscribedGames);
   }
   listen(listener: Listener) {
     this.listeners.push(listener);

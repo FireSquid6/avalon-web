@@ -6,7 +6,19 @@ import { getPartialFromEnv, getConfigFromPartial } from "./backend/config";
 import { getDb } from "./backend/db";
 import { GameObserver } from "./backend/game";
 import { getSessionWithToken } from "./backend/db/auth";
-import { handleClose, handleMessage, type SocketContext, type WsData } from "./backend/socket";
+import { chatResponse, stateResponse } from "./backend/protocol";
+import { generateKnowledgeMap } from "./engine/logic";
+
+export interface SocketContext {
+  config: Config;
+  observer: GameObserver;
+}
+
+export interface WsData {
+  user: User;
+  session: Session;
+  id: string;
+}
 
 
 function startApp(config: Config) {
@@ -66,15 +78,25 @@ function startApp(config: Config) {
       async close(ws) {
         const data = ws.data as WsData
         console.log("Disconnected:", data.id);
-        await handleClose(socketContext, ws as ServerWebSocket<WsData>);
+        observer.unsubscribeId(data.id);
       },
-      async message(ws, buffer) {
-        const message = buffer.toString();
-        // we can typecast trust me
-        await handleMessage(socketContext, ws as ServerWebSocket<WsData>, message);
+      async message(ws) {
+        ws.send("Sending messages to this web socket does nothing. It's purely for server events");
       },
       async open(ws) {
         const data = ws.data as WsData
+        observer.subscribeToUser(data.id, data.user.username, (e) => {
+          switch (e.type) {
+            case "state":
+              const knowledge = generateKnowledgeMap(e.state);
+              ws.send(stateResponse(e.state, knowledge[data.user.username] ?? []));
+              break;
+            case "message":
+              ws.send(chatResponse(e.newMessage));
+              break;
+          }
+
+        })
         console.log("Connected:", data.id);
       },
       // idk what to do with this one

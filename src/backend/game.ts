@@ -1,11 +1,8 @@
 import type { GameState, GameInfo } from "@/engine";
 import type { Db } from "./db";
 import { updateGameState, getGameById } from "./db/game";
-import type { Message, User } from "./db/schema";
-import { viewStateAs } from "@/engine/view";
-import { generateKnowledgeMap } from "@/engine/logic";
-import { stateResponse, chatResponse } from "./protocol";
-import type { ServerWebSocket } from "bun";
+import type { Message } from "./db/schema";
+import { randomUUIDv7 } from "bun";
 
 export type GameEvent = {
   type: "message";
@@ -18,69 +15,51 @@ export type GameEvent = {
 export type GameListener = (e: GameEvent) => void;
 
 export interface SpecificListener {
-  id: string;
+  socketId: string;
+  username: string;
   fn: GameListener;
 }
 
 export class GameObserver {
   private db: Db;
-  private listeners: Record<string, SpecificListener[]> = {};
+  private listeners: SpecificListener[] = [];
 
   constructor(db: Db) {
     this.db = db;
   }
 
-  subscribe(gameId: string, listenerId: string, listener: GameListener) {
-    if (this.isSubscribed(gameId, listenerId)) {
-      return;
-    }
-
-    if (this.listeners[gameId]) {
-      this.listeners[gameId].push({
-        id: listenerId,
-        fn: listener,
-      });
-    }
-    this.listeners[gameId] = [{
-      id: listenerId,
+  subscribeToUser(socketId: string, username: string, listener: GameListener) {
+    this.listeners.push({
+      username,
+      socketId,
       fn: listener,
-    }];
-
-    return () => {
-      this.listeners[gameId]?.filter((l) => l.id !== listenerId);
-    }
+    });
   }
 
-  isSubscribed(gameId: string, listenerId: string): boolean {
-    const l = this.listeners[gameId];
-    if (!l) {
-      return false;
-    }
-    return l.find((l) => l.id === listenerId) !== undefined;
+  unsubscribeId(id: string) {
+    this.listeners.filter((l) => l.socketId !== id);
   }
-
-  unsubscribeListener(listenerId: string) {
-    for (const gameId of Object.keys(this.listeners)) {
-      this.listeners[gameId]?.filter((l) => l.id !== listenerId);
-    }
-  }
-
-  unsubscribe(listenerId: string, gameId: string) {
-    this.listeners[gameId]?.filter((l) => l.id !== listenerId);
-  }
-
 
   async update(state: GameState) {
     await updateGameState(this.db, state);
 
-    for (const l of this.listeners[state.id] ?? []) {
-      l.fn({ type: "state", state });
+    const users = new Set(state.players.map((p) => p.id));
+
+    for (const l of this.listeners) {
+      if (l.username in users) {
+        l.fn({ type: "state", state: state });
+      }
     }
   }
 
   async chat(gameId: string, message: Message) {
-    for (const l of this.listeners[gameId] ?? []) {
-      l.fn({ type: "message", newMessage: message });
+    const game = await getGameById(this.db, gameId);
+    const users = new Set(game?.players.map((p) => p.id));
+
+    for (const l of this.listeners) {
+      if (l.username in users) {
+        l.fn({ type: "message", newMessage: message });
+      }
     }
   }
 
@@ -107,22 +86,3 @@ export class GameObserver {
   }
 }
 
-export function makeListener(user: User, ws: ServerWebSocket<any>): GameListener {
-  return (e) => {
-    switch (e.type) {
-      case "state":
-        const state = e.state;
-        const view = viewStateAs(state, user.username);
-        const knowledgeMap = generateKnowledgeMap(state);
-
-        const knowledge = knowledgeMap[user.username] ?? [];
-
-        console.log("Sending new state...");
-        ws.send(stateResponse(view, knowledge));
-        break;
-      case "message":
-        ws.send(chatResponse(e.newMessage));
-    }
-  }
-
-}

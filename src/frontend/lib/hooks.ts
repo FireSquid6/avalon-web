@@ -111,8 +111,6 @@ export function useGameSubscription(gameId: string): GameSubscriptionResponse {
   const pushError = usePushError();
 
   useEffect(() => {
-    client.subscribeToGame(gameId);
-
     const unlisten = client.listen((e) => {
       switch (e.type) {
         case "active":
