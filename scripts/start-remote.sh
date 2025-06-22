@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
 cd "$(dirname "$0")" || exit
-
-./remote-env.sh
+set -a
+source ./.remote-config || exit
+set +a
 
 cd .. || exit
 bun run start
