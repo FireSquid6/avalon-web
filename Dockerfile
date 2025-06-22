@@ -8,7 +8,5 @@ COPY . /app
 WORKDIR /app
 RUN bun install --frozen-lockfile
 
-RUN ./scripts/generate.sh
-
 EXPOSE 3120/tcp
 ENTRYPOINT ["bun", "run", "start"]
