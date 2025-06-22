@@ -44,9 +44,11 @@ export class GameObserver {
     await updateGameState(this.db, state);
 
     const users = new Set(state.players.map((p) => p.id));
+    console.log("Dispatching for:", users);
 
     for (const l of this.listeners) {
-      if (l.username in users) {
+      if (users.has(l.username)) {
+        console.log("Calling for", l.socketId);
         l.fn({ type: "state", state: state });
       }
     }
@@ -57,7 +59,7 @@ export class GameObserver {
     const users = new Set(game?.players.map((p) => p.id));
 
     for (const l of this.listeners) {
-      if (l.username in users) {
+      if (users.has(l.username)) {
         l.fn({ type: "message", newMessage: message });
       }
     }

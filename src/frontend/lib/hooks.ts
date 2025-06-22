@@ -110,6 +110,8 @@ export function useGameSubscription(gameId: string): GameSubscriptionResponse {
   const [messages, setMessages] = useState<Message[]>(client.peekChat(gameId));
   const pushError = usePushError();
 
+  client.fetchIfUnknown(gameId);
+
   useEffect(() => {
     const unlisten = client.listen((e) => {
       switch (e.type) {

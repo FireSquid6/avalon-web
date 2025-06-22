@@ -1,4 +1,4 @@
-import { randomUUIDv7, serve, type ServerWebSocket } from "bun";
+import { randomUUIDv7, serve } from "bun";
 import index from "./frontend/index.html";
 import type { Config } from "./backend/config";
 import { app } from "./backend/routes"
@@ -8,6 +8,7 @@ import { GameObserver } from "./backend/game";
 import { getSessionWithToken } from "./backend/db/auth";
 import { chatResponse, stateResponse } from "./backend/protocol";
 import { generateKnowledgeMap } from "./engine/logic";
+import type { User, Session } from "./backend/db/schema";
 
 export interface SocketContext {
   config: Config;
@@ -95,9 +96,7 @@ function startApp(config: Config) {
               ws.send(chatResponse(e.newMessage));
               break;
           }
-
-        })
-        console.log("Connected:", data.id);
+        });
       },
       // idk what to do with this one
       drain() { },

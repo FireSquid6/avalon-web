@@ -91,6 +91,7 @@ export class GameClient {
 
     this.socket = getSocket();
     this.socket.onmessage = async (e) => {
+      console.log("Recieved a message")
       const response = responseSchema.parse(JSON.parse(e.data));
 
       switch (response.type) {
@@ -129,6 +130,7 @@ export class GameClient {
     }
     this.socket.onerror = (e) => {
       console.log("Got an error from the socket");
+      console.log(e);
     }
 
     await this.waitForConnection();
@@ -168,6 +170,39 @@ export class GameClient {
         }
       });
     });
+  }
+
+  // when we join a game, we are given the current state by the server
+  // we can immediate put it in the client's store with this function
+  // so that there is no loading stage when we first go into the game
+  hintKnownData(gameId: string, data: GameData) {
+    if (this.gameData.has(gameId)) {
+      return;
+    }
+    this.gameData.set(gameId, data);
+    this.dispatch({ type: "state", id: gameId, data: data });
+  }
+
+  // if we don't have any info on the game, we will fetch the data
+  // for the game
+  //
+  // this is useful if the page for a game is reloaded
+  async fetchIfUnknown(gameId: string) {
+    if (this.gameData.has(gameId)) {
+      return;
+    }
+
+    const { data, error } = await treaty.api.games({ id: gameId }).state.get();
+    if (error !== null) {
+      this.dispatch({
+        type: "error",
+        error: new Error("Error fetching")
+      })
+      return;
+    }
+
+    this.gameData.set(gameId, data);
+    this.dispatch({ type: "state", id: gameId, data: data });
   }
 
   peekChat(gameId: string): Message[] {
