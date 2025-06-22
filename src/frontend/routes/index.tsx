@@ -4,7 +4,7 @@ import { JoinGameForm } from "../components/JoinGameForm"
 import { GameList } from "../components/GameList"
 import type { Rule } from "@/engine"
 import { useAvailableGames } from "../lib/hooks"
-import { createGame, joinGame } from "../lib/game"
+import { client, createGame, joinGame } from "../lib/game"
 import { usePushError } from "../lib/errors"
 import { JoinedGames } from "../components/JoinedGames"
 
@@ -23,6 +23,8 @@ function Index() {
       return;
     }
 
+    client.hintKnownData(data.state.id, data);
+
     navigate({
       to: "/game/$gameId",
       params: {
@@ -38,6 +40,8 @@ function Index() {
       pushError(data);
       return;
     }
+
+    client.hintKnownData(data.state.id, data);
 
     navigate({
       to: "/game/$gameId",

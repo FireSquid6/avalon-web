@@ -1,3 +1,4 @@
+import { client } from "./game";
 import { treaty } from "./treaty";
 
 export async function createUser(username: string, email: string, password: string): Promise<Error | "OK"> {
@@ -15,15 +16,13 @@ export async function createUser(username: string, email: string, password: stri
 }
 
 export async function login(email: string, password: string): Promise<Error | "OK"> {
-  console.log(document.cookie);
-  const { error, data } = await treaty.api.sessions.post({ email, password });
+  const { error } = await treaty.api.sessions.post({ email, password });
 
   if (error !== null) {
     return new Error(`Error logging in: ${error.status} - ${error.value}`);
   }
 
-  console.log(data);
-  console.log(document.cookie);
+  client.reconnect();
 
   return "OK"
 
@@ -36,6 +35,7 @@ export async function logout(): Promise<Error | "OK"> {
     return new Error(`Error signing out: ${error.status} - ${error.value}`);
   }
 
+  client.reconnect();
   return "OK";
 }
 
