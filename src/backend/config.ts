@@ -2,8 +2,6 @@ import { z } from "zod";
 import YAML from "yaml";
 import fs from "fs";
 
-// TODO - add ability to load fromm environment variables and use that
-
 export const configSchema = z.object({
   port: z.optional(z.number()),
   dbType: z.optional(z.enum(["local", "remote"])),

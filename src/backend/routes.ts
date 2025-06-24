@@ -16,12 +16,18 @@ import { createGame, getJoinedGamesByUser, getWaitingGames } from "./db/game";
 import { createMessage, lastNMessages } from "./db/chat";
 import type { Message } from "./db/schema";
 import { cookiePlugin } from "./plugins/cookie";
+import { rateLimit } from "elysia-rate-limit";
 
-// TODO - rate limit
+
 export const app = new Elysia()
   .use(loggerPlugin)
   .use(cors())
   .use(cookiePlugin())
+  // no more than 10 reqs/sec
+  .use(rateLimit({
+    duration: 1000,
+    max: 10,
+  }))
   .state("observer", {} as GameObserver)
   .state("config", {} as Config)
   .state("db", {} as Db)
