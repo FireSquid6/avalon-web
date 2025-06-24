@@ -75,3 +75,13 @@ export const sessionsTable = sqliteTable("sessions", {
 });
 
 export type Session = InferSelectModel<typeof sessionsTable>;
+
+export const resetTable = sqliteTable("resets", {
+  id: text().notNull().unique().primaryKey(),
+  username: text().notNull().references(() => usersTable.username),
+  expiresAt: int({ mode: "timestamp_ms" }).notNull(),
+  key: text().notNull(),
+});
+export type ResetToken = InferSelectModel<typeof resetTable>;
+
+

@@ -8,136 +8,149 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as TestGameRouteImport } from './routes/test-game'
-import { Route as SignoutRouteImport } from './routes/signout'
-import { Route as RulesRouteImport } from './routes/rules'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as ProfileUsernameRouteImport } from './routes/profile/$username'
-import { Route as MeProfileRouteImport } from './routes/me/profile'
-import { Route as MeGamesRouteImport } from './routes/me/games'
-import { Route as GameGameIdRouteImport } from './routes/game/$gameId'
+import { Route as rootRouteImport } from "./routes/__root"
+import { Route as TestGameRouteImport } from "./routes/test-game"
+import { Route as SignoutRouteImport } from "./routes/signout"
+import { Route as RulesRouteImport } from "./routes/rules"
+import { Route as ResetRouteImport } from "./routes/reset"
+import { Route as AuthRouteImport } from "./routes/auth"
+import { Route as IndexRouteImport } from "./routes/index"
+import { Route as ProfileUsernameRouteImport } from "./routes/profile/$username"
+import { Route as MeProfileRouteImport } from "./routes/me/profile"
+import { Route as MeGamesRouteImport } from "./routes/me/games"
+import { Route as GameGameIdRouteImport } from "./routes/game/$gameId"
 
 const TestGameRoute = TestGameRouteImport.update({
-  id: '/test-game',
-  path: '/test-game',
+  id: "/test-game",
+  path: "/test-game",
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignoutRoute = SignoutRouteImport.update({
-  id: '/signout',
-  path: '/signout',
+  id: "/signout",
+  path: "/signout",
   getParentRoute: () => rootRouteImport,
 } as any)
 const RulesRoute = RulesRouteImport.update({
-  id: '/rules',
-  path: '/rules',
+  id: "/rules",
+  path: "/rules",
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetRoute = ResetRouteImport.update({
+  id: "/reset",
+  path: "/reset",
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
+  id: "/auth",
+  path: "/auth",
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileUsernameRoute = ProfileUsernameRouteImport.update({
-  id: '/profile/$username',
-  path: '/profile/$username',
+  id: "/profile/$username",
+  path: "/profile/$username",
   getParentRoute: () => rootRouteImport,
 } as any)
 const MeProfileRoute = MeProfileRouteImport.update({
-  id: '/me/profile',
-  path: '/me/profile',
+  id: "/me/profile",
+  path: "/me/profile",
   getParentRoute: () => rootRouteImport,
 } as any)
 const MeGamesRoute = MeGamesRouteImport.update({
-  id: '/me/games',
-  path: '/me/games',
+  id: "/me/games",
+  path: "/me/games",
   getParentRoute: () => rootRouteImport,
 } as any)
 const GameGameIdRoute = GameGameIdRouteImport.update({
-  id: '/game/$gameId',
-  path: '/game/$gameId',
+  id: "/game/$gameId",
+  path: "/game/$gameId",
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
-  '/rules': typeof RulesRoute
-  '/signout': typeof SignoutRoute
-  '/test-game': typeof TestGameRoute
-  '/game/$gameId': typeof GameGameIdRoute
-  '/me/games': typeof MeGamesRoute
-  '/me/profile': typeof MeProfileRoute
-  '/profile/$username': typeof ProfileUsernameRoute
+  "/": typeof IndexRoute
+  "/auth": typeof AuthRoute
+  "/reset": typeof ResetRoute
+  "/rules": typeof RulesRoute
+  "/signout": typeof SignoutRoute
+  "/test-game": typeof TestGameRoute
+  "/game/$gameId": typeof GameGameIdRoute
+  "/me/games": typeof MeGamesRoute
+  "/me/profile": typeof MeProfileRoute
+  "/profile/$username": typeof ProfileUsernameRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
-  '/rules': typeof RulesRoute
-  '/signout': typeof SignoutRoute
-  '/test-game': typeof TestGameRoute
-  '/game/$gameId': typeof GameGameIdRoute
-  '/me/games': typeof MeGamesRoute
-  '/me/profile': typeof MeProfileRoute
-  '/profile/$username': typeof ProfileUsernameRoute
+  "/": typeof IndexRoute
+  "/auth": typeof AuthRoute
+  "/reset": typeof ResetRoute
+  "/rules": typeof RulesRoute
+  "/signout": typeof SignoutRoute
+  "/test-game": typeof TestGameRoute
+  "/game/$gameId": typeof GameGameIdRoute
+  "/me/games": typeof MeGamesRoute
+  "/me/profile": typeof MeProfileRoute
+  "/profile/$username": typeof ProfileUsernameRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
-  '/rules': typeof RulesRoute
-  '/signout': typeof SignoutRoute
-  '/test-game': typeof TestGameRoute
-  '/game/$gameId': typeof GameGameIdRoute
-  '/me/games': typeof MeGamesRoute
-  '/me/profile': typeof MeProfileRoute
-  '/profile/$username': typeof ProfileUsernameRoute
+  "/": typeof IndexRoute
+  "/auth": typeof AuthRoute
+  "/reset": typeof ResetRoute
+  "/rules": typeof RulesRoute
+  "/signout": typeof SignoutRoute
+  "/test-game": typeof TestGameRoute
+  "/game/$gameId": typeof GameGameIdRoute
+  "/me/games": typeof MeGamesRoute
+  "/me/profile": typeof MeProfileRoute
+  "/profile/$username": typeof ProfileUsernameRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
-    | '/auth'
-    | '/rules'
-    | '/signout'
-    | '/test-game'
-    | '/game/$gameId'
-    | '/me/games'
-    | '/me/profile'
-    | '/profile/$username'
+    | "/"
+    | "/auth"
+    | "/reset"
+    | "/rules"
+    | "/signout"
+    | "/test-game"
+    | "/game/$gameId"
+    | "/me/games"
+    | "/me/profile"
+    | "/profile/$username"
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
-    | '/auth'
-    | '/rules'
-    | '/signout'
-    | '/test-game'
-    | '/game/$gameId'
-    | '/me/games'
-    | '/me/profile'
-    | '/profile/$username'
+    | "/"
+    | "/auth"
+    | "/reset"
+    | "/rules"
+    | "/signout"
+    | "/test-game"
+    | "/game/$gameId"
+    | "/me/games"
+    | "/me/profile"
+    | "/profile/$username"
   id:
-    | '__root__'
-    | '/'
-    | '/auth'
-    | '/rules'
-    | '/signout'
-    | '/test-game'
-    | '/game/$gameId'
-    | '/me/games'
-    | '/me/profile'
-    | '/profile/$username'
+    | "__root__"
+    | "/"
+    | "/auth"
+    | "/reset"
+    | "/rules"
+    | "/signout"
+    | "/test-game"
+    | "/game/$gameId"
+    | "/me/games"
+    | "/me/profile"
+    | "/profile/$username"
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  ResetRoute: typeof ResetRoute
   RulesRoute: typeof RulesRoute
   SignoutRoute: typeof SignoutRoute
   TestGameRoute: typeof TestGameRoute
@@ -147,68 +160,75 @@ export interface RootRouteChildren {
   ProfileUsernameRoute: typeof ProfileUsernameRoute
 }
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    '/test-game': {
-      id: '/test-game'
-      path: '/test-game'
-      fullPath: '/test-game'
+    "/test-game": {
+      id: "/test-game"
+      path: "/test-game"
+      fullPath: "/test-game"
       preLoaderRoute: typeof TestGameRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/signout': {
-      id: '/signout'
-      path: '/signout'
-      fullPath: '/signout'
+    "/signout": {
+      id: "/signout"
+      path: "/signout"
+      fullPath: "/signout"
       preLoaderRoute: typeof SignoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/rules': {
-      id: '/rules'
-      path: '/rules'
-      fullPath: '/rules'
+    "/rules": {
+      id: "/rules"
+      path: "/rules"
+      fullPath: "/rules"
       preLoaderRoute: typeof RulesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
+    "/reset": {
+      id: "/reset"
+      path: "/reset"
+      fullPath: "/reset"
+      preLoaderRoute: typeof ResetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/auth": {
+      id: "/auth"
+      path: "/auth"
+      fullPath: "/auth"
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
+    "/": {
+      id: "/"
+      path: "/"
+      fullPath: "/"
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/profile/$username': {
-      id: '/profile/$username'
-      path: '/profile/$username'
-      fullPath: '/profile/$username'
+    "/profile/$username": {
+      id: "/profile/$username"
+      path: "/profile/$username"
+      fullPath: "/profile/$username"
       preLoaderRoute: typeof ProfileUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/me/profile': {
-      id: '/me/profile'
-      path: '/me/profile'
-      fullPath: '/me/profile'
+    "/me/profile": {
+      id: "/me/profile"
+      path: "/me/profile"
+      fullPath: "/me/profile"
       preLoaderRoute: typeof MeProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/me/games': {
-      id: '/me/games'
-      path: '/me/games'
-      fullPath: '/me/games'
+    "/me/games": {
+      id: "/me/games"
+      path: "/me/games"
+      fullPath: "/me/games"
       preLoaderRoute: typeof MeGamesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/game/$gameId': {
-      id: '/game/$gameId'
-      path: '/game/$gameId'
-      fullPath: '/game/$gameId'
+    "/game/$gameId": {
+      id: "/game/$gameId"
+      path: "/game/$gameId"
+      fullPath: "/game/$gameId"
       preLoaderRoute: typeof GameGameIdRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -218,6 +238,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  ResetRoute: ResetRoute,
   RulesRoute: RulesRoute,
   SignoutRoute: SignoutRoute,
   TestGameRoute: TestGameRoute,

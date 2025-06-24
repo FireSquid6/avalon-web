@@ -1,5 +1,5 @@
 import type { Message } from "@/backend/db/schema";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface ChatProps {
   messages: Message[];
@@ -9,6 +9,7 @@ interface ChatProps {
 
 export function Chat({ messages, viewingUser, onSendMessage }: ChatProps) {
   const [messageInput, setMessageInput] = useState("");
+  const windowRef = useRef<HTMLDivElement | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,9 +19,14 @@ export function Chat({ messages, viewingUser, onSendMessage }: ChatProps) {
     }
   };
 
+  useEffect(() => {
+    const w = windowRef.current!;
+    w.scrollTop = w.scrollHeight;
+  }, [messages])
+
   return (
     <div className="flex flex-col h-full">
-      <div className="flex flex-col gap-2 p-4 flex-1 overflow-y-auto">
+      <div className="flex flex-col gap-2 p-4 flex-1 overflow-y-auto" ref={windowRef}>
         {messages.map((message) => {
           const isOwnMessage = message.userId === viewingUser;
           

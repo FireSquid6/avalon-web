@@ -91,7 +91,6 @@ export class GameClient {
 
     this.socket = getSocket();
     this.socket.onmessage = async (e) => {
-      console.log("Recieved a message")
       const response = responseSchema.parse(JSON.parse(e.data));
 
       switch (response.type) {
@@ -105,6 +104,9 @@ export class GameClient {
           break;
         case "chat":
           const { gameId, sent, userId, content, id: messageId } = response.message;
+          if (!this.chats[gameId]) {
+            this.chats[gameId] = [];
+          }
           this.chats[gameId].push({
             id: messageId,
             sent: new Date(sent),
@@ -112,6 +114,7 @@ export class GameClient {
             userId,
             content,
           });
+          this.chats[gameId].sort((a, b) => a.sent.valueOf() - b.sent.valueOf());
 
           this.dispatch({ type: "chat", chats: this.chats[gameId] })
       }
@@ -196,13 +199,26 @@ export class GameClient {
     if (error !== null) {
       this.dispatch({
         type: "error",
-        error: new Error("Error fetching")
+        error: new Error(`Error fetching game: ${error.status} - ${error.value}`),
       })
       return;
     }
 
     this.gameData.set(gameId, data);
     this.dispatch({ type: "state", id: gameId, data: data });
+
+    const { data: chats, error: chatError } = await treaty.api.games({ id: gameId }).chat.get();
+
+    if (chatError !== null) {
+      this.dispatch({
+        type: "error",
+        error: new Error(`Error fetching chats: ${chatError.status} - ${chatError.value}`),
+      });
+      return;
+    }
+
+    this.chats[gameId] = chats;
+    this.dispatch({ type: "chat", chats: chats });
   }
 
   peekChat(gameId: string): Message[] {

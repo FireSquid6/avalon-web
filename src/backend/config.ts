@@ -7,6 +7,7 @@ export const configSchema = z.object({
   dbType: z.optional(z.enum(["local", "remote"])),
   databasePath: z.optional(z.string()),
   databaseToken: z.optional(z.string()),
+  emailToken: z.optional(z.union([z.string(), z.null()])),
 });
 
 export type PartialConfig = z.infer<typeof configSchema>;
@@ -34,6 +35,7 @@ export function getPartialFromEnv(): PartialConfig {
     dbType: process.env.AVALON_DB_TYPE === "remote" ? "remote" : "local" ,
     databasePath: process.env.AVALON_DB_PATH,
     databaseToken: process.env.AVALON_DB_TOKEN,
+    emailToken: process.env.AVALON_EMAIL_TOKEN,
   }
 
 }
@@ -44,5 +46,6 @@ export function getConfigFromPartial(p: PartialConfig): Config {
     databasePath: p.databasePath ?? ":memory:",
     databaseToken: p.databaseToken ?? "",
     dbType: p.dbType ?? "local",
+    emailToken: p.emailToken ?? null,
   }
 }

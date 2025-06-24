@@ -1,5 +1,5 @@
 import type { Message } from "@/backend/db/schema";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Chat } from "./Chat";
 
 interface ChatWindowProps {
