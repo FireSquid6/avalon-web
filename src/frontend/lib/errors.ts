@@ -1,5 +1,7 @@
 import { atom, useAtom } from "jotai";
+
 export const errorAtom = atom<Error | null>(null);
+export const toastAtom = atom<string | null>(null);
 
 
 export function usePushError() {
@@ -9,5 +11,13 @@ export function usePushError() {
     console.error(err);
     setError(err);
 
+  }
+}
+
+export function usePushMessage() {
+  const [_, setMessage] = useAtom(toastAtom);
+
+  return (s: string) => {
+    setMessage(s);
   }
 }

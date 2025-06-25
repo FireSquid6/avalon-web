@@ -333,7 +333,7 @@ export const app = new Elysia()
       email: user.email,
     }
   })
-  .post("/forgotpassword", async ({ body, store: { db, config } }) => {
+  .post("/api/forgotpassword", async ({ body, store: { db, config } }) => {
     const returnString = "If the user exists, a reset token will be emailed";
     const token = await createResetToken(db, body.email);
 
@@ -352,7 +352,7 @@ export const app = new Elysia()
       email: t.String(),
     }),
   })
-  .post("/passwordreset", async ({ body, status, store: { db, config } }) => {
+  .post("/api/passwordreset", async ({ body, status, store: { db, config } }) => {
     const username = await validateResetToken(db, body.token);
 
     if (username === null) {
