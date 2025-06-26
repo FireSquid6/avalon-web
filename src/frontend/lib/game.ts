@@ -66,17 +66,10 @@ export class GameClient {
   //@ts-expect-error we do actually define it in the constructor. It's fine.
   private socket: WebSocket;
   private listeners: Listener[] = [];
-  private reconnecting: boolean = false;
 
-  async reconnect() {
-    // we don't want to reconnect if we are already trying to
-    if (this.reconnecting || this.connected) {
-      return;
-    }
-
-    this.reconnecting = true;
+  reconnect() {
+    console.log("Starting the reconnection");
     this.connected = false;
-    console.log("Reconnecting...");
 
     // we want to automatically resubscribe to all stuff we had previously
     const previousData = new Map<string, GameData>();
@@ -89,6 +82,15 @@ export class GameClient {
     this.chats = {}
     this.gameData = new Map();
 
+    if (this.socket) {
+      console.log("Closing old socket");
+      this.socket.onclose = () => {};
+      this.socket.onopen = () => {};
+      this.socket.onerror = () => {};
+      this.socket.close();
+    }
+
+    console.log("Getting new socket");
     this.socket = getSocket();
     this.socket.onmessage = async (e) => {
       const response = responseSchema.parse(JSON.parse(e.data));
@@ -135,9 +137,6 @@ export class GameClient {
       console.log("Got an error from the socket");
       console.log(e);
     }
-
-    await this.waitForConnection();
-    this.reconnecting = false;
   }
 
   constructor() {

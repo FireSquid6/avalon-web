@@ -22,6 +22,7 @@ export async function login(email: string, password: string): Promise<Error | "O
     return new Error(`Error logging in: ${error.status} - ${error.value}`);
   }
 
+  console.log("Calling reconnect function");
   client.reconnect();
 
   return "OK"
@@ -35,6 +36,7 @@ export async function logout(): Promise<Error | "OK"> {
     return new Error(`Error signing out: ${error.status} - ${error.value}`);
   }
 
+  console.log("Calling reconnect function");
   client.reconnect();
   return "OK";
 }

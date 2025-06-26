@@ -10,10 +10,6 @@ import { chatResponse, stateResponse } from "./backend/protocol";
 import { generateKnowledgeMap } from "./engine/logic";
 import type { User, Session } from "./backend/db/schema";
 
-export interface SocketContext {
-  config: Config;
-  observer: GameObserver;
-}
 
 export interface WsData {
   user: User;
@@ -25,11 +21,6 @@ export interface WsData {
 function startApp(config: Config) {
   const db = getDb(config);
   const observer = new GameObserver(db)
-
-  const socketContext: SocketContext = {
-    config,
-    observer,
-  }
 
   app.store.config = config;
   app.store.observer = observer;
