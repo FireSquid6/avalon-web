@@ -176,6 +176,8 @@ export async function validateResetToken(db: Db, token: string): Promise<string 
     .from(resetTable)
     .where(eq(resetTable.key, token))
 
+  console.log(token);
+  console.log(tokens);
 
   if (tokens.length !== 1) {
     return null
@@ -183,7 +185,7 @@ export async function validateResetToken(db: Db, token: string): Promise<string 
   const user = tokens[0].username;
   const expires = tokens[0].expiresAt;
 
-  if (expires > new Date()) {
+  if (expires.valueOf() < Date.now()) {
     return null;
   }
 

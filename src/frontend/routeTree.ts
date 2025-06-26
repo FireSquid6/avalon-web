@@ -13,6 +13,7 @@ import { Route as TestGameRouteImport } from "./routes/test-game"
 import { Route as SignoutRouteImport } from "./routes/signout"
 import { Route as RulesRouteImport } from "./routes/rules"
 import { Route as ResetRouteImport } from "./routes/reset"
+import { Route as ForgotRouteImport } from "./routes/forgot"
 import { Route as AuthRouteImport } from "./routes/auth"
 import { Route as IndexRouteImport } from "./routes/index"
 import { Route as ProfileUsernameRouteImport } from "./routes/profile/$username"
@@ -38,6 +39,11 @@ const RulesRoute = RulesRouteImport.update({
 const ResetRoute = ResetRouteImport.update({
   id: "/reset",
   path: "/reset",
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotRoute = ForgotRouteImport.update({
+  id: "/forgot",
+  path: "/forgot",
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -74,6 +80,7 @@ const GameGameIdRoute = GameGameIdRouteImport.update({
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute
   "/auth": typeof AuthRoute
+  "/forgot": typeof ForgotRoute
   "/reset": typeof ResetRoute
   "/rules": typeof RulesRoute
   "/signout": typeof SignoutRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   "/": typeof IndexRoute
   "/auth": typeof AuthRoute
+  "/forgot": typeof ForgotRoute
   "/reset": typeof ResetRoute
   "/rules": typeof RulesRoute
   "/signout": typeof SignoutRoute
@@ -99,6 +107,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   "/": typeof IndexRoute
   "/auth": typeof AuthRoute
+  "/forgot": typeof ForgotRoute
   "/reset": typeof ResetRoute
   "/rules": typeof RulesRoute
   "/signout": typeof SignoutRoute
@@ -113,6 +122,7 @@ export interface FileRouteTypes {
   fullPaths:
     | "/"
     | "/auth"
+    | "/forgot"
     | "/reset"
     | "/rules"
     | "/signout"
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
   to:
     | "/"
     | "/auth"
+    | "/forgot"
     | "/reset"
     | "/rules"
     | "/signout"
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | "__root__"
     | "/"
     | "/auth"
+    | "/forgot"
     | "/reset"
     | "/rules"
     | "/signout"
@@ -150,6 +162,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  ForgotRoute: typeof ForgotRoute
   ResetRoute: typeof ResetRoute
   RulesRoute: typeof RulesRoute
   SignoutRoute: typeof SignoutRoute
@@ -188,6 +201,13 @@ declare module "@tanstack/react-router" {
       path: "/reset"
       fullPath: "/reset"
       preLoaderRoute: typeof ResetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/forgot": {
+      id: "/forgot"
+      path: "/forgot"
+      fullPath: "/forgot"
+      preLoaderRoute: typeof ForgotRouteImport
       parentRoute: typeof rootRouteImport
     }
     "/auth": {
@@ -238,6 +258,7 @@ declare module "@tanstack/react-router" {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  ForgotRoute: ForgotRoute,
   ResetRoute: ResetRoute,
   RulesRoute: RulesRoute,
   SignoutRoute: SignoutRoute,

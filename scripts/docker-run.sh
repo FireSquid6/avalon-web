@@ -2,14 +2,13 @@
 
 # always start in root directory
 cd "$(dirname "$0")" || exit
+
+set -a
+source ./.remote-config || exit
+set +a
+
 cd .. || exit
 
-if [ ! -f packages/server/.env.local ]; then
-  echo "no .env.local file in server"
-  exit 1
-fi
-
-source "packages/server/.env.local"
 
 docker run \
      -p 4320:4320 \

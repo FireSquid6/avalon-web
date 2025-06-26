@@ -3,6 +3,7 @@ import { useState } from "react"
 import { usePushError } from "../lib/errors"
 import { login, createUser } from "../lib/auth"
 import { useAuth } from "../lib/hooks"
+import { Link } from "@tanstack/react-router"
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -139,9 +140,12 @@ function AuthPage() {
           >
             {isSignUp ? "Already have an account? Sign In" : "Need an account? Sign Up"}
           </button>
-          <button className="mt-8 text-primary font-semibold">
+          <Link 
+            to="/forgot"
+            className="mt-8 text-primary font-semibold text-center"
+          >
             Forgot Password?
-          </button>
+          </Link>
         </div>
       </div>
     </div>

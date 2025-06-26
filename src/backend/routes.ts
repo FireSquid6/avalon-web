@@ -344,6 +344,7 @@ export const app = new Elysia()
     if (config.emailToken) {
       console.log("TODO - actually send the email");
     }
+    console.log(token);
     console.log("Generated reset token")
 
     return returnString;

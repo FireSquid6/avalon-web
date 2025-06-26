@@ -55,7 +55,6 @@ export function MessageToast() {
       <div className="alert alert-success">
         <div className="flex-1">
           <div className="flex flex-col">
-            <span className="font-semibold">Error</span>
             <span className="text-sm">{message}</span>
           </div>
         </div>

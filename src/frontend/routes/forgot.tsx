@@ -3,43 +3,33 @@ import { usePushError, usePushMessage } from "../lib/errors";
 import { useState } from "react";
 import { treaty } from "../lib/treaty";
 
-export const Route = createFileRoute("/reset")({
-  component: ResetPage,
+export const Route = createFileRoute("/forgot")({
+  component: ForgotPage,
 })
 
-function ResetPage() {
-  const query = Route.useSearch() as Record<"code", string | undefined>;
+function ForgotPage() {
   const navigate = Route.useNavigate();
   const pushError = usePushError();
   const pushMessage = usePushMessage();
-  const [password, setPassword] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
 
   const handleSubmit = async () => {
-    if (!query.code) {
-      pushError(new Error("No passowrd reset code provided"));
-      return;
-    }
-
     setLoading(true);
 
-    const { error } = await treaty.api.passwordreset.post({
-      token: query.code,
-      newPassword: password,
+    const { data, error } = await treaty.api.forgotpassword.post({
+      email,
     });
 
     if (error) {
       pushError(new Error(`Error resetting password: ${error.status} - ${error.value}`));
     } else {
-      pushMessage("Successfully reset password.")
+      pushMessage(data);
       navigate({
         to: "/auth",
       });
-
     }
-
-
 
     setLoading(false);
   }
@@ -47,21 +37,22 @@ function ResetPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-base-200">
       <div className="card w-96 bg-base-100 shadow-xl">
-        <h2 className="card-title justify-center mb-6">
-          Reset Password
-        </h2>
         <div className="card-body">
-          <form className="space-y-4">
+          <h2 className="card-title justify-center mb-6">
+            Reset Password
+          </h2>
+          <form onSubmit={handleSubmit} className="space-y-4">
+
             <div className="form-control">
               <label className="label">
-                <span className="label-text">Password</span>
+                <span className="label-text">Email</span>
               </label>
               <input
-                type="password"
-                placeholder="Enter your password"
+                type="email"
+                placeholder="Enter your email"
                 className="input input-bordered"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
@@ -69,11 +60,11 @@ function ResetPage() {
             <div className="form-control mt-6">
               <button
                 type="button"
-                onClick={handleSubmit}
                 className="btn btn-primary"
                 disabled={loading}
+                onClick={handleSubmit}
               >
-                Reset Password
+                Send Rest Email
               </button>
             </div>
           </form>
