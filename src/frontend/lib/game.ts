@@ -66,17 +66,10 @@ export class GameClient {
   //@ts-expect-error we do actually define it in the constructor. It's fine.
   private socket: WebSocket;
   private listeners: Listener[] = [];
-  private reconnecting: boolean = false;
 
-  async reconnect() {
-    // we don't want to reconnect if we are already trying to
-    if (this.reconnecting || this.connected) {
-      return;
-    }
-
-    this.reconnecting = true;
+  reconnect() {
+    console.log("Starting the reconnection");
     this.connected = false;
-    console.log("Reconnecting...");
 
     // we want to automatically resubscribe to all stuff we had previously
     const previousData = new Map<string, GameData>();
@@ -89,9 +82,17 @@ export class GameClient {
     this.chats = {}
     this.gameData = new Map();
 
+    if (this.socket) {
+      console.log("Closing old socket");
+      this.socket.onclose = () => {};
+      this.socket.onopen = () => {};
+      this.socket.onerror = () => {};
+      this.socket.close();
+    }
+
+    console.log("Getting new socket");
     this.socket = getSocket();
     this.socket.onmessage = async (e) => {
-      console.log("Recieved a message")
       const response = responseSchema.parse(JSON.parse(e.data));
 
       switch (response.type) {
@@ -105,6 +106,9 @@ export class GameClient {
           break;
         case "chat":
           const { gameId, sent, userId, content, id: messageId } = response.message;
+          if (!this.chats[gameId]) {
+            this.chats[gameId] = [];
+          }
           this.chats[gameId].push({
             id: messageId,
             sent: new Date(sent),
@@ -112,6 +116,7 @@ export class GameClient {
             userId,
             content,
           });
+          this.chats[gameId].sort((a, b) => a.sent.valueOf() - b.sent.valueOf());
 
           this.dispatch({ type: "chat", chats: this.chats[gameId] })
       }
@@ -132,9 +137,6 @@ export class GameClient {
       console.log("Got an error from the socket");
       console.log(e);
     }
-
-    await this.waitForConnection();
-    this.reconnecting = false;
   }
 
   constructor() {
@@ -196,13 +198,26 @@ export class GameClient {
     if (error !== null) {
       this.dispatch({
         type: "error",
-        error: new Error("Error fetching")
+        error: new Error(`Error fetching game: ${error.status} - ${error.value}`),
       })
       return;
     }
 
     this.gameData.set(gameId, data);
     this.dispatch({ type: "state", id: gameId, data: data });
+
+    const { data: chats, error: chatError } = await treaty.api.games({ id: gameId }).chat.get();
+
+    if (chatError !== null) {
+      this.dispatch({
+        type: "error",
+        error: new Error(`Error fetching chats: ${chatError.status} - ${chatError.value}`),
+      });
+      return;
+    }
+
+    this.chats[gameId] = chats;
+    this.dispatch({ type: "chat", chats: chats });
   }
 
   peekChat(gameId: string): Message[] {

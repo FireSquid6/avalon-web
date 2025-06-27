@@ -11,6 +11,9 @@ export function Header() {
         <Link to="/rules" className="btn btn-ghost text-xl font-bold">
           Rules
         </Link>
+        <Link to="/games" className="btn btn-ghost text-xl font-bold">
+          Game Database
+        </Link>
       </div>
       <div className="navbar-end">
         <SignInButton />

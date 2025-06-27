@@ -8,7 +8,7 @@ import { viewStateAs } from "@/engine/view";
 import { loggerPlugin } from "./logger";
 import type { Config } from "./config";
 import type { Db } from "./db";
-import { createSession, createUser, deleteSesssion, getSessionWithToken, userExists, validateEmail, validatePassword, validateUsername } from "./db/auth";
+import { createResetToken, createSession, createUser, deleteSesssion, getSessionWithToken, resetPassword, userExists, validateEmail, validatePassword, validateResetToken, validateUsername } from "./db/auth";
 import { cors } from "@elysiajs/cors";
 import { getProfile } from "./db/profile";
 import { GameObserver } from "./game";
@@ -17,11 +17,12 @@ import { createMessage, lastNMessages } from "./db/chat";
 import type { Message } from "./db/schema";
 import { cookiePlugin } from "./plugins/cookie";
 
-// TODO - rate limit
+
 export const app = new Elysia()
   .use(loggerPlugin)
   .use(cors())
   .use(cookiePlugin())
+  // no more than 10 reqs/sec
   .state("observer", {} as GameObserver)
   .state("config", {} as Config)
   .state("db", {} as Db)
@@ -147,7 +148,6 @@ export const app = new Elysia()
     const { user } = await forceAuthenticated();
 
     const ruleset = z.array(ruleEnum).parse(body.ruleset);
-    // TODO - generate nicer looking ids.
     const gameId = randomGameId();
     const state = getBlankState(gameId, user.username, ruleset, body.maxPlayers, body.password);
     state.players.push({
@@ -172,10 +172,12 @@ export const app = new Elysia()
     const { user } = await forceAuthenticated();
     const state = await observer.peek(params.id);
     const password = body?.password ?? "";
-    // TODO: block join if game is full
 
     if (state === null) {
       return status("Not Found")
+    }
+    if (state.players.length >= state.expectedPlayers)  {
+      return status("Bad Request", "Game is already full");
     }
 
     if (state.status !== "waiting") {
@@ -332,7 +334,54 @@ export const app = new Elysia()
       email: user.email,
     }
   })
-// TODO - reset password with email
+  .post("/api/forgotpassword", async ({ body, store: { db, config } }) => {
+    const returnString = "If the user exists, a reset token will be emailed";
+    const token = await createResetToken(db, body.email);
+
+    if (token === null) {
+      return returnString;
+    }
+
+    if (config.emailToken) {
+      console.log("TODO - actually send the email");
+    }
+    console.log(token);
+    console.log("Generated reset token")
+
+    return returnString;
+  }, {
+    body: t.Object({
+      email: t.String(),
+    }),
+  })
+  .post("/api/passwordreset", async ({ body, status, store: { db, config } }) => {
+    const username = await validateResetToken(db, body.token);
+
+    if (username === null) {
+      // we wait to avoid someone repeatedly guessing so
+      // we make them wait if the guess is wrong
+      await new Promise((r) => setTimeout(r, 2000));
+      return status(400, "Reset token not found");
+    }
+
+    const valid = validatePassword(body.newPassword);
+    if (typeof valid === "string") {
+      return status(400, "Password invalid: " + valid);
+    }
+
+    const hashedPassword = Bun.password.hashSync(body.newPassword);
+    await resetPassword(db, username, hashedPassword);
+  }, {
+    body: t.Object({
+      token: t.String(),
+      newPassword: t.String(),
+    })
+  })
+  .get("/games", async (ctx) => {
+
+  }, {
+    query: t.Object({})
+  })
 
 function randomGameId(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';

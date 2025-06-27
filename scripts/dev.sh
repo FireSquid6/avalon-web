@@ -11,4 +11,4 @@ export AVALON_DB_PATH
 export AVALON_DB_TYPE
 export AVALON_DB_TOKEN
 
-bun run start
+bun run dev

@@ -3,4 +3,4 @@
 cd "$(dirname "$0")" || exit
 cd ../src/backend || exit
 
-bunx drizzle-kit studio --config ./configs/drizzle-local.config.ts
+bunx drizzle-kit studio --config ./configs/drizzle-dev.config.ts

@@ -3,6 +3,7 @@ import { useState } from "react"
 import { usePushError } from "../lib/errors"
 import { login, createUser } from "../lib/auth"
 import { useAuth } from "../lib/hooks"
+import { Link } from "@tanstack/react-router"
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -13,6 +14,7 @@ function AuthPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [username, setUsername] = useState("")
+  const [loading, setLoading] = useState(false);
   const pushError = usePushError();
   const { mutate } = useAuth();
   const navigate = Route.useNavigate();
@@ -46,6 +48,7 @@ function AuthPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setLoading(true);
     
     let status: "OK" | "Bad" = "Bad";
     if (isSignUp) {
@@ -64,7 +67,7 @@ function AuthPage() {
     setUsername("");
     setPassword("");
     setEmail("");
-
+    setLoading(false);
   }
 
   return (
@@ -132,10 +135,17 @@ function AuthPage() {
           <button
             type="button"
             className="btn btn-ghost"
+            disabled={loading}
             onClick={() => setIsSignUp(!isSignUp)}
           >
             {isSignUp ? "Already have an account? Sign In" : "Need an account? Sign Up"}
           </button>
+          <Link 
+            to="/forgot"
+            className="mt-8 text-primary font-semibold text-center"
+          >
+            Forgot Password?
+          </Link>
         </div>
       </div>
     </div>

@@ -125,7 +125,9 @@ export function useGameSubscription(gameId: string): GameSubscriptionResponse {
           setData(e.data);
           break;
         case "chat":
-          setMessages(e.chats);
+          // we clone the array because otherwise
+          // react can't tell that there was an update
+          setMessages([...e.chats]);
           break;
       }
 

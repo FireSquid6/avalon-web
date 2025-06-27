@@ -3,7 +3,6 @@ import { useAuth, useGameSubscription } from "../../lib/hooks";
 import { GameContextProvider } from "../../components/GameContext";
 import { GameRender } from "../../components/game";
 import { ConnectionStatus } from "../../components/ConnectionStatus";
-import { client } from "@/frontend/lib/game";
 
 export const Route = createFileRoute("/game/$gameId")({
   component: RouteComponent,
@@ -21,7 +20,8 @@ function RouteComponent() {
       <ConnectionStatus 
         connected={connected}
         onReconnect={() => {
-          client.reconnect();
+          // works the best honestly
+          location.reload();
         }}
         gameId={gameId}
       />

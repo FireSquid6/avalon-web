@@ -38,7 +38,7 @@ async function dbToGameState(db: Db, gameId: string): Promise<GameState | null> 
 
 // Convert GameState to database records
 async function gameStateToDb(db: Db, gameState: GameState): Promise<void> {
-  
+
   // Insert/update main game record
   await db.insert(gamesTable).values({
     id: gameState.id,
@@ -110,7 +110,7 @@ export async function getFinishedGamesByUser(db: Db, username: string): Promise<
     .select({ gameId: gamePlayersTable.gameId })
     .from(gamePlayersTable)
     .where(eq(gamePlayersTable.playerId, username));
-  
+
   const gameIds = participations.map(p => p.gameId);
   if (gameIds.length === 0) return [];
 
@@ -125,12 +125,12 @@ export async function getFinishedGamesByUser(db: Db, username: string): Promise<
 
   const finishedGames = games.filter(game => gameIds.includes(game.id));
   const results: GameState[] = [];
-  
+
   for (const game of finishedGames) {
     const gameState = await dbToGameState(db, game.id);
     if (gameState) results.push(gameState);
   }
-  
+
   return results;
 }
 
@@ -140,7 +140,7 @@ export async function getJoinedGamesByUser(db: Db, username: string): Promise<Ga
     .select()
     .from(gamePlayersTable)
     .where(eq(gamePlayersTable.playerId, username));
-  
+
   const gameIds = participations.map(p => p.gameId);
 
   if (gameIds.length === 0) return [];
@@ -154,12 +154,12 @@ export async function getJoinedGamesByUser(db: Db, username: string): Promise<Ga
 
   const joinedGames = games.filter(game => gameIds.includes(game.id));
   const results: GameState[] = [];
-  
+
   for (const game of joinedGames) {
     const gameState = await dbToGameState(db, game.id);
     if (gameState) results.push(gameState);
   }
-  
+
   return results;
 }
 
@@ -189,7 +189,7 @@ export async function getWaitingGames(db: Db, filteredUser?: string, limit: numb
 
     results.push(gameState);
   }
-  
+
   return results;
 }
 
@@ -207,3 +207,8 @@ export async function createGame(db: Db, gameState: GameState): Promise<void> {
 export async function getGameById(db: Db, gameId: string): Promise<GameState | null> {
   return await dbToGameState(db, gameId);
 }
+
+export async function gamesWithFilter(): Promise<GameState[]> {
+  return []
+}
+

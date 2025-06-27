@@ -1,0 +1,9 @@
+import { getConfigFromPartial, getPartialFromEnv } from "@/backend/config";
+
+import { getDb } from "@/backend/db";
+import { resetTable } from "@/backend/db/schema";
+const config = getConfigFromPartial(getPartialFromEnv());
+
+const db = getDb(config);
+await db.delete(resetTable);
+

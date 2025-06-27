@@ -1,3 +1,4 @@
+preload = ["./src/bun-plugins/mdx.ts"]
 
 [serve.static]
 plugins = ["bun-plugin-tailwind"]
