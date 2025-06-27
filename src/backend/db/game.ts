@@ -208,7 +208,3 @@ export async function getGameById(db: Db, gameId: string): Promise<GameState | n
   return await dbToGameState(db, gameId);
 }
 
-export async function gamesWithFilter(): Promise<GameState[]> {
-  return []
-}
-
