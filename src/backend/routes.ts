@@ -148,7 +148,6 @@ export const app = new Elysia()
     const { user } = await forceAuthenticated();
 
     const ruleset = z.array(ruleEnum).parse(body.ruleset);
-    // TODO - generate nicer looking ids.
     const gameId = randomGameId();
     const state = getBlankState(gameId, user.username, ruleset, body.maxPlayers, body.password);
     state.players.push({
@@ -173,10 +172,12 @@ export const app = new Elysia()
     const { user } = await forceAuthenticated();
     const state = await observer.peek(params.id);
     const password = body?.password ?? "";
-    // TODO: block join if game is full
 
     if (state === null) {
       return status("Not Found")
+    }
+    if (state.players.length >= state.expectedPlayers)  {
+      return status("Bad Request", "Game is already full");
     }
 
     if (state.status !== "waiting") {
@@ -375,6 +376,11 @@ export const app = new Elysia()
       token: t.String(),
       newPassword: t.String(),
     })
+  })
+  .get("/games", async (ctx) => {
+
+  }, {
+    query: t.Object({})
   })
 
 function randomGameId(): string {
