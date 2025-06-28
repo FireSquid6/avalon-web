@@ -10,12 +10,11 @@ export async function sendEmail(key: string, email: EmailOptions) {
   const resend = new Resend(key);
 
   const { error } = await resend.emails.send({
-    from: "Avalon Web noreply@jdeiss.com",
+    from: "Avalon Web <noreply@jdeiss.com>",
     to: email.to,
     subject: email.subject,
     react: email.node,
   });
-
 
   return error;
 }

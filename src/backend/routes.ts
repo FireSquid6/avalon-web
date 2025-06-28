@@ -177,7 +177,7 @@ export const app = new Elysia()
     if (state === null) {
       return status("Not Found")
     }
-    if (state.players.length >= state.expectedPlayers)  {
+    if (state.players.length >= state.expectedPlayers) {
       return status("Bad Request", "Game is already full");
     }
 
@@ -345,7 +345,10 @@ export const app = new Elysia()
 
     if (config.emailToken !== null) {
       const link = `${new URL(request.url).host}/reset?code=${token}`
+
+      console.log("Sending password reset to", body.email);
       const error = await sendResetEmail(config.emailToken, body.email, link);
+
       if (error !== null) {
         return status(500, `Email error: ${error.name} - ${error.message}`);
       }
@@ -381,7 +384,7 @@ export const app = new Elysia()
       newPassword: t.String(),
     })
   })
-  .get("/games", async (ctx) => {
+  .get("/api/games", async (ctx) => {
 
   }, {
     query: t.Object({})
