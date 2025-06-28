@@ -16,6 +16,7 @@ import { createGame, getJoinedGamesByUser, getWaitingGames } from "./db/game";
 import { createMessage, lastNMessages } from "./db/chat";
 import type { Message } from "./db/schema";
 import { cookiePlugin } from "./plugins/cookie";
+import { sendResetEmail } from "./email";
 
 
 export const app = new Elysia()
@@ -334,7 +335,7 @@ export const app = new Elysia()
       email: user.email,
     }
   })
-  .post("/api/forgotpassword", async ({ body, store: { db, config } }) => {
+  .post("/api/forgotpassword", async ({ body, status, request, store: { db, config } }) => {
     const returnString = "If the user exists, a reset token will be emailed";
     const token = await createResetToken(db, body.email);
 
@@ -342,19 +343,22 @@ export const app = new Elysia()
       return returnString;
     }
 
-    if (config.emailToken) {
-      console.log("TODO - actually send the email");
+    if (config.emailToken !== null) {
+      const link = `${new URL(request.url).host}/reset?code=${token}`
+      const error = await sendResetEmail(config.emailToken, body.email, link);
+      if (error !== null) {
+        return status(500, `Email error: ${error.name} - ${error.message}`);
+      }
+    } else {
+      console.log("No way to email:", token);
     }
-    console.log(token);
-    console.log("Generated reset token")
-
     return returnString;
   }, {
     body: t.Object({
       email: t.String(),
     }),
   })
-  .post("/api/passwordreset", async ({ body, status, store: { db, config } }) => {
+  .post("/api/passwordreset", async ({ body, status, store: { db } }) => {
     const username = await validateResetToken(db, body.token);
 
     if (username === null) {
