@@ -1,21 +1,15 @@
-# bun-react-tailwind-template
+# Avalon Web
+Avalon is a social deduction board game for 5-10 players. This is a website that allows users to play that same game online with their friends.
 
-To install dependencies:
+# Features
+- Custom rulesets
+- 5-10 players per game
+- Simple user interface
+- private and public games
 
-```bash
-bun install
-```
-
-To start a development server:
-
-```bash
-bun dev
-```
-
-To run for production:
-
-```bash
-bun start
-```
-
-This project was created using `bun init` in bun v1.2.13. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+# TODO
+- actually email reset codes
+- games database system
+- rules page
+- turn time limits
+- have a Home and a Play page. The home page should show off features and a screenshot of gameplay. The Play page should do what the home page is currently doing
