@@ -27,6 +27,7 @@ export const app = new Elysia()
   .state("observer", {} as GameObserver)
   .state("config", {} as Config)
   .state("db", {} as Db)
+  // map of gameids to timers
   .derive(({ getSession, set, store: { db, observer } }) => {
     const forceAuthenticated = async () => {
       const token = getSession();

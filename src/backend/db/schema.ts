@@ -1,3 +1,4 @@
+import { Timeset } from "@/engine";
 import type { InferSelectModel } from "drizzle-orm";
 import { int, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
@@ -29,8 +30,10 @@ export const gamesTable = sqliteTable("games", {
   result: text(),
   hiddenRoles: text({ mode: "json" }).$type<Record<string, string>>().notNull(),
   assassinationTarget: text(),
+  timeoutTime: int(),
   createdAt: int({ mode: "timestamp_ms" }).notNull(),
   updatedAt: int({ mode: "timestamp_ms" }).notNull(),
+  timeset: text({ mode: "json" }).$type<Timeset>().notNull(),
 });
 export type Game = InferSelectModel<typeof gamesTable>;
 

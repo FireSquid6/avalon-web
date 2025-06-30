@@ -3,7 +3,7 @@ import { z } from "zod";
 // type alias for code readability purposes
 
 
-export const ruleEnum = z.enum([ 
+export const ruleEnum = z.enum([
   "Lady of the Lake",
   "Oberon",
   "Morgause",
@@ -14,6 +14,7 @@ export const ruleEnum = z.enum([
   "Visible Teammate Roles",
   "Lancelot",
   "Targeting",
+  "Clock",
 ]);
 export type Rule = z.infer<typeof ruleEnum>;
 
@@ -56,6 +57,15 @@ export const roundSchema = z.object({
 
 export type Round = z.infer<typeof roundSchema>;
 
+export const timesetSchema = z.object({
+  nominate: z.number(),
+  lady: z.number(),
+  quest: z.number(),
+  vote: z.number(),
+  assassinate: z.number(),
+});
+export type Timeset = z.infer<typeof timesetSchema>;
+
 export const gameStateSchema = z.object({
   id: z.string(),
   status: z.enum(["in-progress", "finished", "waiting"]),
@@ -67,7 +77,9 @@ export const gameStateSchema = z.object({
 
   gameMaster: z.string(),
   ruleset: z.array(ruleEnum),
-
+  // time in milliseconds for each task
+  timeset: timesetSchema,
+  timeoutTime: z.optional(z.number()),
   rounds: z.array(roundSchema),
   // Arthurian Victory - three quest passes 
   // Assassination Failure - assassination attempted mid-round (hot assassin) but missed
