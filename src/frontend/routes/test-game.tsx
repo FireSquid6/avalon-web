@@ -21,7 +21,7 @@ export const Route = createFileRoute('/test-game')({
 const players = ["Andrew", "Blaise", "Caroline", "Drayton", "Eric", "Frederick", "Gabi", "Hunter", "Isaac", "Jeremiah"]
 
 function getInitialState() {
-  const state = getBlankState("state", players[0], ["Quickshot Assassin", "Lady of the Lake", "Mordred", "Percival and Morgana"], players.length);
+  const state = getBlankState("state", players[0], ["Quickshot Assassin", "Lady of the Lake", "Mordred", "Percival and Morgana", "Clock"], players.length);
 
   for (const p of players) {
     state.players.push({

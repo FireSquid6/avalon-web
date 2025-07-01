@@ -21,6 +21,8 @@ async function dbToGameState(db: Db, gameId: string): Promise<GameState | null> 
     ladyHolder: game.ladyHolder ?? undefined,
     gameMaster: game.gameMaster,
     ruleset: game.ruleset as Rule[],
+    timeset: game.timeset,
+    timeoutTime: game.timeoutTime ?? undefined,
     rounds: rounds.map((r): Round => ({
       monarch: r.monarch,
       questNumber: r.questNumber,
@@ -50,8 +52,10 @@ async function gameStateToDb(db: Db, gameState: GameState): Promise<void> {
     tableOrder: gameState.tableOrder,
     ladyHolder: gameState.ladyHolder ?? null,
     result: gameState.result ?? null,
+    timeset: gameState.timeset,
     hiddenRoles: gameState.hiddenRoles,
     assassinationTarget: gameState.assassinationTarget ?? null,
+    timeoutTime: gameState.timeoutTime ?? null,
     createdAt: new Date(),
     updatedAt: new Date(),
   }).onConflictDoUpdate({
@@ -59,9 +63,11 @@ async function gameStateToDb(db: Db, gameState: GameState): Promise<void> {
     set: {
       status: gameState.status,
       expectedPlayers: gameState.expectedPlayers,
+      timeset: gameState.timeset,
       password: gameState.password ?? null,
       gameMaster: gameState.gameMaster,
       ruleset: gameState.ruleset,
+      timeoutTime: gameState.timeoutTime ?? null,
       tableOrder: gameState.tableOrder,
       ladyHolder: gameState.ladyHolder ?? null,
       result: gameState.result ?? null,

@@ -3,6 +3,7 @@ import type { Db } from "./db";
 import { updateGameState, getGameById } from "./db/game";
 import type { Message } from "./db/schema";
 import { randomUUIDv7 } from "bun";
+import { performTimeout } from "@/engine/mutators";
 
 export type GameEvent = {
   type: "message";
@@ -23,6 +24,7 @@ export interface SpecificListener {
 export class GameObserver {
   private db: Db;
   private listeners: SpecificListener[] = [];
+  private timeoutTimers = new Map<string, NodeJS.Timeout>();
 
   constructor(db: Db) {
     this.db = db;
@@ -51,6 +53,38 @@ export class GameObserver {
         console.log("Calling for", l.socketId);
         l.fn({ type: "state", state: state });
       }
+    }
+
+    if (this.timeoutTimers.has(state.id)) {
+      clearTimeout(this.timeoutTimers.get(state.id)!);
+      this.timeoutTimers.delete(state.id);
+    }
+    if (state.timeoutTime !== undefined) {
+      const l = this.getTimeoutListener(state.id);
+      const difference = state.timeoutTime - Date.now();
+
+      if (difference <= 0) {
+        l();
+      } else {
+        const n = setTimeout(l, difference);
+        this.timeoutTimers.set(state.id, n);
+      }
+      
+    }
+  }
+
+  private getTimeoutListener(gameId: string): () => void {
+    return async () => {
+      const state = await getGameById(this.db, gameId);
+      if (!state || state.status !== "in-progress") {
+        return;
+      }
+
+      if (state.timeoutTime && state.timeoutTime < Date.now()) {
+        performTimeout(state);
+      }
+
+      await this.update(state);
     }
   }
 

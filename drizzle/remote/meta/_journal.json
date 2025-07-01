@@ -15,6 +15,13 @@
       "when": 1751146974328,
       "tag": "0001_youthful_peter_parker",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1751322454670,
+      "tag": "0002_greedy_victor_mancha",
+      "breakpoints": true
     }
   ]
 }

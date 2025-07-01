@@ -1,4 +1,3 @@
-
 import { getConfigFromPartial, getPartialFromEnv } from "@/backend/config";
 
 import { getDb } from "@/backend/db";

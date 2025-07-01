@@ -23,7 +23,7 @@ export type ProcessResult =
   | ProcessError
   | GameState
 
-export interface ProcessInputs<T extends GameAction> {
+export interface ProcessInputs<T extends GameAction | null> {
   state: GameState,
   action: T,
   actorId: string,

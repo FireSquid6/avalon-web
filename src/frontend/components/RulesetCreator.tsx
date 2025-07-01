@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Rule } from 'engine';
+import type { Rule } from '../../engine';
 
 const AVAILABLE_RULES: Rule[] = [
   "Lady of the Lake",
@@ -8,6 +8,7 @@ const AVAILABLE_RULES: Rule[] = [
   "Percival and Morgana",
   "Quickshot Assassin",
   "Visible Teammate Roles",
+  "Clock",
 ];
 
 interface RulesetCreatorProps {

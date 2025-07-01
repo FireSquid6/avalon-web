@@ -25,6 +25,7 @@ function startApp(config: Config) {
   app.store.config = config;
   app.store.observer = observer;
   app.store.db = db;
+  app.store.timeouts = new Map<string, number>();
 
   serve({
     routes: {

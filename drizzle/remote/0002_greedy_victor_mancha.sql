@@ -1,0 +1,2 @@
+ALTER TABLE `games` ADD `timeoutTime` integer;--> statement-breakpoint
+ALTER TABLE `games` ADD `timeset` text DEFAULT '{"nominate":6000,"assassinate":6000,"vote":12000,"lady":6000,"quest":12000}' NOT NULL;

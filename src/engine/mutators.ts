@@ -1,7 +1,9 @@
 // all mutators take in a ProcessInputs object and can mutate it
 // they can also at any time throw an error
+import type { GameState } from ".";
 import type { AbortGameAction, AssassinationAction, LadyAction, NominateAction, QuestAction, RulesetModifiaction, StartAction, VoteAction } from "./actions";
-import { getRolesForRuleset, validateRuleset, rulesetHas, getNextIntendedAction, newRound, getQuestInformation, getFailedVotes, getScore, shuffleArray } from "./logic";
+import { questInfo } from "./data";
+import { getRolesForRuleset, validateRuleset, rulesetHas, getNextIntendedAction, newRound, getQuestInformation, getFailedVotes, getScore, shuffleArray, getTeam } from "./logic";
 import { ProcessError, type ProcessInputs } from "./process";
 
 
@@ -53,6 +55,10 @@ export function performStart(inputs: ProcessInputs<StartAction>) {
   if (rulesetHas(state.ruleset, "Lady of the Lake")) {
     state.ladyHolder = state.tableOrder[state.tableOrder.length - 1];
   }
+  // set the timeout
+  if (rulesetHas(state.ruleset, "Clock")) {
+    state.timeoutTime = Date.now() + state.timeset.nominate;
+  }
 
   newRound(state);
 }
@@ -79,6 +85,11 @@ export function performNominate(inputs: ProcessInputs<NominateAction>) {
 
   // add the players
   round.nominatedPlayers = action.playerIds;
+
+  // reset the timer
+  if (rulesetHas(state.ruleset, "Clock")) {
+    state.timeoutTime = Date.now() + state.timeset.vote;
+  }
 }
 
 export function performVote(inputs: ProcessInputs<VoteAction>) {
@@ -117,15 +128,22 @@ export function performVote(inputs: ProcessInputs<VoteAction>) {
       questedPlayers: [],
       completed: false,
     }
+    if (rulesetHas(state.ruleset, "Clock")) {
+      state.timeoutTime = Date.now() + state.timeset.quest;
+    }
   } else {
     const failedVotes = getFailedVotes(state);
 
     if (failedVotes < 5) {
       newRound(state);
+      if (rulesetHas(state.ruleset, "Clock")) {
+        state.timeoutTime = Date.now() + state.timeset.nominate;
+      }
     } else {
       // game is over, too many failed votes
       state.status = "finished";
       state.result = "Deadlock";
+      state.timeoutTime = undefined;
     }
   }
 }
@@ -172,6 +190,13 @@ export function performQuest(inputs: ProcessInputs<QuestAction>) {
 
     if (!needsToUseLady) {
       newRound(state);
+      if (rulesetHas(state.ruleset, "Clock")) {
+        state.timeoutTime = Date.now() + state.timeset.nominate;
+      }
+    } else {
+      if (rulesetHas(state.ruleset, "Clock")) {
+        state.timeoutTime = Date.now() + state.timeset.lady;
+      }
     }
     return;
   }
@@ -182,11 +207,14 @@ export function performQuest(inputs: ProcessInputs<QuestAction>) {
     if (rulesetHas(state.ruleset, "Quickshot Assassin")) {
       state.status = "finished";
       state.result = "Arthurian Victory";
+      state.timeoutTime = undefined;
+    } else if (rulesetHas(state.ruleset, "Clock")) {
+      state.timeoutTime = Date.now() + state.timeset.assassinate;
     }
-
   } else {
     state.status = "finished";
     state.result = "Mordredic Victory";
+    state.timeoutTime = undefined;
   }
 }
 
@@ -208,6 +236,9 @@ export function performLady(inputs: ProcessInputs<LadyAction>) {
   state.ladyHolder = action.playerId;
 
   newRound(state);
+  if (rulesetHas(state.ruleset, "Clock")) {
+    state.timeoutTime = Date.now() + state.timeset.nominate;
+  }
 }
 
 export function performAssassination(inputs: ProcessInputs<AssassinationAction>) {
@@ -270,6 +301,124 @@ export function performAbortion(inputs: ProcessInputs<AbortGameAction>) {
 
   state.status = "finished";
   state.result = "Aborted";
+}
+
+export function performTimeout(state: GameState) {
+  const intended = getNextIntendedAction(state);
+  const round = state.rounds[state.rounds.length - 1]!;
+
+  switch (intended) {
+    case "lady":
+      // pretty sure this is a stupid way to get a random index
+      let randomIndex = Math.floor(Math.random() * state.players.length);
+      if (randomIndex === state.players.length) {
+        randomIndex -= 1;
+      }
+
+      performLady({
+        state,
+        actorId: state.ladyHolder!,
+        action: {
+          kind: "lady",
+          playerId: state.players[randomIndex]!.id,
+        }
+      });
+      break;
+    case "vote":
+      for (const { id } of state.players) {
+        if (round.votes[id] === undefined) {
+          performVote({
+            actorId: id,
+            state,
+            action: {
+              kind: "vote",
+              vote: "Approve",
+            }
+          });
+        }
+      }
+      break;
+    case "nominate":
+      // auto nominate randomly
+      const players = [...state.players.map(p => p.id)];
+      shuffleArray(players);
+      const expectedAmount = questInfo[players.length]![round.questNumber - 1]!.players
+      const nominated = players.slice(0, expectedAmount - 1);
+
+      performNominate({
+        state,
+        actorId: round.monarch,
+        action: {
+          kind: "nominate",
+          playerIds: nominated,
+        }
+      });
+      break;
+    case "assassinate":
+      // a failed assassination is just a timeout
+      const target = "***inaction***";
+      let assassin = "";
+
+      for (const { id } of state.players) {
+        if (state.hiddenRoles[id] === "Assassin") {
+          assassin = id;
+        }
+      }
+
+      if (assassin === "") {
+        throw new Error("Failed to find assassin");
+      }
+
+      performAssassination({
+        state,
+        actorId: assassin,
+        action: {
+          kind: "assassinate",
+          playerId: target,
+        }
+      });
+      break;
+    case "quest":
+      if (!round.quest || !round.nominatedPlayers) {
+        // impossible case
+        break;
+      }
+      for (const id of round.nominatedPlayers!) {
+        // only perform action for players that have not quested
+        if (round.quest.questedPlayers.find(s => id === s) === undefined) {
+          round.quest.questedPlayers.push(id);
+          const role = state.hiddenRoles[id]!;
+          const team = getTeam(role);
+
+          performQuest({
+            actorId: id,
+            action: {
+              kind: "quest",
+              action: team === "Mordredic" ? "Fail" : "Succeed",
+            },
+            state,
+          })
+
+        }
+      }
+
+      break;
+    case "start":
+      performAbortion({
+        actorId: state.gameMaster,
+        state,
+        action: {
+          kind: "abort",
+        }
+      });
+      break;
+    case "complete":
+      // nothing to do
+      break;
+    case "none":
+      // nothing to do
+      break;
+  }
 }
 
 
