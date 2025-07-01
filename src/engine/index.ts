@@ -129,3 +129,31 @@ export interface Quest {
   players: number;
   failsRequired: number;
 }
+
+export function getRuleDescriptoin(rule: Rule): string {
+  switch (rule) {
+    case "Clock":
+      return "Adds a timer to the game to avoid infinite filibusters";
+    case "Oberon":
+      return "Adds Oberon. Oberon acts as a nerfed evil player who is unknown to and doesn't know his own teammates";
+    case "Mordred":
+      return "Adds Mordred. Mordred is an evil player unknown to Merlin";
+    case "Lancelot":
+      return "Not implemented";
+    case "Morgause":
+      return "Morgause is used at the beginning of the game by Assassin to rearrange the table";
+    case "Excalibur":
+      return "Excalibur is used to flip a specific quest result";
+    case "Targeting":
+      return "Quests can be done in any order";
+    case "Lady of the Lake":
+      return "The lady of the lake allows someone to see the true team of another player";
+    case "Quickshot Assassin":
+      return "The assassin can attack Merlin at any point, and must do so before the conclusion of the final round. Recommended for experienced players";
+    case "Percival and Morgana":
+      return "Adds Percival, who must distinguish between Merlin and Morgana to discover the truth";
+    case "Visible Teammate Roles":
+      return "Evil players know the exact roles of their teammates";
+  }
+
+}

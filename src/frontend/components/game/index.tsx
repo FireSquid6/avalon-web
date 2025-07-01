@@ -9,6 +9,7 @@ import { getNextIntendedAction, getQuestInformation, rulesetHas } from '@/engine
 import { VoteTracker } from './VoteTracker';
 import { KnowledgeModal } from './KnowledgeModal';
 import { ChatWindow } from '../ChatWindow';
+import { Timer } from './Timer';
 
 
 export function GameRender() {
@@ -150,6 +151,10 @@ export function GameRender() {
 
   return (
     <div className="flex-1">
+      <Timer 
+        visible={rulesetHas(state.ruleset, "Clock") && state.status === "in-progress"}
+        timeoutTime={state.timeoutTime ?? -1}
+      />
       {/* Central table */}
       <div className="my-8">
         <PlayerCircle players={players} centerText={centerText} />
