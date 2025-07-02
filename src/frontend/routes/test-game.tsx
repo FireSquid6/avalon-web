@@ -136,7 +136,7 @@ function RouteComponent() {
           Debug
         </button>
       </div>
-      <GameRender />
+      <GameRender displayOnly={false} />
     </GameContextProvider>
   )
 

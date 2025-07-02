@@ -26,7 +26,6 @@ export const roleEnum = z.enum([
   "Assassin",
   "Morgana",
   "Oberon",
-  "Lancelot",
   "Mordredic Servant",
 ]);
 export type Role = z.infer<typeof roleEnum>;

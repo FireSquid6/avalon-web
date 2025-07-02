@@ -30,8 +30,6 @@ function roleToEmoji(role: Role): string {
       return "🧛";
     case "Morgana":
       return "🧝‍♀️";
-    case "Lancelot":
-      return "💂";
   }
 }
 

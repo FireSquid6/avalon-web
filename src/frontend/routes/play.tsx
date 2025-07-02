@@ -56,12 +56,6 @@ function Play() {
 
   return (
     <div className="container mx-auto p-6 space-y-8">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold mb-2">Avalon</h1>
-        <p className="text-lg text-base-content/70">
-          {authType === "authenticated" ? "Create or join an ongoing game" : "You must sign in or create an account to play!"}
-        </p>
-      </div>
       {authType === "authenticated" ? (
         <>
 
@@ -75,6 +69,7 @@ function Play() {
         </>
       ) : (
         <div className="flex flex-col w-full">
+          <p>You must be authenticated to play</p>
           <Link to="/auth" className="btn btn-primary mx-auto">
             Sign In
           </Link>
