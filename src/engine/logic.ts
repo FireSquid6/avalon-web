@@ -40,9 +40,6 @@ export function validateRuleset(ruleset: Rule[], playerCount: number): string | 
       case "Mordred":
         requiredEvilPlayers += 1;
         break;
-      case "Lancelot":
-        requiredGoodPlayers += 1;
-        break;
       case "Percival and Morgana":
         requiredEvilPlayers += 1;
         requiredGoodPlayers += 1;
@@ -107,10 +104,6 @@ export function getRolesForRuleset(ruleset: Rule[], playerCount: number): Role[]
       case "Oberon":
         roles.push("Oberon");
         evilRemaining -= 1;
-        break;
-      case "Lancelot":
-        roles.push("Lancelot");
-        goodRemaining -= 1;
         break;
       case "Mordred":
         roles.push("Mordred");
@@ -432,7 +425,6 @@ export function getTeam(role: Role): "Mordredic" | "Arthurian" {
     case "Morgana":
       return "Mordredic";
     case "Merlin":
-    case "Lancelot":
     case "Percival":
     case "Arthurian Servant":
       return "Arthurian";
