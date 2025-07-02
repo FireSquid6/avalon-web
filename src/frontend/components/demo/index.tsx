@@ -8,7 +8,7 @@ import { processAction, ProcessError } from "@/engine/process";
 import { viewStateAs } from "@/engine/view";
 
 function getInitialState(players: string[]): GameState {
-  const state = getBlankState("id", players[0]!, ["Percival and Morgana", "Oberon", "Lady of the Lake"], 8);
+  const state = getBlankState("id", players[0]!, ["Percival and Morgana", "Mordred", "Quickshot Assassin"], 8);
 
   for (const p of players) {
     insertPlayer(state, {

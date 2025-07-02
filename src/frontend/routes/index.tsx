@@ -1,67 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Demo, type ScriptedActionGenerator } from "../components/demo";
-import type { GameState } from "@/engine";
+import { Demo } from "../components/demo";
+import { actions } from "@/frontend/lib/script";
 import { RulesDisplay } from "../components/Rules";
 
 export const Route = createFileRoute("/")({
   component: Index,
 })
 
-const actions: ScriptedActionGenerator[] = [
-  {
-    generator: (state: GameState) => {
-      return {
-        action: {
-          kind: "start"
-        },
-        actorId: state.gameMaster,
-      }
-    },
-    delay: 1000,
-  },
-  {
-    generator: (state: GameState) => {
-      return {
-        action: {
-          kind: "nominate",
-          playerIds: ["Brodie", "Jonathan", "Aidan"],
-        },
-        actorId: state.rounds[state.rounds.length - 1].monarch,
-      }
-    },
-    delay: 4000,
-  },
-  {
-    generator: (state: GameState) => {
-      return state.players.map(({ id }) => {
-        return {
-          action: {
-            kind: "vote",
-            vote: "Approve",
-          },
-          actorId: id,
-        }
-      })
-
-    },
-    delay: 2000,
-  },
-  {
-    generator: (state: GameState) => {
-      const nominated = state.rounds[state.rounds.length - 1].nominatedPlayers!;
-      return nominated.map((p) => {
-        return {
-          action: {
-            kind: "quest",
-            action: "Succeed",
-          },
-          actorId: p,
-        }
-      });
-    },
-    delay: 4000,
-  },
-]
 
 function Index() {
   return (
@@ -73,7 +18,7 @@ function Index() {
       </div>
       <div>
         <Demo
-          players={["Andrew", "Blake", "Caroline", "Drayton", "Elliana", "Frederick", "Gabi", "Hunter"]}
+          players={["Andrew", "Blaise", "Caroline", "Drayton", "Elliana", "Frederick", "Gabi", "Hunter"]}
           actions={actions}
         />
       </div>
