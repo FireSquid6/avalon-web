@@ -102,7 +102,7 @@ export function GameRender({ displayOnly = false }: { displayOnly: boolean }) {
 
 
   let nominationCount = 0;
-  const questInfo = getQuestInformation(state.players.length < 5 ? 5 : state.players.length);
+  const questInfo = getQuestInformation(state.expectedPlayers);
 
   if (lastRound) {
     nominationCount = questInfo[lastRound.questNumber - 1].players;
