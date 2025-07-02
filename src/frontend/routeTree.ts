@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from "./routes/__root"
 import { Route as TestGameRouteImport } from "./routes/test-game"
 import { Route as SignoutRouteImport } from "./routes/signout"
-import { Route as RulesRouteImport } from "./routes/rules"
 import { Route as ResetRouteImport } from "./routes/reset"
 import { Route as PlayRouteImport } from "./routes/play"
 import { Route as GamesRouteImport } from "./routes/games"
@@ -31,11 +30,6 @@ const TestGameRoute = TestGameRouteImport.update({
 const SignoutRoute = SignoutRouteImport.update({
   id: "/signout",
   path: "/signout",
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RulesRoute = RulesRouteImport.update({
-  id: "/rules",
-  path: "/rules",
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetRoute = ResetRouteImport.update({
@@ -96,7 +90,6 @@ export interface FileRoutesByFullPath {
   "/games": typeof GamesRoute
   "/play": typeof PlayRoute
   "/reset": typeof ResetRoute
-  "/rules": typeof RulesRoute
   "/signout": typeof SignoutRoute
   "/test-game": typeof TestGameRoute
   "/game/$gameId": typeof GameGameIdRoute
@@ -111,7 +104,6 @@ export interface FileRoutesByTo {
   "/games": typeof GamesRoute
   "/play": typeof PlayRoute
   "/reset": typeof ResetRoute
-  "/rules": typeof RulesRoute
   "/signout": typeof SignoutRoute
   "/test-game": typeof TestGameRoute
   "/game/$gameId": typeof GameGameIdRoute
@@ -127,7 +119,6 @@ export interface FileRoutesById {
   "/games": typeof GamesRoute
   "/play": typeof PlayRoute
   "/reset": typeof ResetRoute
-  "/rules": typeof RulesRoute
   "/signout": typeof SignoutRoute
   "/test-game": typeof TestGameRoute
   "/game/$gameId": typeof GameGameIdRoute
@@ -144,7 +135,6 @@ export interface FileRouteTypes {
     | "/games"
     | "/play"
     | "/reset"
-    | "/rules"
     | "/signout"
     | "/test-game"
     | "/game/$gameId"
@@ -159,7 +149,6 @@ export interface FileRouteTypes {
     | "/games"
     | "/play"
     | "/reset"
-    | "/rules"
     | "/signout"
     | "/test-game"
     | "/game/$gameId"
@@ -174,7 +163,6 @@ export interface FileRouteTypes {
     | "/games"
     | "/play"
     | "/reset"
-    | "/rules"
     | "/signout"
     | "/test-game"
     | "/game/$gameId"
@@ -190,7 +178,6 @@ export interface RootRouteChildren {
   GamesRoute: typeof GamesRoute
   PlayRoute: typeof PlayRoute
   ResetRoute: typeof ResetRoute
-  RulesRoute: typeof RulesRoute
   SignoutRoute: typeof SignoutRoute
   TestGameRoute: typeof TestGameRoute
   GameGameIdRoute: typeof GameGameIdRoute
@@ -213,13 +200,6 @@ declare module "@tanstack/react-router" {
       path: "/signout"
       fullPath: "/signout"
       preLoaderRoute: typeof SignoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    "/rules": {
-      id: "/rules"
-      path: "/rules"
-      fullPath: "/rules"
-      preLoaderRoute: typeof RulesRouteImport
       parentRoute: typeof rootRouteImport
     }
     "/reset": {
@@ -302,7 +282,6 @@ const rootRouteChildren: RootRouteChildren = {
   GamesRoute: GamesRoute,
   PlayRoute: PlayRoute,
   ResetRoute: ResetRoute,
-  RulesRoute: RulesRoute,
   SignoutRoute: SignoutRoute,
   TestGameRoute: TestGameRoute,
   GameGameIdRoute: GameGameIdRoute,
