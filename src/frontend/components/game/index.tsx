@@ -12,7 +12,7 @@ import { ChatWindow } from '../ChatWindow';
 import { Timer } from './Timer';
 
 
-export function GameRender() {
+export function GameRender({ displayOnly = false }: { displayOnly: boolean }) {
   const { state, act, chat, messages, knowledge, viewingUser } = useGameContext();
 
   console.log("Rendering:");
@@ -150,33 +150,40 @@ export function GameRender() {
   }
 
   return (
-    <div className="flex-1">
-      <Timer 
-        visible={rulesetHas(state.ruleset, "Clock") && state.status === "in-progress"}
-        timeoutTime={state.timeoutTime ?? -1}
-      />
-      {/* Central table */}
-      <div className="my-8">
-        <PlayerCircle players={players} centerText={centerText} />
-      </div>
-      {/* Game Info */}
+    <div className="flex-1 flex flex-col">
+      <div className="flex-1 max-w-[800px] mx-auto">
+        <Timer
+          visible={rulesetHas(state.ruleset, "Clock") && state.status === "in-progress"}
+          timeoutTime={state.timeoutTime ?? -1}
+        />
+        {/* Central table */}
+        <div className="my-8">
+          <PlayerCircle players={players} centerText={centerText} />
+        </div>
+        {/* Game Info */}
 
-      <div className="flex flex-col mx-8">
-        <VoteTracker failedVotes={failedVotes} />
-        <Quest quests={quests} />
-      </div>
+        <div className="flex flex-col mx-8">
+          <VoteTracker failedVotes={failedVotes} />
+          <Quest quests={quests} />
+        </div>
 
-      {/* Actions bar */}
-      <ActionRenderer
-        currentMaxPlayers={state.expectedPlayers}
-        currentRuleset={state.ruleset}
-        requiredCount={nominationCount}
-        onAction={act}
-        players={players.map((p) => { return { id: p.id, displayName: p.id } })}
-        availableActions={getAvailableActions(state, knowledge, viewingUser)}
-        extras={<KnowledgeModal knowledge={knowledge} viewingUserId={viewingUser} />}
-      />
-      <ChatWindow messages={messages} viewingUser={viewingUser} onSendMessage={chat} />
+        {/* Actions bar */}
+        {!displayOnly && (
+          <>
+            <ActionRenderer
+              currentMaxPlayers={state.expectedPlayers}
+              currentRuleset={state.ruleset}
+              requiredCount={nominationCount}
+              onAction={act}
+              players={players.map((p) => { return { id: p.id, displayName: p.id } })}
+              availableActions={getAvailableActions(state, knowledge, viewingUser)}
+              extras={<KnowledgeModal knowledge={knowledge} viewingUserId={viewingUser} />}
+            />
+            <ChatWindow messages={messages} viewingUser={viewingUser} onSendMessage={chat} />
+          </>
+
+        )}
+      </div>
     </div>
   )
 }
