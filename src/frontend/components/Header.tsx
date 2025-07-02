@@ -6,13 +6,10 @@ export function Header() {
     <header className="navbar bg-base-100 shadow-lg">
       <div className="navbar-start">
         <Link to="/" className="btn btn-ghost text-xl font-bold">
-          Play 
+          Home 
         </Link>
-        <Link to="/rules" className="btn btn-ghost text-xl font-bold">
-          Rules
-        </Link>
-        <Link to="/games" className="btn btn-ghost text-xl font-bold">
-          Game Database
+        <Link to="/play" className="btn btn-ghost text-xl font-bold">
+          Play
         </Link>
       </div>
       <div className="navbar-end">

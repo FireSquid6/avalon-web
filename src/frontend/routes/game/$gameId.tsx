@@ -25,7 +25,7 @@ function RouteComponent() {
         }}
         gameId={gameId}
       />
-      <GameRender />
+      <GameRender displayOnly={false}/>
     </GameContextProvider>
   )
 }
