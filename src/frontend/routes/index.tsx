@@ -22,8 +22,10 @@ function Index() {
           actions={actions}
         />
       </div>
-      <div className="max-w-[800px] mx-auto">
-        <RulesDisplay />
+      <div className="mx-4">
+        <div className="max-w-[800px] mx-auto">
+          <RulesDisplay />
+        </div>
       </div>
     </>
   )
