@@ -46,11 +46,9 @@ export class GameObserver {
     await updateGameState(this.db, state);
 
     const users = new Set(state.players.map((p) => p.id));
-    console.log("Dispatching for:", users);
 
     for (const l of this.listeners) {
       if (users.has(l.username)) {
-        console.log("Calling for", l.socketId);
         l.fn({ type: "state", state: state });
       }
     }

@@ -211,7 +211,7 @@ function getAvailableActions(state: GameState, knowledge: Knowledge[], id: strin
       }
       break;
     case "lady":
-      if (state.ladyHolder === "") {
+      if (state.ladyHolder === id) {
         actions.push("lady");
       }
       break;
@@ -245,8 +245,12 @@ function getAvailableActions(state: GameState, knowledge: Knowledge[], id: strin
     actions.push("assassinate");
   }
 
-  if (state.gameMaster === id && state.status === "waiting") {
-    actions.push("abort");
+  if (state.status === "waiting") {
+    if (state.gameMaster === id) {
+      actions.push("abort");
+    } else {
+      actions.push("leave");
+    }
   }
 
   return actions;

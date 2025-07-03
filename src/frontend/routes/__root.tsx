@@ -14,7 +14,9 @@ export const Route = createRootRoute({
       <Footer />
       <ErrorToast />
       <MessageToast />
-      <TanStackRouterDevtools />
+      <TanStackRouterDevtools 
+        position="bottom-right"
+      />
     </div>
   ),
 })

@@ -10,3 +10,4 @@ Avalon is a social deduction board game for 5-10 players. This is a website that
 # Version 2.0 Features
 - games database system
 - in-game clock for timed matches
+- leave game

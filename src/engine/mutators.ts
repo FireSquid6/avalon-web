@@ -1,7 +1,7 @@
 // all mutators take in a ProcessInputs object and can mutate it
 // they can also at any time throw an error
 import type { GameState } from ".";
-import type { AbortGameAction, AssassinationAction, LadyAction, NominateAction, QuestAction, RulesetModifiaction, StartAction, VoteAction } from "./actions";
+import type { AbortGameAction, AssassinationAction, LadyAction, LeaveGameAction, NominateAction, QuestAction, RulesetModifiaction, StartAction, VoteAction } from "./actions";
 import { questInfo } from "./data";
 import { getRolesForRuleset, validateRuleset, rulesetHas, getNextIntendedAction, newRound, getQuestInformation, getFailedVotes, getScore, shuffleArray, getTeam } from "./logic";
 import { ProcessError, type ProcessInputs } from "./process";
@@ -182,28 +182,18 @@ export function performQuest(inputs: ProcessInputs<QuestAction>) {
   }
 
   round.quest.completed = true;
-  if (round.questNumber < 5) {
-    const questNumber = round.questNumber;
-    const needsToUseLady = rulesetHas(state.ruleset, "Lady of the Lake")
-      && questNumber > 1
-      && round.ladyTarget === undefined
 
-    if (!needsToUseLady) {
-      newRound(state);
-      if (rulesetHas(state.ruleset, "Clock")) {
-        state.timeoutTime = Date.now() + state.timeset.nominate;
-      }
-    } else {
-      if (rulesetHas(state.ruleset, "Clock")) {
-        state.timeoutTime = Date.now() + state.timeset.lady;
-      }
-    }
+  // check for win conditions:
+  const { fails, passes } = getScore(state);
+  if (fails >= 3) {
+    state.status = "finished";
+    state.result = "Arthurian Victory";
+    state.timeoutTime = undefined;
     return;
   }
 
-  const { fails } = getScore(state);
-
-  if (fails < 3) {
+  if (passes >= 3) {
+    // game is only over if there is quickshot assassin
     if (rulesetHas(state.ruleset, "Quickshot Assassin")) {
       state.status = "finished";
       state.result = "Arthurian Victory";
@@ -211,10 +201,23 @@ export function performQuest(inputs: ProcessInputs<QuestAction>) {
     } else if (rulesetHas(state.ruleset, "Clock")) {
       state.timeoutTime = Date.now() + state.timeset.assassinate;
     }
+    return;
+  }
+
+  const questNumber = round.questNumber;
+  const needsToUseLady = rulesetHas(state.ruleset, "Lady of the Lake")
+    && questNumber > 1
+    && round.ladyTarget === undefined
+
+  if (!needsToUseLady) {
+    newRound(state);
+    if (rulesetHas(state.ruleset, "Clock")) {
+      state.timeoutTime = Date.now() + state.timeset.nominate;
+    }
   } else {
-    state.status = "finished";
-    state.result = "Mordredic Victory";
-    state.timeoutTime = undefined;
+    if (rulesetHas(state.ruleset, "Clock")) {
+      state.timeoutTime = Date.now() + state.timeset.lady;
+    }
   }
 }
 
@@ -422,3 +425,14 @@ export function performTimeout(state: GameState) {
 }
 
 
+
+export function performLeave(inputs: ProcessInputs<LeaveGameAction>) {
+  const { state, actorId } = inputs;
+
+  if (state.status !== "waiting") {
+    throw new ProcessError("client", "Must be waiting for the game to start to leave the game");
+  }
+
+  state.players = state.players.filter(({ id }) => actorId !== id);
+  state.tableOrder = state.tableOrder.filter(p => actorId !== p);
+}

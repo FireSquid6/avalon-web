@@ -57,6 +57,11 @@ export const abortGameAction = z.object({
 });
 export type AbortGameAction = z.infer<typeof abortGameAction>;
 
+export const leaveGameAction = z.object({
+  kind: z.literal("leave"),
+});
+export type LeaveGameAction = z.infer<typeof leaveGameAction>;
+
 export const gameActionSchema = z.discriminatedUnion("kind", [
   voteActionSchema,
   nominateActionSchema,
@@ -66,6 +71,7 @@ export const gameActionSchema = z.discriminatedUnion("kind", [
   startActionSchema,
   rulesetModification,
   abortGameAction,
+  leaveGameAction,
 ]);
 
 export type GameAction = z.infer<typeof gameActionSchema>;

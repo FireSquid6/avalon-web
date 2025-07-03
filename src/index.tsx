@@ -9,6 +9,7 @@ import { getSessionWithToken } from "./backend/db/auth";
 import { chatResponse, stateResponse } from "./backend/protocol";
 import { generateKnowledgeMap } from "./engine/logic";
 import type { User, Session } from "./backend/db/schema";
+import { viewStateAs } from "./engine/view";
 
 
 export interface WsData {
@@ -25,7 +26,6 @@ function startApp(config: Config) {
   app.store.config = config;
   app.store.observer = observer;
   app.store.db = db;
-  app.store.timeouts = new Map<string, number>();
 
   serve({
     routes: {
@@ -82,7 +82,8 @@ function startApp(config: Config) {
           switch (e.type) {
             case "state":
               const knowledge = generateKnowledgeMap(e.state);
-              ws.send(stateResponse(e.state, knowledge[data.user.username] ?? []));
+              const view = viewStateAs(e.state, data.user.username)
+              ws.send(stateResponse(view, knowledge[data.user.username] ?? []));
               break;
             case "message":
               ws.send(chatResponse(e.newMessage));

@@ -8,6 +8,7 @@ import { AssassinateActionComponent } from "./AssassinateAction";
 import { StartActionComponent } from "./StartAction";
 import { RulesetModificationActionComponent } from "./RulesetModificationAction";
 import { AbortGame }  from "./AbortAction";
+import { LeaveGameActionComponent } from "./LeaveAction";
 
 interface ActionRendererProps {
   availableActions: string[];
@@ -100,6 +101,14 @@ export function ActionRenderer({
           case "abort":
             return (
               <AbortGame
+                key={action}
+                onAction={onAction}
+                disabled={disabled}
+              />
+            )
+          case "leave":
+            return (
+              <LeaveGameActionComponent
                 key={action}
                 onAction={onAction}
                 disabled={disabled}
